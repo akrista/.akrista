@@ -167,6 +167,7 @@ keybinds clear-defaults=true {
         bind "Alt Shift p" { ToggleGroupMarking; }
         bind "Ctrl q" { Quit; }
         bind "Ctrl Tab" { ToggleTab; }
+        bind "Ctrl Shift Tab" { GoToPreviousTab; }
     }
     shared_except "locked" "move" {
         bind "Ctrl h" { SwitchToMode "move"; }
