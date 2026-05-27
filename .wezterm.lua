@@ -38,30 +38,30 @@ config.background = {
 		height = "100%",
 		width = "100%",
 	},
-	{
-		source = {
-			File = ".akrista/assets/introPsyWorry.png",
-		},
-		attachment = "Fixed",
-		opacity = 0.50,
-		hsb = {
-			brightness = 1,
-			hue = bgimghue,
-			saturation = 1,
-		},
-	},
-	{
-		source = {
-			File = ".akrista/assets/introPsyWorry2.png",
-		},
-		attachment = "Fixed",
-		opacity = 0.50,
-		hsb = {
-			brightness = 1,
-			hue = bgimghue,
-			saturation = 1,
-		},
-	},
+	-- {
+	-- 	source = {
+	-- 		File = "introPsyWorry.png",
+	-- 	},
+	-- 	attachment = "Fixed",
+	-- 	opacity = 0.50,
+	-- 	hsb = {
+	-- 		brightness = 1,
+	-- 		hue = bgimghue,
+	-- 		saturation = 1,
+	-- 	},
+	-- },
+	-- {
+	-- 	source = {
+	-- 		File = "introPsyWorry2.png",
+	-- 	},
+	-- 	attachment = "Fixed",
+	-- 	opacity = 0.50,
+	-- 	hsb = {
+	-- 		brightness = 1,
+	-- 		hue = bgimghue,
+	-- 		saturation = 1,
+	-- 	},
+	-- },
 }
 config.prefer_egl = true
 config.window_padding = {
@@ -75,6 +75,7 @@ config.window_decorations = "NONE | RESIZE"
 config.use_fancy_tab_bar = false
 config.enable_tab_bar = true
 config.initial_cols = 80
+config.cell_width = 0.9
 config.keys = {
 	{
 		key = "h",
