@@ -6,6 +6,7 @@ REM '; : << "BASH"
 BASH
 
 echo "Unix: Bourne-Shell"
+unset ZSH
 
 if [ -n "$TERMUX_VERSION" ] || command -v pkg &> /dev/null; then
     PACKAGER="pkg"
@@ -57,7 +58,7 @@ if [ "$OS" = "Termux" ]; then
 fi
 if [ ! -d "$HOME/.oh-my-zsh" ]; then #
     echo "Installing Oh My Zsh..."
-    ZSH= sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended < /dev/null
 else #
     echo "Oh My Zsh is already installed."
 fi #
