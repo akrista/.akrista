@@ -2,6 +2,26 @@
 
 Personal configuration files for terminal emulators and development tools.
 
+## Installation
+
+You can install the tools and configure your environment by running the polyglot installer script with a single command:
+
+### Linux / Termux (Bash)
+
+Run the following command to identify your OS/package manager and install Oh My Zsh & Oh My Posh:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/akrista/.akrista/master/install.ps1 | bash
+```
+
+### Windows (PowerShell)
+
+Run the following command in an elevated PowerShell session to install Oh My Posh using `winget`:
+
+```powershell
+irm https://raw.githubusercontent.com/akrista/.akrista/master/install.ps1 | iex
+```
+
 ## Files
 
 ### `.sqliterc`
