@@ -44,7 +44,7 @@ if [ "$OS" = "Termux" ]; then
     pkg install -y tur-repo
 
     echo "Installing required utilities..."
-    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn
+    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf
 
     echo "Setting up SSH..."
     sv-enable sshd
@@ -81,6 +81,29 @@ if [ ! -d "$NVIM_CONFIG_DIR" ]; then
 else
     echo "Neovim configuration already exists."
 fi
+
+# Change default shell to zsh
+case "$SHELL" in
+    *zsh)
+        echo "Default shell is already zsh."
+        ;;
+    *)
+        if command -v zsh &> /dev/null; then
+            echo "Changing default shell to zsh..."
+            if [ "$OS" = "Termux" ]; then
+                chsh -s zsh
+            else
+                if command -v chsh &> /dev/null; then
+                    chsh -s "$(command -v zsh)"
+                else
+                    echo "chsh command not found. Please change your default shell to zsh manually."
+                fi
+            fi
+        else
+            echo "zsh is not installed. Cannot change default shell."
+        fi
+        ;;
+esac
 
 exit
 '@
