@@ -56,73 +56,41 @@ if [ "$OS" = "Termux" ]; then
         echo "MesloLGS NF Regular font is already installed."
     fi
 fi
-if [ ! -d "$HOME/.oh-my-zsh" ]; then #
-    echo "Installing Oh My Zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended < /dev/null
-else #
-    echo "Oh My Zsh is already installed."
-fi #
-if ! command -v oh-my-posh &> /dev/null; then
-    echo "Installing Oh My Posh..."
-    curl -s https://ohmyposh.dev/install.sh | bash -s
-else
-    echo "Oh My Posh is already installed."
-fi
+[ -d "$HOME/.oh-my-zsh" ] && echo "Oh My Zsh is already installed." || { echo "Installing Oh My Zsh..."; sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended < /dev/null; } #
+
+command -v oh-my-posh &> /dev/null && echo "Oh My Posh is already installed." || { echo "Installing Oh My Posh..."; curl -s https://ohmyposh.dev/install.sh | bash -s; } #
+
 NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
-if [ ! -d "$NVIM_CONFIG_DIR" ]; then
-    echo "Cloning Neovim configuration..."
-    git clone -b akrista https://github.com/akrista/nvim "$NVIM_CONFIG_DIR"
-else
-    echo "Neovim configuration already exists."
-fi
+[ -d "$NVIM_CONFIG_DIR" ] && echo "Neovim configuration already exists." || { echo "Cloning Neovim configuration..."; git clone -b akrista https://github.com/akrista/nvim "$NVIM_CONFIG_DIR"; } #
+
 DOTFILES_DIR="$HOME/.akrista"
-if [ ! -d "$DOTFILES_DIR" ]; then
-    echo "Cloning .akrista repository..."
-    git clone https://github.com/akrista/.akrista "$DOTFILES_DIR"
-else
-    echo ".akrista repository already exists. Updating..."
-    git -C "$DOTFILES_DIR" pull
-fi
+[ -d "$DOTFILES_DIR" ] && { echo ".akrista repository already exists. Updating..."; git -C "$DOTFILES_DIR" pull; } || { echo "Cloning .akrista repository..."; git clone https://github.com/akrista/.akrista "$DOTFILES_DIR"; } #
+
 [ -d "$DOTFILES_DIR" ] && touch "$DOTFILES_DIR/.last_update_check" 2>/dev/null
+
 ZSHRC_TARGET="$HOME/.zshrc"
 ZSHRC_SOURCE="$DOTFILES_DIR/.zshrc"
-if [ -f "$ZSHRC_SOURCE" ]; then
-    if [ -L "$ZSHRC_TARGET" ] && [ "$(readlink "$ZSHRC_TARGET")" = "$ZSHRC_SOURCE" ]; then
-        echo ".zshrc is already linked to the repository's version."
-    else
+[ ! -f "$ZSHRC_SOURCE" ] && echo "Warning: Repository's .zshrc not found at $ZSHRC_SOURCE" || {
+    [ -L "$ZSHRC_TARGET" ] && [ "$(readlink "$ZSHRC_TARGET")" = "$ZSHRC_SOURCE" ] && echo ".zshrc is already linked to the repository's version." || {
         echo "Creating symlink for .zshrc..."
-        if [ -e "$ZSHRC_TARGET" ] || [ -L "$ZSHRC_TARGET" ]; then
-            echo "Backing up existing $ZSHRC_TARGET to $ZSHRC_TARGET.bak..."
-            mv "$ZSHRC_TARGET" "$ZSHRC_TARGET.bak"
-        fi
+        { [ -e "$ZSHRC_TARGET" ] || [ -L "$ZSHRC_TARGET" ]; } && { echo "Backing up existing $ZSHRC_TARGET to $ZSHRC_TARGET.bak..."; mv "$ZSHRC_TARGET" "$ZSHRC_TARGET.bak"; }
         ln -s "$ZSHRC_SOURCE" "$ZSHRC_TARGET"
-    fi
-else
-    echo "Warning: Repository's .zshrc not found at $ZSHRC_SOURCE"
-fi
-case "$SHELL" in
-    *zsh)
-        echo "Default shell is already zsh."
-        ;;
-    *)
-        if command -v zsh &> /dev/null; then
+    }
+} #
+
+case "$SHELL" in #
+    *zsh) #
+        echo "Default shell is already zsh." ;;
+    *) #
+        command -v zsh &> /dev/null && {
             echo "Changing default shell to zsh..."
-            if [ "$OS" = "Termux" ]; then
-                chsh -s zsh
-            else
-                if command -v chsh &> /dev/null; then
-                    chsh -s "$(command -v zsh)"
-                else
-                    echo "chsh command not found. Please change your default shell to zsh manually."
-                fi
-            fi
+            [ "$OS" = "Termux" ] && chsh -s zsh || {
+                command -v chsh &> /dev/null && chsh -s "$(command -v zsh)" || echo "chsh command not found. Please change your default shell to zsh manually.";
+            }
             echo "Switching current session to zsh..."
-            exec zsh -l
-        else
-            echo "zsh is not installed. Cannot change default shell."
-        fi
-        ;;
-esac
+            exec zsh -l;
+        } || echo "zsh is not installed. Cannot change default shell." ;;
+esac #
 exit
 '@
 
