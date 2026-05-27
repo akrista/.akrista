@@ -37,6 +37,9 @@ if [ "$OS" = "Termux" ]; then
     echo "Changing Termux repository..."
     termux-change-repo
 
+    echo "Updating package lists..."
+    pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+
     echo "Setting up Termux User Repository (tur-repo)..."
     pkg install -y tur-repo
 
