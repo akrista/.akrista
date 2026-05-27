@@ -55,12 +55,12 @@ if [ "$OS" = "Termux" ]; then
         echo "MesloLGS NF Regular font is already installed."
     fi
 fi
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
+if [ ! -d "$HOME/.oh-my-zsh" ]; then #
     echo "Installing Oh My Zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-else
+    ZSH= sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+else #
     echo "Oh My Zsh is already installed."
-fi
+fi #
 if ! command -v oh-my-posh &> /dev/null; then
     echo "Installing Oh My Posh..."
     curl -s https://ohmyposh.dev/install.sh | bash -s
