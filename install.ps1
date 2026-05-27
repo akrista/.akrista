@@ -34,17 +34,17 @@ echo "Detected Package Manager: $PACKAGER"
 # Environment-specific package installations
 if [ "$OS" = "Termux" ]; then
 
+    echo "Setting up Termux User Repository (tur-repo)..."
+    pkg install -y tur-repo root-repo
+
     echo "Changing Termux repository..."
     termux-change-repo
 
     echo "Updating package lists..."
     pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
-    echo "Setting up Termux User Repository (tur-repo)..."
-    pkg install -y tur-repo
-
     echo "Installing required utilities..."
-    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf
+    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide
 
     echo "Setting up SSH..."
     sv-enable sshd
