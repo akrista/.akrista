@@ -128,9 +128,9 @@ GITCONFIG_SOURCE="$DOTFILES_DIR/.gitconfig"
 } #
 
 TERMUX_PROPERTIES_TARGET="$HOME/.termux/termux.properties"
-TERMUX_PROPERTIES_SOURCE="$DOTFILES_DIR/.termux.properties"
+TERMUX_PROPERTIES_SOURCE="$DOTFILES_DIR/termux.properties"
 if [ "$OS" = "Termux" ]; then
-    [ ! -f "$TERMUX_PROPERTIES_SOURCE" ] && echo "Warning: Repository's .termux.properties not found at $TERMUX_PROPERTIES_SOURCE" || {
+    [ ! -f "$TERMUX_PROPERTIES_SOURCE" ] && echo "Warning: Repository's termux.properties not found at $TERMUX_PROPERTIES_SOURCE" || {
         [ -L "$TERMUX_PROPERTIES_TARGET" ] && [ "$(readlink "$TERMUX_PROPERTIES_TARGET")" = "$TERMUX_PROPERTIES_SOURCE" ] && echo "termux.properties is already linked to the repository's version." || {
             echo "Creating symlink for termux.properties..."
             mkdir -p "$HOME/.termux"
