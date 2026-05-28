@@ -196,7 +196,6 @@ _check_update() {
 }
 _check_update
 
-# Update helper for the .akrista dotfiles and environment
 update-akrista() {
   local doc_dir="$HOME/.akrista"
   if [[ -d "$doc_dir" ]]; then
@@ -215,4 +214,3 @@ update-akrista() {
     return 1
   fi
 }
-alias akrista-update=update-akrista
