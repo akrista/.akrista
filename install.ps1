@@ -39,7 +39,7 @@ if [ "$OS" = "Termux" ]; then
     echo "Updating package lists..."
     pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
     echo "Installing required utilities..."
-    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust
+    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh
     echo "Setting up SSH..."
     bash -c "sv-enable sshd"
     bash -c "sv-enable ssh-agent"
@@ -55,10 +55,46 @@ if [ "$OS" = "Termux" ]; then
     else
         echo "MesloLGS NF Regular font is already installed."
     fi
+
+    if ! command -v gemini &> /dev/null; then
+        echo "Installing @google/gemini-cli..."
+        npm install -g @google/gemini-cli
+    else
+        echo "gemini-cli is already installed."
+    fi
 fi
 [ -d "$HOME/.oh-my-zsh" ] && echo "Oh My Zsh is already installed." || { echo "Installing Oh My Zsh..."; sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended < /dev/null; } #
 
+mkdir -p "$HOME/.zsh"
+[ -d "$HOME/.zsh/zsh-autosuggestions" ] && echo "zsh-autosuggestions is already installed." || { echo "Installing zsh-autosuggestions..."; git clone https://github.com/zsh-users/zsh-autosuggestions "$HOME/.zsh/zsh-autosuggestions"; } #
+[ -d "$HOME/.zsh/zsh-syntax-highlighting" ] && echo "zsh-syntax-highlighting is already installed." || { echo "Installing zsh-syntax-highlighting..."; git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$HOME/.zsh/zsh-syntax-highlighting"; } #
+[ -d "$HOME/.zsh/zsh-completions" ] && echo "zsh-completions is already installed." || { echo "Installing zsh-completions..."; git clone https://github.com/zsh-users/zsh-completions.git "$HOME/.zsh/zsh-completions"; rm -f "$HOME/.zcompdump"*; } #
+
 command -v oh-my-posh &> /dev/null && echo "Oh My Posh is already installed." || { echo "Installing Oh My Posh..."; curl -s https://ohmyposh.dev/install.sh | bash -s; } #
+
+if [ "$OS" = "Termux" ]; then
+    echo "Skipping NVM installation on Termux."
+else
+    [ -d "$HOME/.nvm" ] && echo "NVM is already installed." || { echo "Installing NVM..."; curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash; } #
+fi
+
+if [ "$OS" = "Termux" ]; then
+    echo "Skipping Bun installation on Termux."
+else
+    [ -d "$HOME/.bun" ] && echo "Bun is already installed." || { echo "Installing Bun..."; curl -fsSL https://bun.sh/install | bash; } #
+fi
+
+if [ "$OS" = "Termux" ]; then
+    echo "Skipping Opencode installation on Termux."
+else
+    command -v opencode &> /dev/null && echo "OpenCode is already installed." || { echo "Installing OpenCode..."; curl -fsSL https://opencode.ai/install | bash; } #
+fi
+
+if [ "$OS" = "Termux" ]; then
+    echo "Skipping Copilot installation on Termux."
+else
+    command -v copilot &> /dev/null && echo "GitHub Copilot CLI is already installed." || { echo "Installing GitHub Copilot CLI..."; curl -fsSL https://gh.io/copilot-install | bash; } #
+fi
 
 NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 [ -d "$NVIM_CONFIG_DIR" ] && echo "Neovim configuration already exists." || { echo "Cloning Neovim configuration..."; git clone -b akrista https://github.com/akrista/nvim "$NVIM_CONFIG_DIR"; } #
@@ -88,7 +124,7 @@ case "$SHELL" in #
                 command -v chsh &> /dev/null && chsh -s "$(command -v zsh)" || echo "chsh command not found. Please change your default shell to zsh manually.";
             }
             echo "Switching current session to zsh..."
-            exec zsh -l;
+            exec zsh -l </dev/tty;
         } || echo "zsh is not installed. Cannot change default shell." ;;
 esac #
 exit

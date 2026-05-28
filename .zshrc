@@ -6,8 +6,7 @@ export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
-export PATH=/home/akrista/.opencode/bin:$PATH
-export PATH="$PATH:$HOME/Android/Sdk/platform-tools:$HOME/Android/Sdk/tools:/opt/android-studio/bin"
+export PATH="$HOME/.opencode/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 
 HISTFILE=~/.zsh_history
@@ -90,6 +89,10 @@ DISABLE_UNTRACKED_FILES_DIRTY="true"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=()
 
+if [ -d "$HOME/.zsh/zsh-completions/src" ]; then
+  fpath=("$HOME/.zsh/zsh-completions/src" $fpath)
+fi
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -123,6 +126,7 @@ alias ls='eza'
 # End of lines added by compinstall
 
 if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
   eval "$(zoxide init zsh --cmd cd)"
 fi
 
@@ -133,20 +137,26 @@ if [ -s "$NVM_DIR/bash_completion" ]; then
   source "$NVM_DIR/bash_completion"
 fi
 
-if [ -s "/home/akrista/.bun/_bun" ]; then
-  source "/home/akrista/.bun/_bun"
+if [ -s "$HOME/.bun/_bun" ]; then
+  source "$HOME/.bun/_bun"
 fi
 
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ] && command -v oh-my-posh >/dev/null 2>&1; then
   eval "$(oh-my-posh init zsh --config $HOME/.akrista/lambdageneration.omp.json)"
 fi
 
-if [ -f "/usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
-  source "/usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+SYS_PREFIX="${PREFIX:-/usr}"
+
+if [ -f "$SYS_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+  source "$SYS_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [ -f "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+  source "$HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
 fi
 
-if [ -f "/usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
-  source "/usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+if [ -f "$SYS_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  source "$SYS_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif [ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 
 _check_update() {
@@ -158,7 +168,6 @@ _check_update() {
   if [[ ! -f "$check_file" ]]; then
     need_fetch=1
   else
-    # Check if the file is more than 24 hours (24h) old using zsh glob qualifiers
     local old_files=( "$check_file"(mh+24N) )
     if [[ -n "$old_files" ]]; then
       need_fetch=1
