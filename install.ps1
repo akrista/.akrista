@@ -266,26 +266,45 @@ if [ "$OS" = "Termux" ]; then
     
     echo "Reloading Termux settings..."
     termux-reload-settings
-
-    # Install @google/gemini-cli
-    if ! command -v gemini &> /dev/null; then
-        echo "Installing @google/gemini-cli..."
-        if command -v npm &> /dev/null; then
-            npm i -g @google/gemini-cli
-        else
-            echo "Warning: npm not found. Skipping @google/gemini-cli installation."
-        fi
-    else
-        echo "gemini-cli is already installed."
-    fi
 else
     # Non-Termux Installs
-    [ -d "$HOME/.nvm" ] && echo "NVM is already installed." || { echo "Installing NVM..."; curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash; }
+    if [ ! -d "$HOME/.nvm" ]; then
+        echo "Installing NVM..."
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+    else
+        echo "NVM is already installed."
+    fi
+    export NVM_DIR="$HOME/.nvm"
+    if [ -s "$NVM_DIR/nvm.sh" ]; then
+        . "$NVM_DIR/nvm.sh"
+        echo "Ensuring Node.js LTS is installed and configured..."
+        nvm install --lts
+        nvm use --lts
+        nvm alias default 'lts/*'
+    fi
+
     [ -d "$HOME/.bun" ] && echo "Bun is already installed." || { echo "Installing Bun..."; curl -fsSL https://bun.sh/install | bash; }
     command -v opencode &> /dev/null && echo "OpenCode is already installed." || { echo "Installing OpenCode..."; curl -fsSL https://opencode.ai/install | bash; }
     command -v copilot &> /dev/null && echo "GitHub Copilot CLI is already installed." || { echo "Installing GitHub Copilot CLI..."; curl -fsSL https://gh.io/copilot-install | bash; }
     [ -d "$HOME/.tmux/plugins/tpm" ] && echo "tpack (TPM compatible) is already installed." || { echo "Installing tpack (TPM compatible)..."; git clone https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"; }
     command -v rustup &> /dev/null && echo "Rustup is already installed." || { echo "Installing Rustup..."; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; }
+
+    # Install @google/gemini-cli if on ARM architecture
+    case "$(uname -m)" in
+        arm*|aarch64*)
+            if ! command -v gemini &> /dev/null; then
+                echo "Detected ARM architecture. Installing @google/gemini-cli..."
+                if command -v npm &> /dev/null; then
+                    npm i -g @google/gemini-cli
+                else
+                    echo "Warning: npm not found. Skipping @google/gemini-cli installation."
+                fi
+            else
+                echo "gemini-cli is already installed."
+            fi
+            ;;
+    esac
+
     if ! command -v brew &> /dev/null && [ ! -d "/home/linuxbrew/.linuxbrew" ]; then
         echo "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
