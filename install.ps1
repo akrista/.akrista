@@ -126,6 +126,7 @@ DOTFILES_DIR="$HOME/.akrista"
 link_file "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
 link_file "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
 link_file "$DOTFILES_DIR/.sqliterc" "$HOME/.sqliterc" ".sqliterc"
+link_file "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
 
 if [ "$OS" = "Termux" ]; then
     mkdir -p "$HOME/.termux"
