@@ -115,8 +115,89 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# --- Shell Navigation & General Aliases ---
 alias cat='bat'
 alias ls='eza'
+alias l="eza -la --icons --git"
+alias la="eza -a --icons"
+alias ll="eza -l --icons --git"
+alias lt="eza --tree --level=2 --icons"
+alias g="git"
+alias nv="nvim"
+alias v="nvim"
+alias ezsh="nvim ~/.zshrc"
+alias uzsh="source ~/.zshrc"
+
+# --- Termux-Specific Enhancements ---
+if [ -n "$TERMUX_VERSION" ]; then
+  # Quick package management
+  alias pkgup="pkg update && pkg upgrade -y"
+  alias pkgi="pkg install"
+  alias pkgu="pkg uninstall"
+  alias pkgs="pkg search"
+  alias pkgl="pkg list-installed"
+
+  # Wake lock controls to prevent Android/Termux from sleeping during long background tasks
+  alias wakelock="termux-wake-lock"
+  alias wakeunlock="termux-wake-unlock"
+
+  # Quick access to Android Storage directories (requires running termux-setup-storage)
+  if [ -d "$HOME/storage" ]; then
+    alias sdcard="cd $HOME/storage/shared"
+    alias downloads="cd $HOME/storage/downloads"
+    alias dcim="cd $HOME/storage/dcim"
+    alias documents="cd $HOME/storage/shared/Documents"
+  fi
+
+  # Termux API integration (requires 'termux-api' package and Android companion app)
+  if command -v termux-clipboard-get >/dev/null 2>&1; then
+    alias cbget="termux-clipboard-get"
+    alias cbset="termux-clipboard-set"
+  fi
+  if command -v termux-share >/dev/null 2>&1; then
+    alias share="termux-share"
+  fi
+  if command -v termux-open >/dev/null 2>&1; then
+    alias open="termux-open"
+    alias openurl="termux-open-url"
+  fi
+
+  # Device state & interactive actions
+  alias battery="termux-battery-status"
+  alias wifi="termux-wifi-connectioninfo"
+  alias vibrate="termux-vibrate"
+  alias toast="termux-toast"
+  alias notify="termux-notification"
+
+  # Termux Services management (requires 'termux-services' package)
+  if command -v sv >/dev/null 2>&1; then
+    alias tservice="sv"
+    alias tstart="sv-enable"
+    alias tstop="sv-disable"
+  fi
+
+  # proot-distro shortcuts & helpers
+  alias pd="proot-distro"
+  alias pdls="proot-distro list"
+  alias pdi="proot-distro install"
+  alias pdun="proot-distro uninstall"
+
+  pdl() {
+    local user="${1:-akrista}"
+    local distro="${2:-debian}"
+
+    if [[ "$user" == "-h" || "$user" == "--help" ]]; then
+      echo "Usage: pdl [user] [distro]"
+      echo "Log in to a proot-distro container in isolated mode."
+      echo "Defaults: user=akrista, distro=debian"
+      return 0
+    fi
+
+    echo "Logging into '$distro' as user '$user' (isolated)..."
+    proot-distro login --isolated --user "$user" "$distro"
+  }
+fi
 
 # autoload -Uz compinit && compinit
 # zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
@@ -188,7 +269,7 @@ _check_update() {
         local base_commit=$(git -C "$doc_dir" merge-base @ @{u} 2>/dev/null)
         if [[ "$local_commit" = "$base_commit" ]]; then
           printf "\n\e[1;33m[!] An update is available for the .akrista repository!\e[0m\n"
-          printf "    Run \e[1;32mupdate-akrista\e[0m to apply the updates.\n\n"
+          printf "    Run \e[1;32muak\e[0m to apply the updates.\n\n"
         fi
       fi
     fi
@@ -196,7 +277,7 @@ _check_update() {
 }
 _check_update
 
-uzsh() {
+uak() {
   local doc_dir="$HOME/.akrista"
   if [[ -d "$doc_dir" ]]; then
     echo "Updating .akrista repository..."

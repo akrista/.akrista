@@ -43,6 +43,73 @@ echo "Detected Package Manager: $PACKAGER"
 DOTFILES_DIR="$HOME/.akrista"
 
 # 2. Helper Functions
+show_sudo_debian_remediation_message() {
+    local reason="$1"
+    echo ""
+    echo "========================================================================"
+    echo " 🔴 SYSTEM CONFIGURATION ISSUE DETECTED"
+    echo "========================================================================"
+    if [ "$reason" = "root" ]; then
+        echo " Error: You are currently running this script as root!"
+        echo " Running dotfiles setup as root is not supported or recommended."
+    elif [ "$reason" = "no_sudo" ]; then
+        echo " Error: 'sudo' command not found!"
+    else
+        echo " Error: Current user '$USER' does not have sudo privileges!"
+    fi
+    echo ""
+    echo " Debian usually doesn't come with sudo installed by default."
+    echo " Please follow these steps to configure your environment:"
+    echo ""
+    echo " 1. Login with root and install sudo:"
+    echo "    apt update && apt install -y sudo"
+    echo ""
+    echo " 2. Create the desired user:"
+    echo "    useradd -m username"
+    echo "    passwd username"
+    echo ""
+    echo " 3. Add user to sudo group:"
+    echo "    usermod -aG sudo username"
+    echo ""
+    echo " 4. Ensure that an editor is installed (if not, install neovim):"
+    echo "    apt install -y neovim"
+    echo ""
+    echo " 5. Run visudo (or sudo visudo) to add the username privilege:"
+    echo "    visudo"
+    echo "    # Add the following line under the user privilege specification:"
+    echo "    username ALL=(ALL:ALL) ALL"
+    echo ""
+    echo " 6. Switch to your user and run the installation script again:"
+    echo "    su - username"
+    echo "    cd ~/.username"
+    echo "    ./install.ps1"
+    echo "========================================================================"
+    echo ""
+}
+
+has_sudo_privileges() {
+    if ! command -v sudo &> /dev/null; then
+        return 1
+    fi
+    if sudo -n true 2>/dev/null; then
+        return 0
+    fi
+    if groups | grep -qE '\b(sudo|admin|wheel)\b'; then
+        return 0
+    fi
+    local sudo_l_output
+    sudo_l_output=$(sudo -n -l 2>&1)
+    if echo "$sudo_l_output" | grep -qE "not in the sudoers|not allowed to run sudo"; then
+        return 1
+    fi
+    echo "Checking sudo access (you may be prompted for your password)..."
+    if sudo -v &> /dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 link_file() {
     local source_file="$1"
     local target_file="$2"
@@ -116,6 +183,62 @@ if [ "$OS" = "Termux" ]; then
     fi
 fi
 
+# 3.5 Debian/Ubuntu Package Installation & Sudo Verification
+if [ "$OS" = "Debian/Ubuntu" ]; then
+    # 1. Stop the script if the user is root
+    if [ "$EUID" -eq 0 ] || [ "$(id -u)" -eq 0 ]; then
+        show_sudo_debian_remediation_message "root"
+        exit 1
+    fi
+
+    # 2. Check if sudo exists and the current user has sudo privileges
+    if ! command -v sudo &> /dev/null; then
+        show_sudo_debian_remediation_message "no_sudo"
+        exit 1
+    fi
+
+    if ! has_sudo_privileges; then
+        show_sudo_debian_remediation_message "no_privileges"
+        exit 1
+    fi
+
+    # 3. If neovim is installed with apt, remove it
+    if pkg_is_installed neovim; then
+        echo "Found neovim installed via apt. Removing it to install the latest official release..."
+        sudo apt-get remove -y neovim
+    fi
+
+    echo "Updating system package list..."
+    sudo apt update -y && sudo apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+
+    echo "Installing required development tools and utilities..."
+    sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli unzip git xclip curl wget unzip zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala
+
+    echo "Installing official Neovim build..."
+    TEMP_DIR=$(mktemp -d)
+    (
+        cd "$TEMP_DIR" || exit 1
+        curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+        sudo rm -rf /opt/nvim-linux-x86_64
+        sudo mkdir -p /opt/nvim-linux-x86_64
+        sudo chmod a+rX /opt/nvim-linux-x86_64
+        sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+        sudo chmod -R a+rX /opt/nvim-linux-x86_64
+        sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/
+    )
+    rm -rf "$TEMP_DIR"
+
+    echo "Neovim installation completed successfully."
+
+    if ! command -v pacstall &> /dev/null; then
+        echo "Installing Pacstall..."
+        sudo bash -c "$(curl -fsSL https://pacstall.dev/q/install)"
+    else
+        echo "Pacstall is already installed."
+    fi
+fi
+
+
 # 4. Clone / Update Repositories
 NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 [ -d "$NVIM_CONFIG_DIR" ] && echo "Neovim configuration already exists. Updating..." || { echo "Cloning Neovim configuration..."; git clone -b akrista https://github.com/akrista/nvim "$NVIM_CONFIG_DIR"; }
@@ -158,12 +281,13 @@ else
     [ -d "$HOME/.bun" ] && echo "Bun is already installed." || { echo "Installing Bun..."; curl -fsSL https://bun.sh/install | bash; }
     command -v opencode &> /dev/null && echo "OpenCode is already installed." || { echo "Installing OpenCode..."; curl -fsSL https://opencode.ai/install | bash; }
     command -v copilot &> /dev/null && echo "GitHub Copilot CLI is already installed." || { echo "Installing GitHub Copilot CLI..."; curl -fsSL https://gh.io/copilot-install | bash; }
-    
-    # tpack / tmux plugins (Do not run on Termux)
-    [ -d "$HOME/.tmux/plugins/tpm" ] && echo "tpack (TPM compatible) is already installed." || {
-        echo "Installing tpack (TPM compatible)..."
-        git clone https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"
-    }
+    [ -d "$HOME/.tmux/plugins/tpm" ] && echo "tpack (TPM compatible) is already installed." || { git clone https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm" }
+    if ! command -v brew &> /dev/null && [ ! -d "/home/linuxbrew/.linuxbrew" ]; then
+        echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    else
+        echo "Homebrew is already installed."
+    fi
 fi
 
 # 6. Shell & Plugin Installs
@@ -180,6 +304,19 @@ if command -v npm &> /dev/null; then
     command -v pi &> /dev/null && echo "Pi coding agent is already installed." || { echo "Installing Pi coding agent..."; npm i -g --ignore-scripts @earendil-works/pi-coding-agent; }
 else
     echo "Warning: npm not found. Skipping Pi coding agent installation."
+fi
+
+# 6.5 Post-Installation Package Cleanup
+echo "Performing post-installation package cleanup..."
+if [ "$PACKAGER" = "pkg" ]; then
+    echo "Cleaning up Termux packages..."
+    pkg autoclean -y
+    pkg clean
+elif [ "$PACKAGER" = "apt" ]; then
+    echo "Cleaning up Debian/Ubuntu packages..."
+    sudo apt-get autoremove -y
+    sudo apt-get autoclean -y
+    sudo apt-get clean
 fi
 
 # 7. Configurations & Symlinks (Common Dotfiles)
