@@ -212,7 +212,7 @@ if [ "$OS" = "Debian/Ubuntu" ]; then
     sudo apt update -y && sudo apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
     echo "Installing required development tools and utilities..."
-    sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli unzip git xclip curl wget unzip zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala
+    sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli git xclip curl wget unzip zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala
 
     echo "Installing official Neovim build..."
     TEMP_DIR=$(mktemp -d)
@@ -281,7 +281,7 @@ else
     [ -d "$HOME/.bun" ] && echo "Bun is already installed." || { echo "Installing Bun..."; curl -fsSL https://bun.sh/install | bash; }
     command -v opencode &> /dev/null && echo "OpenCode is already installed." || { echo "Installing OpenCode..."; curl -fsSL https://opencode.ai/install | bash; }
     command -v copilot &> /dev/null && echo "GitHub Copilot CLI is already installed." || { echo "Installing GitHub Copilot CLI..."; curl -fsSL https://gh.io/copilot-install | bash; }
-    [ -d "$HOME/.tmux/plugins/tpm" ] && echo "tpack (TPM compatible) is already installed." || { git clone https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm" }
+    [ -d "$HOME/.tmux/plugins/tpm" ] && echo "tpack (TPM compatible) is already installed." || { echo "Installing tpack (TPM compatible)..."; git clone https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"; }
     if ! command -v brew &> /dev/null && [ ! -d "/home/linuxbrew/.linuxbrew" ]; then
         echo "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
