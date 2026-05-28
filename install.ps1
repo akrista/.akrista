@@ -117,9 +117,9 @@ DOTFILES_DIR="$HOME/.akrista"
 
 [ -d "$DOTFILES_DIR" ] && touch "$DOTFILES_DIR/.last_update_check" 2>/dev/null
 
-[ -d "$HOME/.tmux/plugins/tpm" ] && echo "TPM (Tmux Plugin Manager) is already installed." || {
-    echo "Installing TPM (Tmux Plugin Manager)..."
-    git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+[ -d "$HOME/.tmux/plugins/tpm" ] && echo "tpack (TPM compatible) is already installed." || {
+    echo "Installing tpack (TPM compatible)..."
+    git clone https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"
 }
 
 # Link dotfiles
