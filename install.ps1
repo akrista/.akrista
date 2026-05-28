@@ -39,10 +39,19 @@ if [ "$OS" = "Termux" ]; then
     echo "Updating package lists..."
     pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
     echo "Installing required utilities..."
-    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh
+    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh lua-language-server stylua
+
+    echo "Configuring Git global settings..."
+    git config --global user.name "Jorge Thomas (akrista)"
+    git config --global user.email "23145794+Akrista@users.noreply.github.com"
+    git config --global init.defaultBranch "master"
+    git config --global core.editor "nvim"
+    git config --global pull.rebase false
+
     echo "Setting up SSH..."
-    bash -c "sv-enable sshd"
-    bash -c "sv-enable ssh-agent"
+    # Running in a login shell to ensure termux-services environment is loaded
+    bash -l -c "sv-enable sshd"
+    bash -l -c "sv-enable ssh-agent"
     echo "Ensuring Termux boot directory exists (~/.termux/boot)..."
     mkdir -p ~/.termux/boot
     echo "Setting up Termux storage access..."
