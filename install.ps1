@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Version: 1.1 - Modularized and Unix EOL forced
 
 function REM() { return; }
 REM @'
@@ -8,6 +7,14 @@ BASH
 
 echo "Unix: Bourne-Shell"
 unset ZSH
+
+# 0. Argument Parsing
+FORCE=false
+for arg in "$@"; do
+    case $arg in
+        --force|-f) FORCE=true ;;
+    esac
+done
 
 # 1. OS & Package Manager Detection
 if [ -n "$TERMUX_VERSION" ] || command -v pkg &> /dev/null; then
@@ -33,7 +40,7 @@ fi
 echo "Detected OS/Environment: $OS"
 echo "Detected Package Manager: $PACKAGER"
 
-# 2. Symlink Helper Function
+# 2. Helper Functions
 link_file() {
     local source_file="$1"
     local target_file="$2"
@@ -53,24 +60,51 @@ link_file() {
     fi
 }
 
+pkg_is_installed() {
+    if [ "$PACKAGER" = "pkg" ] || [ "$PACKAGER" = "apt" ]; then
+        dpkg -s "$1" &> /dev/null
+    else
+        command -v "$1" &> /dev/null
+    fi
+}
+
 # 3. Termux Specific Setup
 if [ "$OS" = "Termux" ]; then
-    echo "Setting up Termux User Repository (tur-repo)..."
-    pkg install -y tur-repo root-repo
-    echo "Changing Termux repository..."
-    [ -t 0 ] && termux-change-repo || echo "Non-interactive shell detected, skipping mirror configuration."
-    echo "Updating package lists..."
-    pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+    DOTFILES_DIR="$HOME/.akrista"
+    UPGRADE_MARKER="$DOTFILES_DIR/.last_upgrade"
+    
+    if [ "$FORCE" = true ] || [ ! -f "$UPGRADE_MARKER" ] || [ "$(find "$UPGRADE_MARKER" -mmin +1440 2>/dev/null)" ]; then
+        echo "Updating package lists and upgrading..."
+        pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+        mkdir -p "$(dirname "$UPGRADE_MARKER")"
+        touch "$UPGRADE_MARKER"
+    else
+        echo "Skipping pkg upgrade (last run less than 24h ago). Use --force to override."
+    fi
+
+    if ! pkg_is_installed tur-repo || ! pkg_is_installed root-repo; then
+        echo "Setting up Termux User Repository (tur-repo)..."
+        pkg install -y tur-repo root-repo
+    fi
+
+    if [ "$FORCE" = true ] && [ -t 0 ]; then
+        echo "Changing Termux repository..."
+        termux-change-repo
+    fi
+
     echo "Installing required utilities..."
     pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh lua-language-server stylua
 
-    echo "Setting up SSH..."
-    bash -l -c "sv-enable sshd"
-    bash -l -c "sv-enable ssh-agent"
-    echo "Ensuring Termux boot directory exists (~/.termux/boot)..."
-    mkdir -p ~/.termux/boot
-    echo "Setting up Termux storage access..."
-    termux-setup-storage
+    if pkg_is_installed termux-services; then
+        [ -d "$PREFIX/var/service/sshd" ] || { echo "Enabling sshd..."; sv-enable sshd; }
+        [ -d "$PREFIX/var/service/ssh-agent" ] || { echo "Enabling ssh-agent..."; sv-enable ssh-agent; }
+    fi
+
+    if [ ! -d "$HOME/storage" ]; then
+        echo "Setting up Termux storage access..."
+        termux-setup-storage
+    fi
+
     if [ ! -f ~/.termux/font.ttf ]; then
         echo "Downloading and installing MesloLGS NF Regular font..."
         mkdir -p ~/.termux
@@ -110,7 +144,8 @@ command -v pi &> /dev/null && echo "Pi coding agent is already installed." || { 
 
 # 6. Configurations & Symlinks
 NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
-[ -d "$NVIM_CONFIG_DIR" ] && echo "Neovim configuration already exists." || { echo "Cloning Neovim configuration..."; git clone -b akrista https://github.com/akrista/nvim "$NVIM_CONFIG_DIR"; }
+[ -d "$NVIM_CONFIG_DIR" ] && echo "Neovim configuration already exists. Updating..." || { echo "Cloning Neovim configuration..."; git clone -b akrista https://github.com/akrista/nvim "$NVIM_CONFIG_DIR"; }
+[ -d "$NVIM_CONFIG_DIR" ] && git -C "$NVIM_CONFIG_DIR" pull
 
 DOTFILES_DIR="$HOME/.akrista"
 [ -d "$DOTFILES_DIR" ] && { echo ".akrista repository already exists. Updating..."; git -C "$DOTFILES_DIR" pull; } || { echo "Cloning .akrista repository..."; git clone https://github.com/akrista/.akrista "$DOTFILES_DIR"; }
@@ -162,8 +197,16 @@ exit
 # Windows PowerShell Execution Block
 # =====================================================================
 Write-Host "Windows: Powershell"
-Write-Host "Installing Oh My Posh..."
-winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh --source winget
+
+# Argument Parsing for PowerShell
+$Force = $args -contains "--force" -or $args -contains "-f"
+
+if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
+    Write-Host "Oh My Posh is already installed."
+} else {
+    Write-Host "Installing Oh My Posh..."
+    winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh --source winget
+}
 
 # PowerShell Symlink Helper
 function Link-File {
@@ -215,7 +258,8 @@ if (-not (Test-Path $nvimConfigPath)) {
     Write-Host "Cloning Neovim configuration..."
     git clone -b akrista https://github.com/akrista/nvim $nvimConfigPath
 } else {
-    Write-Host "Neovim configuration already exists."
+    Write-Host "Neovim configuration already exists. Updating..."
+    git -C $nvimConfigPath pull
 }
 
 $dotfilesPath = Join-Path $HOME ".akrista"
