@@ -127,6 +127,20 @@ GITCONFIG_SOURCE="$DOTFILES_DIR/.gitconfig"
     }
 } #
 
+TERMUX_PROPERTIES_TARGET="$HOME/.termux/termux.properties"
+TERMUX_PROPERTIES_SOURCE="$DOTFILES_DIR/.termux.properties"
+if [ "$OS" = "Termux" ]; then
+    [ ! -f "$TERMUX_PROPERTIES_SOURCE" ] && echo "Warning: Repository's .termux.properties not found at $TERMUX_PROPERTIES_SOURCE" || {
+        [ -L "$TERMUX_PROPERTIES_TARGET" ] && [ "$(readlink "$TERMUX_PROPERTIES_TARGET")" = "$TERMUX_PROPERTIES_SOURCE" ] && echo "termux.properties is already linked to the repository's version." || {
+            echo "Creating symlink for termux.properties..."
+            mkdir -p "$HOME/.termux"
+            { [ -e "$TERMUX_PROPERTIES_TARGET" ] || [ -L "$TERMUX_PROPERTIES_TARGET" ]; } && { echo "Backing up existing $TERMUX_PROPERTIES_TARGET to $TERMUX_PROPERTIES_TARGET.bak..."; mv "$TERMUX_PROPERTIES_TARGET" "$TERMUX_PROPERTIES_TARGET.bak"; }
+            ln -s "$TERMUX_PROPERTIES_SOURCE" "$TERMUX_PROPERTIES_TARGET"
+            termux-reload-settings
+        }
+    }
+fi #
+
 GITCONFIG_LOCAL="$HOME/.gitconfig.local"
 [ -f "$GITCONFIG_LOCAL" ] && echo ".gitconfig.local already exists." || {
     echo "Creating empty .gitconfig.local..."
