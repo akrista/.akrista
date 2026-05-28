@@ -188,10 +188,31 @@ _check_update() {
         local base_commit=$(git -C "$doc_dir" merge-base @ @{u} 2>/dev/null)
         if [[ "$local_commit" = "$base_commit" ]]; then
           printf "\n\e[1;33m[!] An update is available for the .akrista repository!\e[0m\n"
-          printf "    Run \e[1;32m./.akrista/install.ps1\e[0m (or \e[1;32mgit -C ~/.akrista pull\e[0m) to update.\n\n"
+          printf "    Run \e[1;32mupdate-akrista\e[0m to apply the updates.\n\n"
         fi
       fi
     fi
   fi
 }
 _check_update
+
+# Update helper for the .akrista dotfiles and environment
+update-akrista() {
+  local doc_dir="$HOME/.akrista"
+  if [[ -d "$doc_dir" ]]; then
+    echo "Updating .akrista repository..."
+    git -C "$doc_dir" pull
+    
+    if [[ -f "$doc_dir/install.ps1" ]]; then
+      echo "Running installer..."
+      bash "$doc_dir/install.ps1" "$@"
+    else
+      echo "Error: install.ps1 not found in $doc_dir"
+      return 1
+    fi
+  else
+    echo "Error: .akrista directory not found at $doc_dir"
+    return 1
+  fi
+}
+alias akrista-update=update-akrista
