@@ -1,0 +1,22 @@
+[user]
+	name = Jorge Thomas (Akrista)
+	email = 23145794+Akrista@users.noreply.github.com
+
+[core]
+	autocrlf = true
+	editor = nvim
+
+[init]
+	defaultBranch = master
+
+[pull]
+	rebase = false
+
+[alias]
+	st = status
+	co = checkout
+	br = branch
+	cm = commit
+
+[include]
+	path = ~/.gitconfig.local

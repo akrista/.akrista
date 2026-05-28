@@ -41,15 +41,7 @@ if [ "$OS" = "Termux" ]; then
     echo "Installing required utilities..."
     pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh lua-language-server stylua
 
-    echo "Configuring Git global settings..."
-    git config --global user.name "Jorge Thomas (akrista)"
-    git config --global user.email "23145794+Akrista@users.noreply.github.com"
-    git config --global init.defaultBranch "master"
-    git config --global core.editor "nvim"
-    git config --global pull.rebase false
-
     echo "Setting up SSH..."
-    # Running in a login shell to ensure termux-services environment is loaded
     bash -l -c "sv-enable sshd"
     bash -l -c "sv-enable ssh-agent"
     echo "Ensuring Termux boot directory exists (~/.termux/boot)..."
@@ -125,6 +117,22 @@ ZSHRC_SOURCE="$DOTFILES_DIR/.zshrc"
     }
 } #
 
+GITCONFIG_TARGET="$HOME/.gitconfig"
+GITCONFIG_SOURCE="$DOTFILES_DIR/.gitconfig"
+[ ! -f "$GITCONFIG_SOURCE" ] && echo "Warning: Repository's .gitconfig not found at $GITCONFIG_SOURCE" || {
+    [ -L "$GITCONFIG_TARGET" ] && [ "$(readlink "$GITCONFIG_TARGET")" = "$GITCONFIG_SOURCE" ] && echo ".gitconfig is already linked to the repository's version." || {
+        echo "Creating symlink for .gitconfig..."
+        { [ -e "$GITCONFIG_TARGET" ] || [ -L "$GITCONFIG_TARGET" ]; } && { echo "Backing up existing $GITCONFIG_TARGET to $GITCONFIG_TARGET.bak..."; mv "$GITCONFIG_TARGET" "$GITCONFIG_TARGET.bak"; }
+        ln -s "$GITCONFIG_SOURCE" "$GITCONFIG_TARGET"
+    }
+} #
+
+GITCONFIG_LOCAL="$HOME/.gitconfig.local"
+[ -f "$GITCONFIG_LOCAL" ] && echo ".gitconfig.local already exists." || {
+    echo "Creating empty .gitconfig.local..."
+    touch "$GITCONFIG_LOCAL"
+} #
+
 case "$SHELL" in #
     *zsh) #
         echo "Default shell is already zsh." ;;
@@ -165,4 +173,50 @@ if (-not (Test-Path $dotfilesPath)) {
 if (Test-Path $dotfilesPath) {
     $checkFile = Join-Path $dotfilesPath ".last_update_check"
     New-Item -ItemType File -Path $checkFile -Force | Out-Null
+}
+
+$gitConfigTarget = Join-Path $HOME ".gitconfig"
+$gitConfigSource = Join-Path $dotfilesPath ".gitconfig"
+
+if (Test-Path $gitConfigSource) {
+    $alreadyLinked = $false
+    if (Test-Path $gitConfigTarget) {
+        $item = Get-Item $gitConfigTarget
+        if ($item.Attributes -match "ReparsePoint") {
+            $target = $item.Target
+            if ($target -eq $gitConfigSource -or $target -eq (Get-Item $gitConfigSource).FullName) {
+                Write-Host ".gitconfig is already linked to the repository's version."
+                $alreadyLinked = $true
+            }
+        }
+        
+        if (-not $alreadyLinked) {
+            Write-Host "Backing up existing $gitConfigTarget to $gitConfigTarget.bak..."
+            if (Test-Path "$gitConfigTarget.bak") {
+                Remove-Item "$gitConfigTarget.bak" -Force
+            }
+            Move-Item $gitConfigTarget "$gitConfigTarget.bak" -Force
+            Write-Host "Creating symlink for .gitconfig..."
+            try {
+                New-Item -ItemType SymbolicLink -Path $gitConfigTarget -Value $gitConfigSource -ErrorAction Stop | Out-Null
+            } catch {
+                Write-Host "Failed to create symlink (requires Admin or Developer Mode). Copying file instead..."
+                Copy-Item $gitConfigSource $gitConfigTarget -Force
+            }
+        }
+    } else {
+        Write-Host "Creating symlink for .gitconfig..."
+        try {
+            New-Item -ItemType SymbolicLink -Path $gitConfigTarget -Value $gitConfigSource -ErrorAction Stop | Out-Null
+        } catch {
+            Write-Host "Failed to create symlink. Copying file instead..."
+            Copy-Item $gitConfigSource $gitConfigTarget -Force
+        }
+    }
+}
+
+$gitConfigLocal = Join-Path $HOME ".gitconfig.local"
+if (-not (Test-Path $gitConfigLocal)) {
+    Write-Host "Creating empty $gitConfigLocal..."
+    New-Item -ItemType File -Path $gitConfigLocal -Force | Out-Null
 }
