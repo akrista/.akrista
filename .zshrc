@@ -117,7 +117,11 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # --- Shell Navigation & General Aliases ---
-alias cat='bat'
+if command -v batcat >/dev/null 2>&1; then
+  alias cat='batcat'
+else
+  alias cat='bat'
+fi
 alias ls='eza'
 alias l="eza -la --icons --git"
 alias la="eza -a --icons"

@@ -214,21 +214,24 @@ if [ "$OS" = "Debian/Ubuntu" ]; then
     echo "Installing required development tools and utilities..."
     sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli git xclip curl wget unzip zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala
 
-    echo "Installing official Neovim build..."
-    TEMP_DIR=$(mktemp -d)
-    (
-        cd "$TEMP_DIR" || exit 1
-        curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-        sudo rm -rf /opt/nvim-linux-x86_64
-        sudo mkdir -p /opt/nvim-linux-x86_64
-        sudo chmod a+rX /opt/nvim-linux-x86_64
-        sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-        sudo chmod -R a+rX /opt/nvim-linux-x86_64
-        sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/
-    )
-    rm -rf "$TEMP_DIR"
-
-    echo "Neovim installation completed successfully."
+    if [ "$FORCE" = true ] || ! command -v nvim &> /dev/null; then
+        echo "Installing official Neovim build..."
+        TEMP_DIR=$(mktemp -d)
+        (
+            cd "$TEMP_DIR" || exit 1
+            curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+            sudo rm -rf /opt/nvim-linux-x86_64
+            sudo mkdir -p /opt/nvim-linux-x86_64
+            sudo chmod a+rX /opt/nvim-linux-x86_64
+            sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+            sudo chmod -R a+rX /opt/nvim-linux-x86_64
+            sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/
+        )
+        rm -rf "$TEMP_DIR"
+        echo "Neovim installation completed successfully."
+    else
+        echo "Neovim is already installed. Use --force to reinstall."
+    fi
 
     if ! command -v pacstall &> /dev/null; then
         echo "Installing Pacstall..."
@@ -282,6 +285,7 @@ else
     command -v opencode &> /dev/null && echo "OpenCode is already installed." || { echo "Installing OpenCode..."; curl -fsSL https://opencode.ai/install | bash; }
     command -v copilot &> /dev/null && echo "GitHub Copilot CLI is already installed." || { echo "Installing GitHub Copilot CLI..."; curl -fsSL https://gh.io/copilot-install | bash; }
     [ -d "$HOME/.tmux/plugins/tpm" ] && echo "tpack (TPM compatible) is already installed." || { echo "Installing tpack (TPM compatible)..."; git clone https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"; }
+    command -v rustup &> /dev/null && echo "Rustup is already installed." || { echo "Installing Rustup..."; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; }
     if ! command -v brew &> /dev/null && [ ! -d "/home/linuxbrew/.linuxbrew" ]; then
         echo "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -347,7 +351,7 @@ case "$SHELL" in
         command -v zsh &> /dev/null && {
             echo "Changing default shell to zsh..."
             [ "$OS" = "Termux" ] && chsh -s zsh || {
-                command -v chsh &> /dev/null && chsh -s "$(command -v zsh)" || echo "chsh command not found. Please change your default shell to zsh manually.";
+                command -v chsh &> /dev/null && sudo chsh -s "$(command -v zsh)" "$USER" || echo "chsh command not found. Please change your default shell to zsh manually.";
             }
             echo "Switching current session to zsh..."
             exec zsh -l </dev/tty;
