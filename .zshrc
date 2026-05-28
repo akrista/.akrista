@@ -196,7 +196,7 @@ _check_update() {
 }
 _check_update
 
-update-akrista() {
+uzsh() {
   local doc_dir="$HOME/.akrista"
   if [[ -d "$doc_dir" ]]; then
     echo "Updating .akrista repository..."
