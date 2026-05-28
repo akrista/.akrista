@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Version: 1.1 - Modularized and Unix EOL forced
 
 function REM() { return; }
 REM @'
