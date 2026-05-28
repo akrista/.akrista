@@ -35,7 +35,7 @@ if [ "$OS" = "Termux" ]; then
     echo "Setting up Termux User Repository (tur-repo)..."
     pkg install -y tur-repo root-repo
     echo "Changing Termux repository..."
-    termux-change-repo
+    [ -t 0 ] && termux-change-repo || echo "Non-interactive shell detected, skipping mirror configuration."
     echo "Updating package lists..."
     pkg upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
     echo "Installing required utilities..."
@@ -58,7 +58,7 @@ if [ "$OS" = "Termux" ]; then
 
     if ! command -v gemini &> /dev/null; then
         echo "Installing @google/gemini-cli..."
-        npm install -g @google/gemini-cli
+        npm i -g @google/gemini-cli
     else
         echo "gemini-cli is already installed."
     fi
@@ -96,6 +96,8 @@ else
     command -v copilot &> /dev/null && echo "GitHub Copilot CLI is already installed." || { echo "Installing GitHub Copilot CLI..."; curl -fsSL https://gh.io/copilot-install | bash; } #
 fi
 
+command -v pi &> /dev/null && echo "Pi coding agent is already installed." || { echo "Installing Pi coding agent..."; curl -fsSL https://pi.dev/install.sh | sh; } #
+
 NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 [ -d "$NVIM_CONFIG_DIR" ] && echo "Neovim configuration already exists." || { echo "Cloning Neovim configuration..."; git clone -b akrista https://github.com/akrista/nvim "$NVIM_CONFIG_DIR"; } #
 
@@ -129,6 +131,7 @@ case "$SHELL" in #
 esac #
 exit
 '@
+# '
 
 Write-Host "Windows: Powershell"
 Write-Host "Installing Oh My Posh..."
