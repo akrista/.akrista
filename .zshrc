@@ -1,6 +1,11 @@
 export ZSH_DISABLE_COMPFIX="true"
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+if locale -a 2>/dev/null | grep -qi "en_US.utf8"; then
+  export LANG=en_US.UTF-8
+  export LC_ALL=en_US.UTF-8
+elif locale -a 2>/dev/null | grep -qi "C.utf8"; then
+  export LANG=C.UTF-8
+  export LC_ALL=C.UTF-8
+fi
 
 # --- Startup Timing ---
 if [[ -n "$ZSH_STARTUP_DEBUG" ]]; then
