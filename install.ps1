@@ -40,6 +40,13 @@ fi
 echo "Detected OS/Environment: $OS"
 echo "Detected Package Manager: $PACKAGER"
 
+# Detect if we are in a proot-distro environment
+IS_PROOT_DISTRO=false
+if uname -a | grep -q "PRoot-Distro"; then
+    IS_PROOT_DISTRO=true
+    echo "Detected PRoot-Distro environment."
+fi
+
 DOTFILES_DIR="$HOME/.akrista"
 
 # 2. Helper Functions
@@ -161,7 +168,7 @@ if [ "$OS" = "Termux" ]; then
     fi
 
     echo "Installing required utilities..."
-    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh lua-language-server stylua
+    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh lua-language-server stylua dos2unix
 
     if pkg_is_installed termux-services; then
         # Try bootstrapping termux-services environment if newly installed
@@ -212,23 +219,40 @@ if [ "$OS" = "Debian/Ubuntu" ]; then
     sudo apt update -y && sudo apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
     echo "Installing required development tools and utilities..."
-    sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli git xclip curl wget unzip zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala
+    sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli git xclip curl wget unzip zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala locales dos2unix
+
+    echo "Configuring locales..."
+    if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
+        echo "en_US.UTF-8 UTF-8" | sudo tee -a /etc/locale.gen
+        sudo locale-gen en_US.UTF-8
+    fi
+    sudo update-locale LANG=en_US.UTF-8
 
     if [ "$FORCE" = true ] || ! command -v nvim &> /dev/null; then
         echo "Installing official Neovim build..."
-        TEMP_DIR=$(mktemp -d)
-        (
-            cd "$TEMP_DIR" || exit 1
-            curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-            sudo rm -rf /opt/nvim-linux-x86_64
-            sudo mkdir -p /opt/nvim-linux-x86_64
-            sudo chmod a+rX /opt/nvim-linux-x86_64
-            sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-            sudo chmod -R a+rX /opt/nvim-linux-x86_64
-            sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/
-        )
-        rm -rf "$TEMP_DIR"
-        echo "Neovim installation completed successfully."
+        ARCH=$(uname -m)
+        case "$ARCH" in
+            x86_64) NVIM_ARCH="x86_64" ;;
+            aarch64|arm64) NVIM_ARCH="arm64" ;;
+            *) echo "Unsupported architecture for official Neovim build: $ARCH. Falling back to apt."; sudo apt install -y neovim; NVIM_ARCH="unknown" ;;
+        esac
+
+        if [ "$NVIM_ARCH" != "unknown" ]; then
+            TEMP_DIR=$(mktemp -d)
+            (
+                cd "$TEMP_DIR" || exit 1
+                NVIM_TAR="nvim-linux-$NVIM_ARCH.tar.gz"
+                echo "Downloading $NVIM_TAR..."
+                curl -LO "https://github.com/neovim/neovim/releases/latest/download/$NVIM_TAR"
+                sudo rm -rf "/opt/nvim-linux-$NVIM_ARCH"
+                sudo mkdir -p "/opt/nvim-linux-$NVIM_ARCH"
+                sudo tar -C /opt -xzf "$NVIM_TAR"
+                sudo chmod -R a+rX "/opt/nvim-linux-$NVIM_ARCH"
+                sudo ln -sf "/opt/nvim-linux-$NVIM_ARCH/bin/nvim" /usr/local/bin/nvim
+            )
+            rm -rf "$TEMP_DIR"
+            echo "Neovim installation completed successfully."
+        fi
     else
         echo "Neovim is already installed. Use --force to reinstall."
     fi
@@ -266,7 +290,16 @@ if [ "$OS" = "Termux" ]; then
     
     echo "Reloading Termux settings..."
     termux-reload-settings
-else
+elif [ "$IS_PROOT_DISTRO" = true ]; then
+    echo ""
+    echo "⚠️  PROOT-DISTRO DETECTED"
+    echo "   To fix fonts and terminal settings in Termux, please run the"
+    echo "   installer in your main Termux shell (outside the container):"
+    echo "   curl -fsSL https://github.com/akrista/.akrista/raw/master/install.ps1 | bash"
+    echo ""
+fi
+
+if [ "$OS" != "Termux" ]; then
     # Non-Termux Installs
     if [ ! -d "$HOME/.nvm" ]; then
         echo "Installing NVM..."
@@ -347,6 +380,16 @@ link_file "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
 link_file "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
 link_file "$DOTFILES_DIR/.sqliterc" "$HOME/.sqliterc" ".sqliterc"
 link_file "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
+
+if command -v tmux &> /dev/null && [ -d "$HOME/.tmux/plugins/tpm" ]; then
+    echo "Installing/Updating tmux plugins..."
+    export TMUX_PLUGIN_MANAGER_PATH="$HOME/.tmux/plugins"
+    "$HOME/.tmux/plugins/tpm/bin/install_plugins" || echo "Warning: Could not install tmux plugins automatically."
+
+    # Fix CRLF issues in plugins (crucial for proot-distro and ARM environments)
+    echo "Fixing line endings in tmux plugins..."
+    find "$HOME/.tmux/plugins" -type f \( -name "*.tmux" -o -name "*.sh" \) -exec dos2unix {} +
+fi
 
 GITCONFIG_LOCAL="$HOME/.gitconfig.local"
 [ -f "$GITCONFIG_LOCAL" ] && echo ".gitconfig.local already exists." || {

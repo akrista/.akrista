@@ -15,6 +15,7 @@
         {
           "background": "#292929",
           "foreground": "#fb7e14",
+          "min_width": 80,
           "properties": {
             "always_enabled": true,
             "style": "austin",
@@ -39,6 +40,7 @@
             "{{ if eq \"Charging\" .State.String }}#40c4ff{{ end }}",
             "{{ if eq \"Discharging\" .State.String }}#826b7a{{ end }}"
           ],
+          "min_width": 60,
           "properties": {
             "charged_icon": "\uf240 ",
             "charging_icon": "\ueb2d ",
@@ -74,6 +76,7 @@
           "background": "#292929",
           "foreground": "#fb7e14",
           "leading_diamond": "\ue0b6",
+          "min_width": 100,
           "style": "diamond",
           "template": " {{ if .SSHSession }}\ueba9 {{ end }}{{ .UserName }}@{{ .HostName }} <#fb7e14>\ue0b3</> ",
           "type": "session"
@@ -81,6 +84,7 @@
         {
           "background": "#292929",
           "foreground": "#fb7e14",
+          "min_width": 80,
           "properties": {
             "time_format": "15:04:05, _2"
           },
@@ -100,7 +104,7 @@
           "background": "#292929",
           "foreground": "#fb7e14",
           "properties": {
-            "style": "full",
+            "style": "unique",
             "trailing_diamond": "\ue0c6"
           },
           "style": "diamond",

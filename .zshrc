@@ -1,12 +1,42 @@
-if [ -d "/home/linuxbrew/.linuxbrew" ]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+export ZSH_DISABLE_COMPFIX="true"
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# --- Startup Timing ---
+if [[ -n "$ZSH_STARTUP_DEBUG" ]]; then
+  zmodload zsh/datetime
+  _startup_start_time=$EPOCHREALTIME
+  _startup_last_time=$_startup_start_time
+  _log_time() {
+    local current_time=$EPOCHREALTIME
+    printf "DEBUG: %-30s | +%.4fs | Total: %.4fs\n" "$1" "$(( current_time - _startup_last_time ))" "$(( current_time - _startup_start_time ))"
+    _startup_last_time=$current_time
+  }
+  _log_time "ZSH Start"
 fi
 
-export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
+typeset -U path PATH
+
+if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Brew"
+  if [ -z "$HOMEBREW_PREFIX" ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  fi
+  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Brew"
+fi
+
+path=(
+  $HOME/bin
+  $HOME/.local/bin
+  /usr/local/bin
+  $path
+)
+
 export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH="$HOME/.opencode/bin:$PATH"
+path=($BUN_INSTALL/bin $path)
+path=($HOME/.cargo/bin $path)
+path=($HOME/.opencode/bin $path)
+
 export NVM_DIR="$HOME/.nvm"
 
 HISTFILE=~/.zsh_history
@@ -93,7 +123,9 @@ if [ -d "$HOME/.zsh/zsh-completions/src" ]; then
   fpath=("$HOME/.zsh/zsh-completions/src" $fpath)
 fi
 
+[[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Oh My Zsh"
 source $ZSH/oh-my-zsh.sh
+[[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Oh My Zsh"
 
 # User configuration
 
@@ -211,15 +243,19 @@ fi
 # End of lines added by compinstall
 
 if command -v zoxide >/dev/null 2>&1; then
+  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Zoxide"
   eval "$(zoxide init zsh)"
   eval "$(zoxide init zsh --cmd cd)"
+  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Zoxide"
 fi
 
 if [ -s "$NVM_DIR/nvm.sh" ]; then
+  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Loading NVM"
   source "$NVM_DIR/nvm.sh"
-fi
-if [ -s "$NVM_DIR/bash_completion" ]; then
-  source "$NVM_DIR/bash_completion"
+  [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
+  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "NVM Loaded"
+else
+  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "NVM not found"
 fi
 
 if [ -s "$HOME/.bun/_bun" ]; then
@@ -227,7 +263,14 @@ if [ -s "$HOME/.bun/_bun" ]; then
 fi
 
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ] && command -v oh-my-posh >/dev/null 2>&1; then
-  eval "$(oh-my-posh init zsh --config $HOME/.akrista/lambdageneration.omp.json)"
+  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Oh My Posh"
+  OMP_CONFIG="$HOME/.akrista/lambdageneration.omp.json"
+  if [ -f "$OMP_CONFIG" ]; then
+    eval "$(oh-my-posh init zsh --config "$OMP_CONFIG")"
+  else
+    eval "$(oh-my-posh init zsh)"
+  fi
+  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Oh My Posh"
 fi
 
 SYS_PREFIX="${PREFIX:-/usr}"
