@@ -41,6 +41,7 @@ export BUN_INSTALL="$HOME/.bun"
 path=($BUN_INSTALL/bin $path)
 path=($HOME/.cargo/bin $path)
 path=($HOME/.opencode/bin $path)
+path=($HOME/.composer/vendor/bin $path)
 
 export NVM_DIR="$HOME/.nvm"
 
