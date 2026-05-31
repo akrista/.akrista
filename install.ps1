@@ -337,6 +337,18 @@ if [ "$OS" != "Termux" ]; then
     [ -d "$HOME/.tmux/plugins/tpm" ] && echo "tpack (TPM compatible) is already installed." || { echo "Installing tpack (TPM compatible)..."; git clone https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"; }
     command -v rustup &> /dev/null && echo "Rustup is already installed." || { echo "Installing Rustup..."; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; }
 
+    if [ "$OS" = "Debian/Ubuntu" ]; then
+        if ! command -v gitui &> /dev/null; then
+            echo "Installing gitui..."
+            if [ -f "$HOME/.cargo/env" ]; then
+                . "$HOME/.cargo/env"
+            fi
+            cargo install gitui --locked
+        else
+            echo "gitui is already installed."
+        fi
+    fi
+
     # Install @google/gemini-cli if on ARM architecture
     case "$(uname -m)" in
         arm*|aarch64*)
