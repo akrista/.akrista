@@ -3,7 +3,7 @@
 	email = 23145794+Akrista@users.noreply.github.com
 
 [core]
-	autocrlf = true
+	autocrlf = input
 	editor = nvim
 
 [init]
