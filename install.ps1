@@ -483,13 +483,13 @@ if [ "$OS" = "Termux" ]; then
     termux-reload-settings
 elif [ "$IS_PROOT_DISTRO" = true ]; then
     echo ""
-    echo -e "${YELLOW}========================================================================"
+    echo -e "${YELLOW}===================================================="
     echo " ⚠️  PROOT-DISTRO DETECTED"
-    echo "========================================================================"
+    echo "===================================================="
     echo "   To fix fonts and terminal settings in Termux, please run the"
     echo "   installer in your main Termux shell (outside the container):"
     echo "   curl -fsSL https://github.com/akrista/.akrista/raw/master/install.ps1 | bash"
-    echo -e "========================================================================${NC}"
+    echo -e "====================================================${NC}"
     echo ""
 fi
 
@@ -705,11 +705,11 @@ fi
 #  12. Interactive Shell Integration (Default to ZSH)
 # ------------------------------------------------------------------------------
 echo ""
-echo -e "${GREEN}================================================================"
+echo -e "${GREEN}============================================"
 echo " 🎉 Installation completed successfully!"
 echo -e " ⚠️  Please reload your shell or restart your terminal"
 echo "    to ensure all changes and utilities are fully functional."
-echo -e "================================================================${NC}"
+echo -e "============================================${NC}"
 echo ""
 
 case "$SHELL" in
