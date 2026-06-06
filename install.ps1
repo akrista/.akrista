@@ -200,7 +200,7 @@ pkg_is_installed() {
 # --- 5.1 TERMUX INSTALLER ---
 install_termux_packages() {
     log_info "Starting package installation for Termux..."
-    UPGRADE_MARKER="$DOTFILES_DIR/.last_upgrade"
+    UPGRADE_MARKER="$HOME/.last_termux_upgrade"
     
     # 24-hour rate limit on upgrades to keep shells opening quickly
     if [ "$FORCE" = true ] || [ ! -f "$UPGRADE_MARKER" ] || [ "$(find "$UPGRADE_MARKER" -mmin +1440 2>/dev/null)" ]; then
@@ -446,19 +446,29 @@ esac
 log_info "Configuring active workspaces..."
 NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 
-if [ -d "$NVIM_CONFIG_DIR" ]; then
+if [ -d "$NVIM_CONFIG_DIR/.git" ]; then
     log_info "Neovim configuration already exists at $NVIM_CONFIG_DIR. Pulling updates..."
     git -C "$NVIM_CONFIG_DIR" pull
 else
     log_info "Cloning Neovim configuration (branch: akrista)..."
+    if [ -d "$NVIM_CONFIG_DIR" ]; then
+        log_warn "$NVIM_CONFIG_DIR exists but is not a git repository. Backing up..."
+        rm -rf "${NVIM_CONFIG_DIR}.bak"
+        mv "$NVIM_CONFIG_DIR" "${NVIM_CONFIG_DIR}.bak"
+    fi
     git clone -b akrista https://github.com/akrista/nvim "$NVIM_CONFIG_DIR"
 fi
 
-if [ -d "$DOTFILES_DIR" ]; then
+if [ -d "$DOTFILES_DIR/.git" ]; then
     log_info ".akrista repository already exists at $DOTFILES_DIR. Pulling updates..."
     git -C "$DOTFILES_DIR" pull
 else
     log_info "Cloning .akrista repository..."
+    if [ -d "$DOTFILES_DIR" ]; then
+        log_warn "$DOTFILES_DIR exists but is not a git repository. Backing up..."
+        rm -rf "${DOTFILES_DIR}.bak"
+        mv "$DOTFILES_DIR" "${DOTFILES_DIR}.bak"
+    fi
     git clone https://github.com/akrista/.akrista "$DOTFILES_DIR"
 fi
 [ -d "$DOTFILES_DIR" ] && touch "$DOTFILES_DIR/.last_update_check" 2>/dev/null
