@@ -385,7 +385,12 @@ EOF
         rm -rf "$TEMP_DIR"
         log_success "Composer installed successfully."
     else
-        log_info "Composer is already installed."
+        log_info "Checking for Composer updates..."
+        if [ "$OS" = "Termux" ]; then
+            composer self-update --quiet 2>/dev/null || log_warn "Composer self-update failed."
+        else
+            sudo composer self-update --quiet 2>/dev/null || log_warn "Composer self-update failed."
+        fi
     fi
 }
 
@@ -524,8 +529,17 @@ if [ "$OS" != "Termux" ]; then
     fi
 
     # Bun Runtime
-    if [ -d "$HOME/.bun" ]; then
-        log_success "Bun is already installed."
+    if command -v bun &> /dev/null; then
+        log_info "Checking for Bun updates..."
+        bun upgrade
+    elif [ -d "$HOME/.bun" ]; then
+        log_success "Bun directory exists. Sourcing bun to check if upgrade is needed..."
+        export BUN_INSTALL="$HOME/.bun"
+        export PATH="$BUN_INSTALL/bin:$PATH"
+        if command -v bun &> /dev/null; then
+            log_info "Checking for Bun updates..."
+            bun upgrade
+        fi
     else
         log_info "Installing Bun..."
         curl -fsSL https://bun.sh/install | bash
@@ -549,15 +563,17 @@ if [ "$OS" != "Termux" ]; then
     
     # Tmux Pack (tpack / lightweight TPM)
     if [ -d "$HOME/.tmux/plugins/tpm" ]; then
-        log_success "tpack (TPM compatible) is already installed."
+        log_info "Updating tpack (TPM compatible)..."
+        git -C "$HOME/.tmux/plugins/tpm" pull -q
     else
         log_info "Installing tpack (TPM compatible)..."
-        git clone https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"
+        git clone -q https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"
     fi
     
     # Rust toolchain
     if command -v rustup &> /dev/null; then
-        log_success "Rustup is already installed."
+        log_info "Checking for Rust updates..."
+        rustup update
     else
         log_info "Installing Rustup..."
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -586,22 +602,6 @@ if [ "$OS" != "Termux" ]; then
         fi
     fi
 
-    # ARM specialized modules
-    case "$(uname -m)" in
-        arm*|aarch64*)
-            if ! command -v gemini &> /dev/null; then
-                log_info "Detected ARM architecture. Installing @google/gemini-cli..."
-                if command -v npm &> /dev/null; then
-                    npm i -g @google/gemini-cli
-                    log_success "Gemini CLI installed successfully."
-                else
-                    log_warn "npm not found. Skipping @google/gemini-cli installation."
-                fi
-            else
-                log_success "gemini-cli is already installed."
-            fi
-            ;;
-    esac
 
     # Homebrew OS abstraction
     if ! command -v brew &> /dev/null && [ ! -d "/home/linuxbrew/.linuxbrew" ]; then
@@ -626,45 +626,66 @@ fi
 
 mkdir -p "$HOME/.zsh"
 if [ -d "$HOME/.zsh/zsh-autosuggestions" ]; then
-    log_success "zsh-autosuggestions is already installed."
+    log_info "Updating zsh-autosuggestions..."
+    git -C "$HOME/.zsh/zsh-autosuggestions" pull -q
 else
     log_info "Installing zsh-autosuggestions..."
-    git clone https://github.com/zsh-users/zsh-autosuggestions "$HOME/.zsh/zsh-autosuggestions"
+    git clone -q https://github.com/zsh-users/zsh-autosuggestions "$HOME/.zsh/zsh-autosuggestions"
 fi
 
 if [ -d "$HOME/.zsh/zsh-syntax-highlighting" ]; then
-    log_success "zsh-syntax-highlighting is already installed."
+    log_info "Updating zsh-syntax-highlighting..."
+    git -C "$HOME/.zsh/zsh-syntax-highlighting" pull -q
 else
     log_info "Installing zsh-syntax-highlighting..."
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$HOME/.zsh/zsh-syntax-highlighting"
+    git clone -q https://github.com/zsh-users/zsh-syntax-highlighting.git "$HOME/.zsh/zsh-syntax-highlighting"
 fi
 
 if [ -d "$HOME/.zsh/zsh-completions" ]; then
-    log_success "zsh-completions is already installed."
+    log_info "Updating zsh-completions..."
+    git -C "$HOME/.zsh/zsh-completions" pull -q
+    rm -f "$HOME/.zcompdump"*
 else
     log_info "Installing zsh-completions..."
-    git clone https://github.com/zsh-users/zsh-completions.git "$HOME/.zsh/zsh-completions"
+    git clone -q https://github.com/zsh-users/zsh-completions.git "$HOME/.zsh/zsh-completions"
     rm -f "$HOME/.zcompdump"*
 fi
 
 # Oh My Posh shell prompt engine
 if command -v oh-my-posh &> /dev/null; then
-    log_success "Oh My Posh is already installed."
+    log_info "Checking for Oh My Posh updates..."
+    oh-my-posh upgrade 2>/dev/null || log_warn "Oh My Posh upgrade check failed."
 else
     log_info "Installing Oh My Posh..."
     curl -s https://ohmyposh.dev/install.sh | bash -s
 fi
 
-# Pi Coding Agent
+# Unified Global Node/NPM Packages (Cross-Platform)
+log_info "Configuring global Node/NPM packages..."
 if command -v npm &> /dev/null; then
-    if command -v pi &> /dev/null; then
-        log_success "Pi coding agent is already installed."
+    # Gemini CLI
+    if ! command -v gemini &> /dev/null; then
+        log_info "Installing @google/gemini-cli..."
+        npm i -g @google/gemini-cli
+        log_success "Gemini CLI installed successfully."
     else
+        log_info "Updating @google/gemini-cli..."
+        npm update -g @google/gemini-cli
+        log_success "Gemini CLI updated successfully."
+    fi
+
+    # Pi Coding Agent
+    if ! command -v pi &> /dev/null; then
         log_info "Installing Pi coding agent..."
         npm i -g --ignore-scripts @earendil-works/pi-coding-agent
+        log_success "Pi coding agent installed successfully."
+    else
+        log_info "Updating Pi coding agent..."
+        npm update -g @earendil-works/pi-coding-agent
+        log_success "Pi coding agent updated successfully."
     fi
 else
-    log_warn "npm not found. Skipping Pi coding agent installation."
+    log_warn "npm not found. Skipping global NPM packages installation/updates."
 fi
 
 # ------------------------------------------------------------------------------
