@@ -48,8 +48,8 @@ log_info "Initializing Unix setup block..."
 FORCE=false
 for arg in "$@"; do
     case $arg in
-        --force|-f) 
-            FORCE=true 
+        --force|-f)
+            FORCE=true
             log_info "Force installation flag (--force / -f) detected."
             ;;
     esac
@@ -169,9 +169,9 @@ link_file() {
     local source_file="$1"
     local target_file="$2"
     local name="$3"
-    
+
     [ ! -f "$source_file" ] && log_warn "Repository's $name not found at $source_file" && return
-    
+
     if [ -L "$target_file" ] && [ "$(readlink "$target_file")" = "$source_file" ]; then
         log_success "$name is already linked to the repository's version."
     else
@@ -270,7 +270,7 @@ log_success "All pre-installation checks passed successfully!"
 install_termux_packages() {
     log_info "Starting package installation for Termux..."
     UPGRADE_MARKER="$HOME/.last_termux_upgrade"
-    
+
     # 24-hour rate limit on upgrades to keep shells opening quickly
     if [ "$FORCE" = true ] || [ ! -f "$UPGRADE_MARKER" ] || [ "$(find "$UPGRADE_MARKER" -mmin +1440 2>/dev/null)" ]; then
         log_info "Updating package lists and upgrading system packages..."
@@ -320,7 +320,7 @@ install_termux_packages() {
 # --- 5.2 DEBIAN / UBUNTU INSTALLER ---
 install_debian_ubuntu_packages() {
     log_info "Starting package installation for Debian/Ubuntu..."
-    
+
     # Outdated Neovim installs will break modern LSP configurations
     # We remove the package manager version and download the official upstream release later
     if pkg_is_installed neovim; then
@@ -348,10 +348,10 @@ install_debian_ubuntu_packages() {
         case "$ARCH" in
             x86_64) NVIM_ARCH="x86_64" ;;
             aarch64|arm64) NVIM_ARCH="arm64" ;;
-            *) 
+            *)
                 log_warn "Unsupported architecture for official Neovim build: $ARCH. Falling back to apt installation."
                 sudo apt install -y neovim
-                NVIM_ARCH="unknown" 
+                NVIM_ARCH="unknown"
                 ;;
         esac
 
@@ -536,8 +536,8 @@ fi
 if [ "$OS" = "Termux" ]; then
     log_info "Configuring Termux GUI and settings..."
     mkdir -p "$HOME/.termux"
-    link_file "$DOTFILES_DIR/termux.properties" "$HOME/.termux/termux.properties" "termux.properties"
-    
+    link_file "$DOTFILES_DIR/config/termux/termux.properties" "$HOME/.termux/termux.properties" "termux.properties"
+
     # Download Meslo Nerd Font
     if [ ! -f "$HOME/.termux/font.ttf" ]; then
         log_info "Downloading and installing MesloLGS NF Regular font..."
@@ -545,7 +545,7 @@ if [ "$OS" = "Termux" ]; then
     else
         log_success "MesloLGS NF Regular font is already installed."
     fi
-    
+
     log_info "Reloading Termux settings..."
     termux-reload-settings
 elif [ "$IS_PROOT_DISTRO" = true ]; then
@@ -563,7 +563,7 @@ fi
 # Multi-platform development configurations (non-Termux architectures)
 if [ "$OS" != "Termux" ]; then
     log_info "Setting up multi-platform runtime engines..."
-    
+
     # Node Version Manager (NVM)
     if [ ! -d "$HOME/.nvm" ]; then
         log_info "Installing NVM..."
@@ -596,7 +596,7 @@ if [ "$OS" != "Termux" ]; then
         log_info "Installing Bun..."
         curl -fsSL https://bun.sh/install | bash
     fi
-    
+
     # OpenCode
     if command -v opencode &> /dev/null; then
         log_success "OpenCode is already installed."
@@ -604,7 +604,7 @@ if [ "$OS" != "Termux" ]; then
         log_info "Installing OpenCode..."
         curl -fsSL https://opencode.ai/install | bash
     fi
-    
+
     # GitHub Copilot CLI helper
     if command -v copilot &> /dev/null; then
         log_success "GitHub Copilot CLI is already installed."
@@ -612,7 +612,7 @@ if [ "$OS" != "Termux" ]; then
         log_info "Installing GitHub Copilot CLI..."
         curl -fsSL https://gh.io/copilot-install | bash
     fi
-    
+
     # Tmux Pack (tpack / lightweight TPM)
     if [ -d "$HOME/.tmux/plugins/tpm" ]; then
         log_info "Updating tpack (TPM compatible)..."
@@ -621,7 +621,7 @@ if [ "$OS" != "Termux" ]; then
         log_info "Installing tpack (TPM compatible)..."
         git clone -q https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"
     fi
-    
+
     # Rust toolchain
     if command -v rustup &> /dev/null; then
         log_info "Checking for Rust updates..."
@@ -759,10 +759,10 @@ fi
 #  11. Symlink Dotfile Setup
 # ------------------------------------------------------------------------------
 log_info "Symlinking runtime configurations..."
-link_file "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
-link_file "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
-link_file "$DOTFILES_DIR/.sqliterc" "$HOME/.sqliterc" ".sqliterc"
-link_file "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
+link_file "$DOTFILES_DIR/config/zsh/.zshrc" "$HOME/.zshrc" ".zshrc"
+link_file "$DOTFILES_DIR/config/git/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
+link_file "$DOTFILES_DIR/config/sqlite/.sqliterc" "$HOME/.sqliterc" ".sqliterc"
+link_file "$DOTFILES_DIR/config/tmux/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
 
 # Tmux Plugin Manager & Plugin compilation logic
 if command -v tmux &> /dev/null && [ -d "$HOME/.tmux/plugins/tpm" ]; then
@@ -884,7 +884,7 @@ function Link-File {
                     $alreadyLinked = $true
                 }
             }
-            
+
             if (-not $alreadyLinked) {
                 Write-LogInfo "Backing up existing $TargetPath to $TargetPath.bak..."
                 if (Test-Path "$TargetPath.bak") {
@@ -939,8 +939,8 @@ if (Test-Path $dotfilesPath) {
 
 #region 6. Linking Windows Configurations
 Write-LogInfo "Linking local configuration dotfiles..."
-Link-File -SourcePath (Join-Path $dotfilesPath ".gitconfig") -TargetPath (Join-Path $HOME ".gitconfig") -Name ".gitconfig"
-Link-File -SourcePath (Join-Path $dotfilesPath ".sqliterc") -TargetPath (Join-Path $HOME ".sqliterc") -Name ".sqliterc"
+Link-File -SourcePath (Join-Path $dotfilesPath "config/git/.gitconfig") -TargetPath (Join-Path $HOME ".gitconfig") -Name ".gitconfig"
+Link-File -SourcePath (Join-Path $dotfilesPath "config/sqlite/.sqliterc") -TargetPath (Join-Path $HOME ".sqliterc") -Name ".sqliterc"
 
 $gitConfigLocal = Join-Path $HOME ".gitconfig.local"
 if (-not (Test-Path $gitConfigLocal)) {

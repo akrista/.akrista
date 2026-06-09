@@ -46,6 +46,7 @@ path=($HOME/.composer/vendor/bin $path)
 export NVM_DIR="$HOME/.nvm"
 
 HISTFILE=~/.zsh_history
+HISTDUP=erase
 HISTSIZE=5000
 SAVEHIST=10000
 
@@ -318,7 +319,7 @@ fi
 
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ] && command -v oh-my-posh >/dev/null 2>&1; then
   [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Oh My Posh"
-  OMP_CONFIG="$HOME/.akrista/lambdageneration.omp.json"
+  OMP_CONFIG="$HOME/.akrista/config/omp/lambdageneration.omp.json"
   if [ -f "$OMP_CONFIG" ]; then
     eval "$(oh-my-posh init zsh --config "$OMP_CONFIG")"
   else
