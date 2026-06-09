@@ -1,0 +1,97 @@
+# --- Shell Navigation & General Aliases ---
+if command -v batcat >/dev/null 2>&1; then
+  alias cat='batcat'
+elif command -v bat >/dev/null 2>&1; then
+  alias cat='bat'
+fi
+
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza'
+  alias l="eza -la --icons --git"
+  alias la="eza -a --icons"
+  alias ll="eza -l --icons --git"
+  alias lt="eza --tree --level=2 --icons"
+fi
+
+if command -v git >/dev/null 2>&1; then
+  alias g="git"
+fi
+
+if command -v nvim >/dev/null 2>&1; then
+  alias nv="nvim"
+  alias v="nvim"
+  alias ezsh="nvim ~/.zshrc"
+fi
+
+alias uzsh="source ~/.zshrc"
+
+# --- Termux-Specific Enhancements ---
+if [ -n "$TERMUX_VERSION" ]; then
+  # Quick package management
+  if command -v pkg >/dev/null 2>&1; then
+    alias pkgup="pkg update && pkg upgrade -y"
+    alias pkgi="pkg install"
+    alias pkgu="pkg uninstall"
+    alias pkgs="pkg search"
+    alias pkgl="pkg list-installed"
+  fi
+
+  # Wake lock controls to prevent Android/Termux from sleeping during long background tasks
+  if command -v termux-wake-lock >/dev/null 2>&1; then
+    alias wakelock="termux-wake-lock"
+    alias wakeunlock="termux-wake-unlock"
+  fi
+
+  # Quick access to Android Storage directories (requires running termux-setup-storage)
+  if [ -d "$HOME/storage" ]; then
+    alias sdcard="cd $HOME/storage/shared"
+    alias downloads="cd $HOME/storage/downloads"
+    alias dcim="cd $HOME/storage/dcim"
+    alias documents="cd $HOME/storage/shared/Documents"
+  fi
+
+  # Termux API integration (requires 'termux-api' package and Android companion app)
+  if command -v termux-clipboard-get >/dev/null 2>&1; then
+    alias cbget="termux-clipboard-get"
+    alias cbset="termux-clipboard-set"
+  fi
+  if command -v termux-share >/dev/null 2>&1; then
+    alias share="termux-share"
+  fi
+  if command -v termux-open >/dev/null 2>&1; then
+    alias open="termux-open"
+    alias openurl="termux-open-url"
+  fi
+
+  # Device state & interactive actions
+  if command -v termux-battery-status >/dev/null 2>&1; then
+    alias battery="termux-battery-status"
+  fi
+  if command -v termux-wifi-connectioninfo >/dev/null 2>&1; then
+    alias wifi="termux-wifi-connectioninfo"
+  fi
+  if command -v termux-vibrate >/dev/null 2>&1; then
+    alias vibrate="termux-vibrate"
+  fi
+  if command -v termux-toast >/dev/null 2>&1; then
+    alias toast="termux-toast"
+  fi
+  if command -v termux-notification >/dev/null 2>&1; then
+    alias notify="termux-notification"
+  fi
+
+  # Termux Services management (requires 'termux-services' package)
+  if command -v sv >/dev/null 2>&1; then
+    alias tservice="sv"
+    alias tstart="sv-enable"
+    alias tstop="sv-disable"
+  fi
+
+  # proot-distro shortcuts & helpers
+  if command -v proot-distro >/dev/null 2>&1; then
+    alias pd="proot-distro"
+    alias pdls="proot-distro list"
+    alias pdi="proot-distro install"
+    alias pdun="proot-distro uninstall"
+  fi
+fi

@@ -1,0 +1,72 @@
+# Log in to a proot-distro container in isolated mode
+pdl() {
+  local user="${1:-akrista}"
+  local distro="${2:-debian}"
+
+  if [[ "$user" == "-h" || "$user" == "--help" ]]; then
+    echo "Usage: pdl [user] [distro]"
+    echo "Log in to a proot-distro container in isolated mode."
+    echo "Defaults: user=akrista, distro=debian"
+    return 0
+  fi
+
+  echo "Logging into '$distro' as user '$user' (isolated)..."
+  proot-distro login --isolated --user "$user" "$distro"
+}
+
+# Periodically check if updates are available for the .akrista repository
+_check_update() {
+  local doc_dir="$HOME/.akrista"
+  [[ -d "$doc_dir/.git" ]] || return
+
+  local check_file="$doc_dir/.last_update_check"
+  local need_fetch=0
+  if [[ ! -f "$check_file" ]]; then
+    need_fetch=1
+  else
+    local old_files=( "$check_file"(mh+24N) )
+    if [[ -n "$old_files" ]]; then
+      need_fetch=1
+    fi
+  fi
+
+  if (( need_fetch )); then
+    touch "$check_file" 2>/dev/null
+    (cd "$doc_dir" && git fetch -q) >/dev/null 2>&1 &!
+  fi
+
+  if command -v git >/dev/null 2>&1; then
+    local upstream=$(git -C "$doc_dir" rev-parse --abbrev-ref @{u} 2>/dev/null)
+    if [[ -n "$upstream" ]]; then
+      local local_commit=$(git -C "$doc_dir" rev-parse @ 2>/dev/null)
+      local remote_commit=$(git -C "$doc_dir" rev-parse @{u} 2>/dev/null)
+      if [[ "$local_commit" != "$remote_commit" ]]; then
+        local base_commit=$(git -C "$doc_dir" merge-base @ @{u} 2>/dev/null)
+        if [[ "$local_commit" = "$base_commit" ]]; then
+          printf "\n\e[1;33m[!] An update is available for the .akrista repository!\e[0m\n"
+          printf "    Run \e[1;32muak\e[0m to apply the updates.\n\n"
+        fi
+      fi
+    fi
+  fi
+}
+
+# Update the .akrista repository and run the installer
+uak() {
+  local doc_dir="$HOME/.akrista"
+  if [[ -d "$doc_dir" ]]; then
+    echo "Updating .akrista repository..."
+    git -C "$doc_dir" pull
+    
+    if [[ -f "$doc_dir/install.ps1" ]]; then
+      echo "Running installer..."
+      bash "$doc_dir/install.ps1" "$@"
+    else
+      echo "Error: install.ps1 not found in $doc_dir"
+      return 1
+    fi
+  else
+    echo "Error: .akrista directory not found at $doc_dir"
+    return 1
+  fi
+}
