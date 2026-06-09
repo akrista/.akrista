@@ -1,12 +1,3 @@
-export ZSH_DISABLE_COMPFIX="true"
-if locale -a 2>/dev/null | grep -qi "en_US.utf8"; then
-  export LANG=en_US.UTF-8
-  export LC_ALL=en_US.UTF-8
-elif locale -a 2>/dev/null | grep -qi "C.utf8"; then
-  export LANG=C.UTF-8
-  export LC_ALL=C.UTF-8
-fi
-
 # --- Startup Timing ---
 if [[ -n "$ZSH_STARTUP_DEBUG" ]]; then
   zmodload zsh/datetime
@@ -20,31 +11,16 @@ if [[ -n "$ZSH_STARTUP_DEBUG" ]]; then
   _log_time "ZSH Start"
 fi
 
-typeset -U path PATH
+# Define path configurations
+export DOTFILES="$HOME/.akrista"
+export ZDOTDIR="$DOTFILES/config/zsh"
 
-if [ -d "/home/linuxbrew/.linuxbrew" ]; then
-  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Brew"
-  if [ -z "$HOMEBREW_PREFIX" ]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  fi
-  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Brew"
+# Source early environment settings
+if [ -f "$ZDOTDIR/.zshenv" ]; then
+  source "$ZDOTDIR/.zshenv"
 fi
 
-path=(
-  $HOME/bin
-  $HOME/.local/bin
-  /usr/local/bin
-  $path
-)
-
-export BUN_INSTALL="$HOME/.bun"
-path=($BUN_INSTALL/bin $path)
-path=($HOME/.cargo/bin $path)
-path=($HOME/.opencode/bin $path)
-path=($HOME/.composer/vendor/bin $path)
-
-export NVM_DIR="$HOME/.nvm"
-
+# --- Zsh Options & Variables ---
 HISTFILE=~/.zsh_history
 HISTDUP=erase
 HISTSIZE=5000
@@ -64,15 +40,14 @@ setopt AUTO_PUSHD             # Make cd push the old directory onto the director
 setopt PUSHD_IGNORE_DUPS      # Don't push duplicate directories onto stack
 setopt PUSHD_SILENT           # Do not print the directory stack after pushd or popd
 
-
 export VISUAL=nvim
 export EDITOR="$VISUAL"
 export COMPOSE_BAKE=true
 
+# --- Oh My Zsh Setup ---
 # If you come from bash you might have to change your $PATH.
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
-
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -93,11 +68,11 @@ ZSH_THEME="robbyrussell"
 # HYPHEN_INSENSITIVE="true"
 
 # Uncomment one of the following lines to change the auto-update behavior
-# zstyle ':omz:update' mode disabled  # disable automatic updates
-zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode disabled  # disable automatic updates
+# zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 # Uncomment the following line to change how often to auto-update (in days).
-zstyle ':omz:update' frequency 30
+# zstyle ':omz:update' frequency 30
 
 # Uncomment the following line if pasting URLs and other text is messed up.
 # DISABLE_MAGIC_FUNCTIONS="true"
@@ -148,9 +123,6 @@ fi
 source $ZSH/oh-my-zsh.sh
 [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Oh My Zsh"
 
-# User configuration
-
-
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
@@ -169,126 +141,21 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# --- Shell Navigation & General Aliases ---
-if command -v batcat >/dev/null 2>&1; then
-  alias cat='batcat'
-elif command -v bat >/dev/null 2>&1; then
-  alias cat='bat'
+# --- Load Custom Modular Settings ---
+
+# Load helper functions
+if [ -f "$ZDOTDIR/.zsh_functions" ]; then
+  source "$ZDOTDIR/.zsh_functions"
 fi
 
-if command -v eza >/dev/null 2>&1; then
-  alias ls='eza'
-  alias l="eza -la --icons --git"
-  alias la="eza -a --icons"
-  alias ll="eza -l --icons --git"
-  alias lt="eza --tree --level=2 --icons"
+# Load aliases
+if [ -f "$ZDOTDIR/.zsh_aliases" ]; then
+  source "$ZDOTDIR/.zsh_aliases"
 fi
 
-if command -v git >/dev/null 2>&1; then
-  alias g="git"
-fi
+# --- Integrations & Add-ons ---
 
-if command -v nvim >/dev/null 2>&1; then
-  alias nv="nvim"
-  alias v="nvim"
-  alias ezsh="nvim ~/.zshrc"
-fi
-
-alias uzsh="source ~/.zshrc"
-
-# --- Termux-Specific Enhancements ---
-if [ -n "$TERMUX_VERSION" ]; then
-  # Quick package management
-  if command -v pkg >/dev/null 2>&1; then
-    alias pkgup="pkg update && pkg upgrade -y"
-    alias pkgi="pkg install"
-    alias pkgu="pkg uninstall"
-    alias pkgs="pkg search"
-    alias pkgl="pkg list-installed"
-  fi
-
-  # Wake lock controls to prevent Android/Termux from sleeping during long background tasks
-  if command -v termux-wake-lock >/dev/null 2>&1; then
-    alias wakelock="termux-wake-lock"
-    alias wakeunlock="termux-wake-unlock"
-  fi
-
-  # Quick access to Android Storage directories (requires running termux-setup-storage)
-  if [ -d "$HOME/storage" ]; then
-    alias sdcard="cd $HOME/storage/shared"
-    alias downloads="cd $HOME/storage/downloads"
-    alias dcim="cd $HOME/storage/dcim"
-    alias documents="cd $HOME/storage/shared/Documents"
-  fi
-
-  # Termux API integration (requires 'termux-api' package and Android companion app)
-  if command -v termux-clipboard-get >/dev/null 2>&1; then
-    alias cbget="termux-clipboard-get"
-    alias cbset="termux-clipboard-set"
-  fi
-  if command -v termux-share >/dev/null 2>&1; then
-    alias share="termux-share"
-  fi
-  if command -v termux-open >/dev/null 2>&1; then
-    alias open="termux-open"
-    alias openurl="termux-open-url"
-  fi
-
-  # Device state & interactive actions
-  if command -v termux-battery-status >/dev/null 2>&1; then
-    alias battery="termux-battery-status"
-  fi
-  if command -v termux-wifi-connectioninfo >/dev/null 2>&1; then
-    alias wifi="termux-wifi-connectioninfo"
-  fi
-  if command -v termux-vibrate >/dev/null 2>&1; then
-    alias vibrate="termux-vibrate"
-  fi
-  if command -v termux-toast >/dev/null 2>&1; then
-    alias toast="termux-toast"
-  fi
-  if command -v termux-notification >/dev/null 2>&1; then
-    alias notify="termux-notification"
-  fi
-
-  # Termux Services management (requires 'termux-services' package)
-  if command -v sv >/dev/null 2>&1; then
-    alias tservice="sv"
-    alias tstart="sv-enable"
-    alias tstop="sv-disable"
-  fi
-
-  # proot-distro shortcuts & helpers
-  if command -v proot-distro >/dev/null 2>&1; then
-    alias pd="proot-distro"
-    alias pdls="proot-distro list"
-    alias pdi="proot-distro install"
-    alias pdun="proot-distro uninstall"
-  fi
-
-  pdl() {
-    local user="${1:-akrista}"
-    local distro="${2:-debian}"
-
-    if [[ "$user" == "-h" || "$user" == "--help" ]]; then
-      echo "Usage: pdl [user] [distro]"
-      echo "Log in to a proot-distro container in isolated mode."
-      echo "Defaults: user=akrista, distro=debian"
-      return 0
-    fi
-
-    echo "Logging into '$distro' as user '$user' (isolated)..."
-    proot-distro login --isolated --user "$user" "$distro"
-  }
-fi
-
-# autoload -Uz compinit && compinit
-# zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-# zstyle :compinstall filename '/home/akrista/.zshrc'
-# zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-# zstyle ':completion:*' menu no
-# End of lines added by compinstall
-
+# Zoxide
 if command -v zoxide >/dev/null 2>&1; then
   [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Zoxide"
   eval "$(zoxide init zsh)"
@@ -296,8 +163,8 @@ if command -v zoxide >/dev/null 2>&1; then
   [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Zoxide"
 fi
 
+# NVM Lazy Loading
 if [ -s "$NVM_DIR/nvm.sh" ]; then
-  # Lazy load NVM to speed up shell startup
   lazy_nvm() {
     unset -f nvm node npm npx yarn pnpm corepack
     [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Lazy Loading NVM"
@@ -305,7 +172,7 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
     [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
     [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "NVM Loaded (Lazy)"
   }
-  
+
   for cmd in nvm node npm npx yarn pnpm corepack; do
     eval "$cmd() { lazy_nvm; $cmd \"\$@\"; }"
   done
@@ -313,21 +180,18 @@ else
   [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "NVM not found"
 fi
 
+# Bun
 if [ -s "$HOME/.bun/_bun" ]; then
   source "$HOME/.bun/_bun"
 fi
 
-if [ "$TERM_PROGRAM" != "Apple_Terminal" ] && command -v oh-my-posh >/dev/null 2>&1; then
-  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Oh My Posh"
-  OMP_CONFIG="$HOME/.akrista/config/omp/lambdageneration.omp.json"
-  if [ -f "$OMP_CONFIG" ]; then
-    eval "$(oh-my-posh init zsh --config "$OMP_CONFIG")"
-  else
-    eval "$(oh-my-posh init zsh)"
-  fi
-  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Oh My Posh"
+# Load prompt settings
+if [ -f "$ZDOTDIR/.zsh_prompt" ]; then
+  source "$ZDOTDIR/.zsh_prompt"
 fi
 
+
+# Autosuggestions & Syntax Highlighting
 SYS_PREFIX="${PREFIX:-/usr}"
 
 if [ -f "$SYS_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
@@ -342,58 +206,7 @@ elif [ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; th
   source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 
-_check_update() {
-  local doc_dir="$HOME/.akrista"
-  [[ -d "$doc_dir/.git" ]] || return
-
-  local check_file="$doc_dir/.last_update_check"
-  local need_fetch=0
-  if [[ ! -f "$check_file" ]]; then
-    need_fetch=1
-  else
-    local old_files=( "$check_file"(mh+24N) )
-    if [[ -n "$old_files" ]]; then
-      need_fetch=1
-    fi
-  fi
-
-  if (( need_fetch )); then
-    touch "$check_file" 2>/dev/null
-    (cd "$doc_dir" && git fetch -q) >/dev/null 2>&1 &!
-  fi
-
-  if command -v git >/dev/null 2>&1; then
-    local upstream=$(git -C "$doc_dir" rev-parse --abbrev-ref @{u} 2>/dev/null)
-    if [[ -n "$upstream" ]]; then
-      local local_commit=$(git -C "$doc_dir" rev-parse @ 2>/dev/null)
-      local remote_commit=$(git -C "$doc_dir" rev-parse @{u} 2>/dev/null)
-      if [[ "$local_commit" != "$remote_commit" ]]; then
-        local base_commit=$(git -C "$doc_dir" merge-base @ @{u} 2>/dev/null)
-        if [[ "$local_commit" = "$base_commit" ]]; then
-          printf "\n\e[1;33m[!] An update is available for the .akrista repository!\e[0m\n"
-          printf "    Run \e[1;32muak\e[0m to apply the updates.\n\n"
-        fi
-      fi
-    fi
-  fi
-}
-_check_update
-
-uak() {
-  local doc_dir="$HOME/.akrista"
-  if [[ -d "$doc_dir" ]]; then
-    echo "Updating .akrista repository..."
-    git -C "$doc_dir" pull
-    
-    if [[ -f "$doc_dir/install.ps1" ]]; then
-      echo "Running installer..."
-      bash "$doc_dir/install.ps1" "$@"
-    else
-      echo "Error: install.ps1 not found in $doc_dir"
-      return 1
-    fi
-  else
-    echo "Error: .akrista directory not found at $doc_dir"
-    return 1
-  fi
-}
+# Trigger repository update check
+if declare -f _check_update >/dev/null; then
+  _check_update
+fi
