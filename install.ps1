@@ -194,6 +194,75 @@ pkg_is_installed() {
 }
 
 # ------------------------------------------------------------------------------
+#  4.5 Check Installation Capabilities & System Issues (Bash)
+# ------------------------------------------------------------------------------
+log_info "Verifying installation capabilities and system requirements..."
+
+# 1. Verify that we have a supported package manager/OS
+if [ "$PACKAGER" = "unknown" ]; then
+    log_error "Unsupported OS/Environment ($OS) or package manager."
+    log_error "This script requires one of the following package managers: pkg, apt, dnf, pacman, apk."
+    log_error "Interrupting the script to prevent partial/failed installation."
+    exit 1
+fi
+
+# 2. Check for privilege and permission issues
+# Termux (pkg) runs in a user environment and doesn't require root/sudo.
+# Other environments require either root or sudo privileges.
+if [ "$PACKAGER" != "pkg" ]; then
+    if [ "$EUID" -eq 0 ] || [ "$(id -u)" -eq 0 ]; then
+        if [ "$PACKAGER" = "apt" ]; then
+            show_sudo_debian_remediation_message "root"
+        else
+            log_error "You are currently running this script as root! Running dotfiles setup as root is not supported or recommended."
+        fi
+        exit 1
+    fi
+
+    if ! command -v sudo &> /dev/null; then
+        if [ "$PACKAGER" = "apt" ]; then
+            show_sudo_debian_remediation_message "no_sudo"
+        else
+            log_error "Error: 'sudo' command not found! Sudo is required to install system packages."
+        fi
+        exit 1
+    fi
+
+    if ! has_sudo_privileges; then
+        if [ "$PACKAGER" = "apt" ]; then
+            show_sudo_debian_remediation_message "no_privileges"
+        else
+            log_error "Error: Current user '$USER' does not have sudo privileges! Sudo privileges are required."
+        fi
+        exit 1
+    fi
+fi
+
+# 3. Check for internet connectivity issues
+log_info "Verifying internet connection..."
+has_internet=false
+if command -v curl &> /dev/null; then
+    if curl -s --connect-timeout 5 https://www.google.com &>/dev/null || curl -s --connect-timeout 5 https://github.com &>/dev/null; then
+        has_internet=true
+    fi
+elif command -v wget &> /dev/null; then
+    if wget -q --spider --timeout=5 https://www.google.com &>/dev/null || wget -q --spider --timeout=5 https://github.com &>/dev/null; then
+        has_internet=true
+    fi
+elif ping -c 1 -W 5 1.1.1.1 &>/dev/null || ping -c 1 -W 5 8.8.8.8 &>/dev/null; then
+    has_internet=true
+fi
+
+if [ "$has_internet" = false ]; then
+    log_error "No internet connection detected."
+    log_error "An active internet connection is required to download packages and configure development tools."
+    log_error "Interrupting the script."
+    exit 1
+fi
+
+log_success "All pre-installation checks passed successfully!"
+
+# ------------------------------------------------------------------------------
 #  5. Modular Distribution Setup Functions (Bash)
 # ------------------------------------------------------------------------------
 
@@ -252,23 +321,6 @@ install_termux_packages() {
 install_debian_ubuntu_packages() {
     log_info "Starting package installation for Debian/Ubuntu..."
     
-    # Dotfiles configurations should NEVER run directly under root account to prevent home directory permission skew
-    if [ "$EUID" -eq 0 ] || [ "$(id -u)" -eq 0 ]; then
-        show_sudo_debian_remediation_message "root"
-        exit 1
-    fi
-
-    # Make sure we have the privilege tool 'sudo' configured properly
-    if ! command -v sudo &> /dev/null; then
-        show_sudo_debian_remediation_message "no_sudo"
-        exit 1
-    fi
-
-    if ! has_sudo_privileges; then
-        show_sudo_debian_remediation_message "no_privileges"
-        exit 1
-    fi
-
     # Outdated Neovim installs will break modern LSP configurations
     # We remove the package manager version and download the official upstream release later
     if pkg_is_installed neovim; then

@@ -46,9 +46,23 @@ path=($HOME/.composer/vendor/bin $path)
 export NVM_DIR="$HOME/.nvm"
 
 HISTFILE=~/.zsh_history
-HISTDUP=erase
 HISTSIZE=5000
 SAVEHIST=10000
+
+# Modern Zsh history options
+setopt SHARE_HISTORY          # Share history between all sessions
+setopt INC_APPEND_HISTORY     # Write to history file immediately, not just when logout
+setopt HIST_IGNORE_ALL_DUPS   # Erase old duplicate command if new one is typed
+setopt HIST_IGNORE_SPACE      # Don't record an entry starting with a space
+setopt HIST_SAVE_NO_DUPS      # Don't write duplicate entries to history file
+setopt HIST_REDUCE_BLANKS     # Remove superfluous blanks before recording entry
+
+# Native Zsh directory navigation options
+setopt AUTO_CD                # Go to directory by just entering its name
+setopt AUTO_PUSHD             # Make cd push the old directory onto the directory stack
+setopt PUSHD_IGNORE_DUPS      # Don't push duplicate directories onto stack
+setopt PUSHD_SILENT           # Do not print the directory stack after pushd or popd
+
 
 export VISUAL=nvim
 export EDITOR="$VISUAL"
@@ -157,32 +171,46 @@ source $ZSH/oh-my-zsh.sh
 # --- Shell Navigation & General Aliases ---
 if command -v batcat >/dev/null 2>&1; then
   alias cat='batcat'
-else
+elif command -v bat >/dev/null 2>&1; then
   alias cat='bat'
 fi
-alias ls='eza'
-alias l="eza -la --icons --git"
-alias la="eza -a --icons"
-alias ll="eza -l --icons --git"
-alias lt="eza --tree --level=2 --icons"
-alias g="git"
-alias nv="nvim"
-alias v="nvim"
-alias ezsh="nvim ~/.zshrc"
+
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza'
+  alias l="eza -la --icons --git"
+  alias la="eza -a --icons"
+  alias ll="eza -l --icons --git"
+  alias lt="eza --tree --level=2 --icons"
+fi
+
+if command -v git >/dev/null 2>&1; then
+  alias g="git"
+fi
+
+if command -v nvim >/dev/null 2>&1; then
+  alias nv="nvim"
+  alias v="nvim"
+  alias ezsh="nvim ~/.zshrc"
+fi
+
 alias uzsh="source ~/.zshrc"
 
 # --- Termux-Specific Enhancements ---
 if [ -n "$TERMUX_VERSION" ]; then
   # Quick package management
-  alias pkgup="pkg update && pkg upgrade -y"
-  alias pkgi="pkg install"
-  alias pkgu="pkg uninstall"
-  alias pkgs="pkg search"
-  alias pkgl="pkg list-installed"
+  if command -v pkg >/dev/null 2>&1; then
+    alias pkgup="pkg update && pkg upgrade -y"
+    alias pkgi="pkg install"
+    alias pkgu="pkg uninstall"
+    alias pkgs="pkg search"
+    alias pkgl="pkg list-installed"
+  fi
 
   # Wake lock controls to prevent Android/Termux from sleeping during long background tasks
-  alias wakelock="termux-wake-lock"
-  alias wakeunlock="termux-wake-unlock"
+  if command -v termux-wake-lock >/dev/null 2>&1; then
+    alias wakelock="termux-wake-lock"
+    alias wakeunlock="termux-wake-unlock"
+  fi
 
   # Quick access to Android Storage directories (requires running termux-setup-storage)
   if [ -d "$HOME/storage" ]; then
@@ -206,11 +234,21 @@ if [ -n "$TERMUX_VERSION" ]; then
   fi
 
   # Device state & interactive actions
-  alias battery="termux-battery-status"
-  alias wifi="termux-wifi-connectioninfo"
-  alias vibrate="termux-vibrate"
-  alias toast="termux-toast"
-  alias notify="termux-notification"
+  if command -v termux-battery-status >/dev/null 2>&1; then
+    alias battery="termux-battery-status"
+  fi
+  if command -v termux-wifi-connectioninfo >/dev/null 2>&1; then
+    alias wifi="termux-wifi-connectioninfo"
+  fi
+  if command -v termux-vibrate >/dev/null 2>&1; then
+    alias vibrate="termux-vibrate"
+  fi
+  if command -v termux-toast >/dev/null 2>&1; then
+    alias toast="termux-toast"
+  fi
+  if command -v termux-notification >/dev/null 2>&1; then
+    alias notify="termux-notification"
+  fi
 
   # Termux Services management (requires 'termux-services' package)
   if command -v sv >/dev/null 2>&1; then
@@ -220,10 +258,12 @@ if [ -n "$TERMUX_VERSION" ]; then
   fi
 
   # proot-distro shortcuts & helpers
-  alias pd="proot-distro"
-  alias pdls="proot-distro list"
-  alias pdi="proot-distro install"
-  alias pdun="proot-distro uninstall"
+  if command -v proot-distro >/dev/null 2>&1; then
+    alias pd="proot-distro"
+    alias pdls="proot-distro list"
+    alias pdi="proot-distro install"
+    alias pdun="proot-distro uninstall"
+  fi
 
   pdl() {
     local user="${1:-akrista}"
@@ -256,10 +296,18 @@ if command -v zoxide >/dev/null 2>&1; then
 fi
 
 if [ -s "$NVM_DIR/nvm.sh" ]; then
-  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Loading NVM"
-  source "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
-  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "NVM Loaded"
+  # Lazy load NVM to speed up shell startup
+  lazy_nvm() {
+    unset -f nvm node npm npx yarn pnpm corepack
+    [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Lazy Loading NVM"
+    source "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
+    [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "NVM Loaded (Lazy)"
+  }
+  
+  for cmd in nvm node npm npx yarn pnpm corepack; do
+    eval "$cmd() { lazy_nvm; $cmd \"\$@\"; }"
+  done
 else
   [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "NVM not found"
 fi
