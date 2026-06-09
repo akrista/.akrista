@@ -671,6 +671,10 @@ log_info "Bootstrapping Oh-My-Zsh & interactive shell environments..."
 
 if [ -d "$HOME/.oh-my-zsh" ]; then
     log_success "Oh My Zsh is already installed."
+    log_info "Updating Oh My Zsh..."
+    if command -v zsh &> /dev/null; then
+        zsh -c "export ZSH=\"\$HOME/.oh-my-zsh\"; source \$ZSH/oh-my-zsh.sh && omz update"
+    fi
 else
     log_info "Installing Oh My Zsh..."
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended < /dev/null
