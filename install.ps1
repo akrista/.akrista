@@ -673,7 +673,7 @@ if [ -d "$HOME/.oh-my-zsh" ]; then
     log_success "Oh My Zsh is already installed."
     log_info "Updating Oh My Zsh..."
     if command -v zsh &> /dev/null; then
-        zsh -c "export ZSH=\"\$HOME/.oh-my-zsh\"; source \$ZSH/oh-my-zsh.sh && omz update"
+        zsh -c "export ZSH=\"\$HOME/.oh-my-zsh\"; source \$ZSH/oh-my-zsh.sh && omz update --unattended"
     fi
 else
     log_info "Installing Oh My Zsh..."
