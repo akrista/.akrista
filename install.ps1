@@ -170,6 +170,12 @@ link_file() {
     local target_file="$2"
     local name="$3"
 
+    # Remove dangling symlinks to prevent cp or linking errors
+    if [ -L "$target_file" ] && [ ! -e "$target_file" ]; then
+        log_warn "$name has a dangling symlink at $target_file. Cleaning up..."
+        rm -f "$target_file"
+    fi
+
     [ ! -f "$source_file" ] && log_warn "Repository's $name not found at $source_file" && return
 
     if [ -L "$target_file" ] && [ "$(readlink "$target_file")" = "$source_file" ]; then
@@ -294,6 +300,12 @@ install_termux_packages() {
 
     log_info "Installing comprehensive development suite..."
     pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh lua-language-server stylua dos2unix
+
+    # Verify key utilities are functional and repair dependencies if broken
+    if ! curl --version &>/dev/null || ! git --version &>/dev/null; then
+        log_warn "Detected broken library links in curl/git. Running dependency self-repair..."
+        pkg reinstall -y openssl git curl || apt install --reinstall -y openssl git curl
+    fi
 
     # Bootstraps SSHD & background daemons via termux-services
     if pkg_is_installed termux-services; then
