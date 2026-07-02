@@ -731,7 +731,7 @@ fi
 # Unified Global Node/NPM Packages & CLI Agents
 log_info "Configuring CLI agents and global packages..."
 
-# CLI Agent Installation (Antigravity CLI for modern x86_64 Linux, Gemini CLI fallback for older CPUs/ARM/Termux)
+# CLI Agent Installation (Antigravity CLI for compatible environments)
 supports_agy=false
 if [ "$OS" != "Termux" ] && [ "$(uname -m)" = "x86_64" ] && grep -q -E "avx|avx2" /proc/cpuinfo 2>/dev/null; then
     supports_agy=true
@@ -744,19 +744,6 @@ if [ "$supports_agy" = true ]; then
         log_success "Antigravity CLI installed successfully."
     else
         log_info "Antigravity CLI (agy) is already installed."
-    fi
-else
-    log_info "Environment is ARM/mobile or older CPU. Falling back to Gemini CLI..."
-    if command -v npm &> /dev/null; then
-        if ! command -v gemini &> /dev/null; then
-            log_info "Installing @google/gemini-cli..."
-            npm i -g @google/gemini-cli
-            log_success "Gemini CLI installed successfully."
-        else
-            log_info "Updating @google/gemini-cli..."
-            npm update -g @google/gemini-cli
-            log_success "Gemini CLI updated successfully."
-        fi
     fi
 fi
 
