@@ -287,10 +287,10 @@ install_termux_packages() {
         log_info "Skipping pkg upgrade (last run less than 24h ago). Use --force to override."
     fi
 
-    # Termux User Repository (TUR) holds custom programming utilities
-    if ! pkg_is_installed tur-repo || ! pkg_is_installed root-repo; then
-        log_info "Setting up Termux User Repository (tur-repo) and root-repo..."
-        pkg install -y tur-repo root-repo
+    # Termux User Repository (TUR) and glibc repositories
+    if ! pkg_is_installed tur-repo || ! pkg_is_installed root-repo || ! pkg_is_installed glibc-repo; then
+        log_info "Setting up Termux User Repository (tur-repo), root-repo, and glibc-repo..."
+        pkg install -y tur-repo root-repo glibc-repo
     fi
 
     if [ "$FORCE" = true ] && [ -t 0 ]; then
@@ -299,7 +299,7 @@ install_termux_packages() {
     fi
 
     log_info "Installing comprehensive development suite..."
-    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh lua-language-server stylua dos2unix
+    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh lua-language-server stylua dos2unix glibc-runner
 
     # Verify key utilities are functional and repair dependencies if broken
     if ! curl --version &>/dev/null || ! git --version &>/dev/null; then
@@ -609,14 +609,6 @@ if [ "$OS" != "Termux" ]; then
         curl -fsSL https://bun.sh/install | bash
     fi
 
-    # OpenCode
-    if command -v opencode &> /dev/null; then
-        log_success "OpenCode is already installed."
-    else
-        log_info "Installing OpenCode..."
-        curl -fsSL https://opencode.ai/install | bash
-    fi
-
     # GitHub Copilot CLI helper
     if command -v copilot &> /dev/null; then
         log_success "GitHub Copilot CLI is already installed."
@@ -731,20 +723,31 @@ fi
 # Unified Global Node/NPM Packages & CLI Agents
 log_info "Configuring CLI agents and global packages..."
 
-# CLI Agent Installation (Antigravity CLI for compatible environments)
+# CLI Agent Installation (Antigravity CLI)
 supports_agy=false
-if [ "$OS" != "Termux" ] && [ "$(uname -m)" = "x86_64" ] && grep -q -E "avx|avx2" /proc/cpuinfo 2>/dev/null; then
+if [ "$OS" = "Termux" ]; then
+    supports_agy=true
+elif [ "$OS" != "Termux" ] && [ "$(uname -m)" = "x86_64" ] && grep -q -E "avx|avx2" /proc/cpuinfo 2>/dev/null; then
     supports_agy=true
 fi
 
 if [ "$supports_agy" = true ]; then
-    if ! command -v agy &> /dev/null; then
+    if [ ! -f "$HOME/.local/bin/agy" ]; then
         log_info "Installing Antigravity CLI (agy)..."
         curl -fsSL https://antigravity.google/cli/install.sh | bash
         log_success "Antigravity CLI installed successfully."
     else
         log_info "Antigravity CLI (agy) is already installed."
     fi
+fi
+
+# OpenCode Installation (Multi-platform & Termux)
+if [ ! -f "$HOME/.opencode/bin/opencode" ]; then
+    log_info "Installing OpenCode..."
+    curl -fsSL https://opencode.ai/install | bash
+    log_success "OpenCode installed successfully."
+else
+    log_info "OpenCode is already installed."
 fi
 
 if command -v npm &> /dev/null; then
