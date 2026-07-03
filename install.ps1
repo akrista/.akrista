@@ -725,9 +725,7 @@ log_info "Configuring CLI agents and global packages..."
 
 # CLI Agent Installation (Antigravity CLI)
 supports_agy=false
-if [ "$OS" = "Termux" ]; then
-    supports_agy=true
-elif [ "$OS" != "Termux" ] && [ "$(uname -m)" = "x86_64" ] && grep -q -E "avx|avx2" /proc/cpuinfo 2>/dev/null; then
+if [ "$OS" != "Termux" ] && [ "$(uname -m)" = "x86_64" ] && grep -q -E "avx|avx2" /proc/cpuinfo 2>/dev/null; then
     supports_agy=true
 fi
 
@@ -741,13 +739,15 @@ if [ "$supports_agy" = true ]; then
     fi
 fi
 
-# OpenCode Installation (Multi-platform & Termux)
-if [ ! -f "$HOME/.opencode/bin/opencode" ]; then
-    log_info "Installing OpenCode..."
-    curl -fsSL https://opencode.ai/install | bash
-    log_success "OpenCode installed successfully."
-else
-    log_info "OpenCode is already installed."
+# OpenCode Installation (Non-Termux)
+if [ "$OS" != "Termux" ]; then
+    if [ ! -f "$HOME/.opencode/bin/opencode" ]; then
+        log_info "Installing OpenCode..."
+        curl -fsSL https://opencode.ai/install | bash
+        log_success "OpenCode installed successfully."
+    else
+        log_info "OpenCode is already installed."
+    fi
 fi
 
 if command -v npm &> /dev/null; then
