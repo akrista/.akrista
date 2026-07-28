@@ -18,5 +18,8 @@
 	br = branch
 	cm = commit
 
+[push]
+	autoSetupRemote = true
+
 [include]
 	path = ~/.gitconfig.local
