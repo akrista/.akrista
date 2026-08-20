@@ -35,6 +35,7 @@ path=(
 )
 
 export BUN_INSTALL="$HOME/.bun"
+export UV_PYTHON="3.12"
 path=($BUN_INSTALL/bin $path)
 path=($HOME/.local/share/fnm $path)
 path=($HOME/.cargo/bin $path)
