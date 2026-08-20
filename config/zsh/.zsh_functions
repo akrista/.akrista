@@ -1,4 +1,3 @@
-# Log in to a proot-distro container in isolated mode
 pdl() {
   local user="${1:-akrista}"
   local distro="${2:-debian}"
@@ -14,7 +13,6 @@ pdl() {
   proot-distro login --isolated --user "$user" "$distro"
 }
 
-# Periodically check if updates are available for the .akrista repository
 _check_update() {
   local doc_dir="$HOME/.akrista"
   [[ -d "$doc_dir/.git" ]] || return
@@ -51,7 +49,6 @@ _check_update() {
   fi
 }
 
-# Update the .akrista repository and run the installer
 uak() {
   local doc_dir="$HOME/.akrista"
   if [[ -d "$doc_dir" ]]; then

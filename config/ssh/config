@@ -1,8 +1,3 @@
-# ==============================================================================
-#  🔑 Base Shared SSH Configuration
-# ==============================================================================
-#  Shared host shortcuts and safe defaults across machines.
-
 Host *
     ServerAliveInterval 60
     ServerAliveCountMax 3

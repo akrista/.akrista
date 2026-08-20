@@ -10,7 +10,7 @@
   "session": {
     "trust_all_worktrees": true
   },
-  "diff_view_style": "unified",
+  "diff_view_style": "split",
   "context_servers": {
     "Home <DATABASE_NAME>": {
       "enabled": false,

@@ -1,15 +1,3 @@
-# oxker config file — https://github.com/mrjackwills/oxker
-# Colors below are the standard Gruvbox Dark palette.
-# Points at Podman's rootless socket instead of Docker's. 1000 is
-# replaced with the real `id -u` by install.ps1 at install time — this file is
-# a template, not meant to be symlinked as-is. Requires the socket enabled:
-#   systemctl --user enable --now podman.socket
-host = "/run/user/1000/podman/podman.sock"
-
-#################
-# Gruvbox Dark  #
-#################
-
 [colors.headers_bar]
 background = "#504945"
 loading_spinner = "#fabd2f"

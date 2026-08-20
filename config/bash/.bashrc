@@ -1,10 +1,4 @@
-# ==============================================================================
-#  🐚 Interactive Bash Shell Configuration (.bashrc)
-# ==============================================================================
-
-# ------------------------------------------------------------------------------
-# 1. Non-Interactive Guard & Terminal Options
-# ------------------------------------------------------------------------------
+# Non-interactive shell guard
 case $- in
     *i*) ;;
       *) return;;
@@ -20,15 +14,12 @@ HISTFILESIZE=10000
 shopt -s checkwinsize
 shopt -s autocd 2>/dev/null || true
 
-# ------------------------------------------------------------------------------
-# 2. Core Environment Variables & Default Editors
-# ------------------------------------------------------------------------------
+# Environment variables
 export DOTFILES="$HOME/.akrista"
 export VISUAL=nvim
 export EDITOR="$VISUAL"
 export COMPOSE_BAKE=true
 
-# Ensure UTF-8 locale if available
 if locale -a 2>/dev/null | grep -qi "en_US.utf8"; then
   export LANG=en_US.UTF-8
   export LC_ALL=en_US.UTF-8
@@ -37,43 +28,36 @@ elif locale -a 2>/dev/null | grep -qi "C.utf8"; then
   export LC_ALL=C.UTF-8
 fi
 
-# ------------------------------------------------------------------------------
-# 3. Path Configurations & Runtimes
-# ------------------------------------------------------------------------------
-
-# Homebrew / Linuxbrew
+# Runtimes & Paths
 if [ -d "/home/linuxbrew/.linuxbrew" ]; then
   if [ -z "$HOMEBREW_PREFIX" ]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   fi
 fi
 
-# Source machine-specific local environment if present
 if [ -f "$HOME/.env.local" ]; then
   source "$HOME/.env.local"
 fi
 
-# Go binary path
 [ -d "/usr/local/go/bin" ] && export PATH="/usr/local/go/bin:$PATH"
 if command -v go >/dev/null 2>&1; then
   export PATH="$(go env GOPATH)/bin:$PATH"
 fi
 
-# Standard & local paths
 export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 
-# Bun Runtime
+# Bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun" 2>/dev/null || true
 
-# Fast Node Manager (fnm)
+# fnm
 export PATH="$HOME/.local/share/fnm:$PATH"
 if command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --use-on-cd)"
 fi
 
-# Rust / Cargo
+# Rust
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 export PATH="$HOME/.cargo/bin:$PATH"
 
@@ -87,9 +71,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # Deno
 [ -s "$HOME/.deno/env" ] && . "$HOME/.deno/env"
 
-# ------------------------------------------------------------------------------
-# 4. Programmable Shell Completions
-# ------------------------------------------------------------------------------
+# Completions
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
@@ -102,17 +84,13 @@ if [ -f "$HOME/.local/share/bash-completion/completions/deno.bash" ]; then
   source "$HOME/.local/share/bash-completion/completions/deno.bash"
 fi
 
-# ------------------------------------------------------------------------------
-# 5. Integrations (Zoxide)
-# ------------------------------------------------------------------------------
+# Zoxide
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init bash)"
   eval "$(zoxide init bash --cmd cd)"
 fi
 
-# ------------------------------------------------------------------------------
-# 6. Shared Aliases & Helpers
-# ------------------------------------------------------------------------------
+# Aliases
 if [ -f "$DOTFILES/config/zsh/.zsh_aliases" ]; then
   source "$DOTFILES/config/zsh/.zsh_aliases"
 fi
@@ -124,10 +102,6 @@ fi
 alias ubash="source ~/.bashrc"
 alias ebash="nvim ~/.bashrc"
 
-# ------------------------------------------------------------------------------
-# 7. Updater & Utility Functions
-# ------------------------------------------------------------------------------
-# Update the .akrista repository and run installer
 uak() {
   local doc_dir="$HOME/.akrista"
   if [[ -d "$doc_dir" ]]; then
@@ -147,7 +121,6 @@ uak() {
   fi
 }
 
-# Log in to a proot-distro container in isolated mode
 pdl() {
   local user="${1:-akrista}"
   local distro="${2:-debian}"
@@ -163,7 +136,6 @@ pdl() {
   proot-distro login --isolated --user "$user" "$distro"
 }
 
-# Check for repository updates periodically (24h rate limit)
 _check_update() {
   local doc_dir="$HOME/.akrista"
   [[ -d "$doc_dir/.git" ]] || return
@@ -199,12 +171,9 @@ _check_update() {
   fi
 }
 
-# Run background update check
 _check_update
 
-# ------------------------------------------------------------------------------
-# 8. Shell Prompt (Oh My Posh with fallback)
-# ------------------------------------------------------------------------------
+# Prompt
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ] && command -v oh-my-posh >/dev/null 2>&1; then
   OMP_CONFIG="$DOTFILES/config/omp/lambdageneration.omp.json"
   if [ -f "$OMP_CONFIG" ]; then

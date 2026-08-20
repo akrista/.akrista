@@ -1,4 +1,3 @@
-# --- Shell Navigation & General Aliases ---
 if command -v batcat >/dev/null 2>&1; then
   alias cat='batcat'
 elif command -v bat >/dev/null 2>&1; then
@@ -27,9 +26,8 @@ fi
 alias uzsh="source ~/.zshrc"
 alias ubash="source ~/.bashrc"
 
-# --- Termux-Specific Enhancements ---
+# Termux
 if [ -n "$TERMUX_VERSION" ]; then
-  # Quick package management
   if command -v pkg >/dev/null 2>&1; then
     alias pkgup="pkg update && pkg upgrade -y"
     alias pkgi="pkg install"
@@ -38,13 +36,11 @@ if [ -n "$TERMUX_VERSION" ]; then
     alias pkgl="pkg list-installed"
   fi
 
-  # Wake lock controls to prevent Android/Termux from sleeping during long background tasks
   if command -v termux-wake-lock >/dev/null 2>&1; then
     alias wakelock="termux-wake-lock"
     alias wakeunlock="termux-wake-unlock"
   fi
 
-  # Quick access to Android Storage directories (requires running termux-setup-storage)
   if [ -d "$HOME/storage" ]; then
     alias sdcard="cd $HOME/storage/shared"
     alias downloads="cd $HOME/storage/downloads"
@@ -52,7 +48,6 @@ if [ -n "$TERMUX_VERSION" ]; then
     alias documents="cd $HOME/storage/shared/Documents"
   fi
 
-  # Termux API integration (requires 'termux-api' package and Android companion app)
   if command -v termux-clipboard-get >/dev/null 2>&1; then
     alias cbget="termux-clipboard-get"
     alias cbset="termux-clipboard-set"
@@ -65,7 +60,6 @@ if [ -n "$TERMUX_VERSION" ]; then
     alias openurl="termux-open-url"
   fi
 
-  # Device state & interactive actions
   if command -v termux-battery-status >/dev/null 2>&1; then
     alias battery="termux-battery-status"
   fi
@@ -82,19 +76,16 @@ if [ -n "$TERMUX_VERSION" ]; then
     alias notify="termux-notification"
   fi
 
-  # Termux Services management (requires 'termux-services' package)
   if command -v sv >/dev/null 2>&1; then
     alias tservice="sv"
     alias tstart="sv-enable"
     alias tstop="sv-disable"
   fi
 
-  # proot-distro shortcuts & helpers
   if command -v proot-distro >/dev/null 2>&1; then
     alias pd="proot-distro"
     alias pdls="proot-distro list"
     alias pdi="proot-distro install"
     alias pdun="proot-distro uninstall"
   fi
-
 fi

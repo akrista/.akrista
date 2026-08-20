@@ -1,64 +1,38 @@
 #!/usr/bin/env bash
-
-# ==============================================================================
-#  🛠️  Bilingual Environment Bootstrapper & Installer (install.ps1 / Polyglot)
-# ==============================================================================
-#  This script is a polyglot / bilingual execution script. It is designed to
-#  run directly as a Bourne-Shell (Bash) script on Unix/Linux/macOS/Termux systems
-#  and as a PowerShell 5.1/7+ script on Windows systems—all within the SAME file.
-#
-#  💡 HOW THE POLYGLOT TECHNIQUE WORKS:
-#  - Linux/Unix shells run this file using 'bash'.
-#  - Line 3 declares the REM function. In shell scripts, REM is a standard command.
-#  - Line 4 'REM @'' evaluates as a call to REM with the argument "@'".
-#  - Line 5 uses Bash's command sequence separator (;) and a here-doc redirect (: << "BASH")
-#    to make Bash execute everything inside this block and ignore the rest of the file.
-#  - Line 450 ends the Bash script with "exit" and the PowerShell here-string closing tag "'@".
-#  - Windows PowerShell reads 'REM @'' as the beginning of a multi-line here-string,
-#    meaning PowerShell completely skips the entire Bash block (lines 4 to 450) and
-#    runs only the PowerShell block starting on line 453.
-# ==============================================================================
+# Polyglot installer for Bash (Linux/Termux/macOS) and PowerShell (Windows).
 
 function REM() { return; }
 REM @'
 REM '; : << "BASH"
 BASH
 
-# ------------------------------------------------------------------------------
-#  1. Logging & Formatting Helpers (Bash)
-# ------------------------------------------------------------------------------
-# Define standard colors for elegant, premium logging output.
+# Logging helpers
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color / Reset
+NC='\033[0m'
 
 log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 log_warn()    { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 log_error()   { echo -e "${RED}[ERROR]${NC} $1"; }
 
-log_info "Initializing Unix setup block..."
+log_info "Initializing setup..."
 
-# ------------------------------------------------------------------------------
-#  2. Argument Parsing (Bash)
-# ------------------------------------------------------------------------------
+# Argument parsing
 FORCE=false
 for arg in "$@"; do
     case $arg in
         --force|-f)
             FORCE=true
-            log_info "Force installation flag (--force / -f) detected."
+            log_info "Force flag enabled."
             ;;
     esac
 done
 
-# ------------------------------------------------------------------------------
-#  3. OS & Package Manager Detection (Bash)
-# ------------------------------------------------------------------------------
-# Dynamically queries package manager tools to figure out the active environment.
+# OS and package manager detection
 if [ -n "$TERMUX_VERSION" ] || command -v pkg &> /dev/null; then
     PACKAGER="pkg"
     OS="Termux"
@@ -79,40 +53,32 @@ else
     OS="unknown"
 fi
 
-log_info "Detected OS/Environment: $OS"
+log_info "Detected OS: $OS"
 log_info "Detected Package Manager: $PACKAGER"
 
-# Checks if we are running in a PRoot/Chroot containment framework under Android
 IS_PROOT_DISTRO=false
 if uname -a | grep -q "PRoot-Distro"; then
     IS_PROOT_DISTRO=true
-    log_info "PRoot-Distro sandbox environment detected."
+    log_info "PRoot-Distro environment detected."
 fi
 
 DOTFILES_DIR="$HOME/.akrista"
 
-# ------------------------------------------------------------------------------
-#  4. Sudo & Linking Utilities (Bash)
-# ------------------------------------------------------------------------------
-
-# Renders a diagnostic, beautiful instruction panel if the user runs into privilege blockades.
 show_sudo_debian_remediation_message() {
     local reason="$1"
     echo ""
     echo -e "${RED}========================================================================"
-    echo " 🔴 SYSTEM CONFIGURATION ISSUE DETECTED"
+    echo " SYSTEM CONFIGURATION ERROR"
     echo -e "========================================================================${NC}"
     if [ "$reason" = "root" ]; then
-        echo " Error: You are currently running this script as root!"
-        echo " Running dotfiles setup as root is not supported or recommended."
+        echo " Error: Running dotfiles setup as root is not supported."
     elif [ "$reason" = "no_sudo" ]; then
-        echo " Error: 'sudo' command not found!"
+        echo " Error: 'sudo' command not found."
     else
-        echo " Error: Current user '$USER' does not have sudo privileges!"
+        echo " Error: Current user '$USER' does not have sudo privileges."
     fi
     echo ""
-    echo " Debian usually doesn't come with sudo installed by default."
-    echo " Please follow these steps to configure your environment:"
+    echo " Steps to configure sudo on Debian:"
     echo ""
     echo " 1. Login with root and install sudo:"
     echo "    apt update && apt install -y sudo"
@@ -124,15 +90,15 @@ show_sudo_debian_remediation_message() {
     echo " 3. Add user to sudo group:"
     echo "    usermod -aG sudo username"
     echo ""
-    echo " 4. Ensure that an editor is installed (if not, install neovim):"
+    echo " 4. Ensure an editor is installed:"
     echo "    apt install -y neovim"
     echo ""
-    echo " 5. Run visudo (or sudo visudo) to add the username privilege:"
+    echo " 5. Add user privilege with visudo:"
     echo "    visudo"
-    echo "    # Add the following line under the user privilege specification:"
+    echo "    # Add line under user privilege specification:"
     echo "    username ALL=(ALL:ALL) ALL"
     echo ""
-    echo " 6. Switch to your user and run the installation script again:"
+    echo " 6. Switch to your user and rerun the installer:"
     echo "    su - username"
     echo "    cd ~/.username"
     echo "    ./install.ps1"
@@ -140,7 +106,6 @@ show_sudo_debian_remediation_message() {
     echo ""
 }
 
-# Verifies if the active shell user has sudo permissions without blocking interactive sessions.
 has_sudo_privileges() {
     if ! command -v sudo &> /dev/null; then
         return 1
@@ -156,7 +121,7 @@ has_sudo_privileges() {
     if echo "$sudo_l_output" | grep -qE "not in the sudoers|not allowed to run sudo"; then
         return 1
     fi
-    log_info "Checking sudo access (you may be prompted for your password)..."
+    log_info "Checking sudo access..."
     if sudo -v &> /dev/null; then
         return 0
     else
@@ -164,13 +129,11 @@ has_sudo_privileges() {
     fi
 }
 
-# Creates a symbolic link for config files while backing up any pre-existing custom versions.
 link_file() {
     local source_file="$1"
     local target_file="$2"
     local name="$3"
 
-    # Remove dangling symlinks to prevent cp or linking errors
     if [ -L "$target_file" ] && [ ! -e "$target_file" ]; then
         log_warn "$name has a dangling symlink at $target_file. Cleaning up..."
         rm -f "$target_file"
@@ -179,7 +142,7 @@ link_file() {
     [ ! -f "$source_file" ] && log_warn "Repository's $name not found at $source_file" && return
 
     if [ -L "$target_file" ] && [ "$(readlink "$target_file")" = "$source_file" ]; then
-        log_success "$name is already linked to the repository's version."
+        log_success "$name is already linked to the repository version."
     else
         log_info "Creating symlink for $name..."
         if [ -e "$target_file" ] || [ -L "$target_file" ]; then
@@ -190,7 +153,6 @@ link_file() {
     fi
 }
 
-# Check if a package is installed using dpkg/apt or command check fallback.
 pkg_is_installed() {
     if [ "$PACKAGER" = "pkg" ] || [ "$PACKAGER" = "apt" ]; then
         dpkg -s "$1" &> /dev/null
@@ -199,28 +161,20 @@ pkg_is_installed() {
     fi
 }
 
-# ------------------------------------------------------------------------------
-#  4.5 Check Installation Capabilities & System Issues (Bash)
-# ------------------------------------------------------------------------------
-log_info "Verifying installation capabilities and system requirements..."
+log_info "Verifying system requirements..."
 
-# 1. Verify that we have a supported package manager/OS
 if [ "$PACKAGER" = "unknown" ]; then
     log_error "Unsupported OS/Environment ($OS) or package manager."
-    log_error "This script requires one of the following package managers: pkg, apt, dnf, pacman, apk."
-    log_error "Interrupting the script to prevent partial/failed installation."
+    log_error "This script requires one of: pkg, apt, dnf, pacman, apk."
     exit 1
 fi
 
-# 2. Check for privilege and permission issues
-# Termux (pkg) runs in a user environment and doesn't require root/sudo.
-# Other environments require either root or sudo privileges.
 if [ "$PACKAGER" != "pkg" ]; then
     if [ "$EUID" -eq 0 ] || [ "$(id -u)" -eq 0 ]; then
         if [ "$PACKAGER" = "apt" ]; then
             show_sudo_debian_remediation_message "root"
         else
-            log_error "You are currently running this script as root! Running dotfiles setup as root is not supported or recommended."
+            log_error "Running dotfiles setup as root is not supported."
         fi
         exit 1
     fi
@@ -229,7 +183,7 @@ if [ "$PACKAGER" != "pkg" ]; then
         if [ "$PACKAGER" = "apt" ]; then
             show_sudo_debian_remediation_message "no_sudo"
         else
-            log_error "Error: 'sudo' command not found! Sudo is required to install system packages."
+            log_error "Error: 'sudo' command not found."
         fi
         exit 1
     fi
@@ -238,13 +192,12 @@ if [ "$PACKAGER" != "pkg" ]; then
         if [ "$PACKAGER" = "apt" ]; then
             show_sudo_debian_remediation_message "no_privileges"
         else
-            log_error "Error: Current user '$USER' does not have sudo privileges! Sudo privileges are required."
+            log_error "Error: User '$USER' does not have sudo privileges."
         fi
         exit 1
     fi
 fi
 
-# 3. Check for internet connectivity issues
 log_info "Verifying internet connection..."
 has_internet=false
 if command -v curl &> /dev/null; then
@@ -261,12 +214,10 @@ fi
 
 if [ "$has_internet" = false ]; then
     log_error "No internet connection detected."
-    log_error "An active internet connection is required to download packages and configure development tools."
-    log_error "Interrupting the script."
     exit 1
 fi
 
-log_success "All pre-installation checks passed successfully!"
+log_success "Pre-installation checks passed."
 
 # ------------------------------------------------------------------------------
 #  5. Modular Distribution Setup Functions (Bash)
@@ -316,27 +267,23 @@ install_termux_packages() {
 
         if command -v sv-enable &> /dev/null; then
             [ -d "$PREFIX/var/service/sshd" ] || { log_info "Enabling sshd service..."; sv-enable sshd || log_warn "Could not enable sshd automatically. It will be enabled when you restart your terminal."; }
-            [ -d "$PREFIX/var/service/ssh-agent" ] || { log_info "Enabling ssh-agent service..."; sv-enable ssh-agent || log_warn "Could not enable ssh-agent automatically. It will be enabled when you restart your terminal."; }
+            [ -d "$PREFIX/var/service/ssh-agent" ] || { log_info "Enabling ssh-agent service..."; sv-enable ssh-agent || log_warn "Could not enable ssh-agent automatically."; }
         else
-            log_warn "sv-enable command not found. Services will be enabled when you reload your terminal."
+            log_warn "sv-enable command not found."
         fi
     fi
 
-    # Enables Android storage permissions
     if [ ! -d "$HOME/storage" ]; then
         log_info "Setting up Termux storage access..."
         termux-setup-storage
     fi
 }
 
-# --- 5.2 DEBIAN / UBUNTU INSTALLER ---
 install_debian_ubuntu_packages() {
     log_info "Starting package installation for Debian/Ubuntu..."
 
-    # Outdated Neovim installs will break modern LSP configurations
-    # We remove the package manager version and download the official upstream release later
     if pkg_is_installed neovim; then
-        log_warn "Found outdated Neovim installed via apt. Removing it to prevent path collisions..."
+        log_warn "Removing distro Neovim to prevent collisions with official release..."
         sudo apt-get remove -y neovim
     fi
 
@@ -353,7 +300,6 @@ install_debian_ubuntu_packages() {
     fi
     sudo update-locale LANG=en_US.UTF-8
 
-    # Install Official Upstream Neovim Build
     if [ "$FORCE" = true ] || ! command -v nvim &> /dev/null; then
         log_info "Installing official Neovim build..."
         ARCH=$(uname -m)
@@ -361,7 +307,7 @@ install_debian_ubuntu_packages() {
             x86_64) NVIM_ARCH="x86_64" ;;
             aarch64|arm64) NVIM_ARCH="arm64" ;;
             *)
-                log_warn "Unsupported architecture for official Neovim build: $ARCH. Falling back to apt installation."
+                log_warn "Unsupported architecture for official Neovim build: $ARCH. Falling back to apt."
                 sudo apt install -y neovim
                 NVIM_ARCH="unknown"
                 ;;
@@ -372,7 +318,7 @@ install_debian_ubuntu_packages() {
             (
                 cd "$TEMP_DIR" || exit 1
                 NVIM_TAR="nvim-linux-$NVIM_ARCH.tar.gz"
-                log_info "Downloading $NVIM_TAR from GitHub..."
+                log_info "Downloading $NVIM_TAR..."
                 curl -LO "https://github.com/neovim/neovim/releases/latest/download/$NVIM_TAR"
                 sudo rm -rf "/opt/nvim-linux-$NVIM_ARCH"
                 sudo mkdir -p "/opt/nvim-linux-$NVIM_ARCH"
@@ -381,13 +327,12 @@ install_debian_ubuntu_packages() {
                 sudo ln -sf "/opt/nvim-linux-$NVIM_ARCH/bin/nvim" /usr/local/bin/nvim
             )
             rm -rf "$TEMP_DIR"
-            log_success "Neovim installation completed successfully."
+            log_success "Neovim installation completed."
         fi
     else
-        log_info "Neovim is already installed. Use --force to reinstall."
+        log_info "Neovim is already installed."
     fi
 
-    # Pacstall (An AUR-like package manager for Debian/Ubuntu distros)
     if ! command -v pacstall &> /dev/null; then
         log_info "Installing Pacstall..."
         sudo bash -c "$(curl -fsSL https://pacstall.dev/q/install)"
@@ -395,7 +340,6 @@ install_debian_ubuntu_packages() {
         log_info "Pacstall is already installed."
     fi
 
-    # GitHub CLI (official repository setup)
     if ! command -v gh &> /dev/null; then
         log_info "Installing GitHub CLI..."
         sudo mkdir -p -m 755 /etc/apt/keyrings
@@ -412,10 +356,9 @@ install_debian_ubuntu_packages() {
         log_info "GitHub CLI (gh) is already installed."
     fi
 
-    # Docker daemon configuration
     if [ -f "$DOTFILES_DIR/config/docker/daemon.json" ]; then
         if command -v docker &> /dev/null || [ -d "/etc/docker" ]; then
-            log_info "Configuring Docker daemon settings (/etc/docker/daemon.json)..."
+            log_info "Configuring Docker daemon..."
             sudo mkdir -p /etc/docker
             if [ ! -f /etc/docker/daemon.json ] || [ "$FORCE" = true ]; then
                 sudo cp "$DOTFILES_DIR/config/docker/daemon.json" /etc/docker/daemon.json
@@ -424,59 +367,41 @@ install_debian_ubuntu_packages() {
         fi
     fi
 
-    # OpenSSH Server daemon hardening (Debian/Ubuntu)
     if [ -f "$DOTFILES_DIR/config/sshd/99-hardening.conf" ]; then
         if [ -d "/etc/ssh/sshd_config.d" ] || command -v sshd &> /dev/null; then
-            log_info "Deploying SSHD hardening configuration (/etc/ssh/sshd_config.d/99-hardening.conf)..."
+            log_info "Deploying SSHD hardening configuration..."
             sudo mkdir -p /etc/ssh/sshd_config.d
             sudo cp "$DOTFILES_DIR/config/sshd/99-hardening.conf" /etc/ssh/sshd_config.d/99-hardening.conf
             sudo chmod 644 /etc/ssh/sshd_config.d/99-hardening.conf
 
-            # Validate syntax before reloading service
             if sudo sshd -t 2>/dev/null; then
-                log_success "SSHD configuration validated successfully."
+                log_success "SSHD configuration validated."
                 if systemctl is-active --quiet ssh 2>/dev/null; then
                     sudo systemctl reload ssh 2>/dev/null || true
                 fi
             else
-                log_warn "SSHD configuration test failed. Reverting 99-hardening.conf..."
+                log_warn "SSHD configuration test failed. Reverting..."
                 sudo rm -f /etc/ssh/sshd_config.d/99-hardening.conf
             fi
         fi
     fi
-
 }
 
-# --- 5.3 FEDORA INSTALLER ---
 install_fedora_packages() {
     log_info "Starting package installation for Fedora..."
-    log_warn "Fedora package list configuration is currently a placeholder. Please extend this block!"
-    # Implement Fedora specific setup here:
-    # sudo dnf update -y
-    # sudo dnf install -y make gcc git ripgrep zsh tmux ...
+    log_warn "Fedora package list configuration placeholder."
 }
 
-# --- 5.4 ARCH LINUX INSTALLER ---
 install_arch_packages() {
     log_info "Starting package installation for Arch Linux..."
-    log_warn "Arch Linux package list configuration is currently a placeholder. Please extend this block!"
-    # Implement Arch specific setup here:
-    # sudo pacman -Syu --noconfirm
-    # sudo pacman -S --needed --noconfirm make gcc git ripgrep zsh ...
+    log_warn "Arch Linux package list configuration placeholder."
 }
 
-# --- 5.5 ALPINE INSTALLER ---
 install_alpine_packages() {
     log_info "Starting package installation for Alpine..."
-    log_warn "Alpine package list configuration is currently a placeholder. Please extend this block!"
-    # Implement Alpine specific setup here:
-    # sudo apk update
-    # sudo apk add make gcc git ripgrep zsh ...
+    log_warn "Alpine package list configuration placeholder."
 }
 
-# ------------------------------------------------------------------------------
-#  6. Run Core Modular Package Install
-# ------------------------------------------------------------------------------
 case "$OS" in
     "Termux")
         install_termux_packages
@@ -498,17 +423,15 @@ case "$OS" in
         ;;
 esac
 
-# ------------------------------------------------------------------------------
-#  7. Clone / Update Repositories
-# ------------------------------------------------------------------------------
-log_info "Configuring active workspaces..."
+# Workspaces
+log_info "Configuring workspaces..."
 NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 
 if [ -d "$NVIM_CONFIG_DIR/.git" ]; then
-    log_info "Neovim configuration already exists at $NVIM_CONFIG_DIR. Pulling updates..."
+    log_info "Neovim configuration exists at $NVIM_CONFIG_DIR. Pulling updates..."
     git -C "$NVIM_CONFIG_DIR" pull
 else
-    log_info "Cloning Neovim configuration (branch: akrista)..."
+    log_info "Cloning Neovim configuration..."
     if [ -d "$NVIM_CONFIG_DIR" ]; then
         log_warn "$NVIM_CONFIG_DIR exists but is not a git repository. Backing up..."
         rm -rf "${NVIM_CONFIG_DIR}.bak"
@@ -518,7 +441,7 @@ else
 fi
 
 if [ -d "$DOTFILES_DIR/.git" ]; then
-    log_info ".akrista repository already exists at $DOTFILES_DIR. Pulling updates..."
+    log_info ".akrista repository exists at $DOTFILES_DIR. Pulling updates..."
     git -C "$DOTFILES_DIR" pull
 else
     log_info "Cloning .akrista repository..."
@@ -531,17 +454,14 @@ else
 fi
 [ -d "$DOTFILES_DIR" ] && touch "$DOTFILES_DIR/.last_update_check" 2>/dev/null
 
-# ------------------------------------------------------------------------------
-#  8. Environment-Specific Configs & Setup
-# ------------------------------------------------------------------------------
+# Environment-specific configuration
 if [ "$OS" = "Termux" ]; then
-    log_info "Configuring Termux GUI and settings..."
+    log_info "Configuring Termux..."
     mkdir -p "$HOME/.termux"
     link_file "$DOTFILES_DIR/config/termux/termux.properties" "$HOME/.termux/termux.properties" "termux.properties"
 
-    # Download Meslo Nerd Font
     if [ ! -f "$HOME/.termux/font.ttf" ]; then
-        log_info "Downloading and installing MesloLGS NF Regular font..."
+        log_info "Downloading MesloLGS NF Regular font..."
         curl -fsSL -o "$HOME/.termux/font.ttf" "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf"
     else
         log_success "MesloLGS NF Regular font is already installed."
@@ -551,19 +471,14 @@ if [ "$OS" = "Termux" ]; then
     termux-reload-settings
 elif [ "$IS_PROOT_DISTRO" = true ]; then
     echo ""
-    echo -e "${YELLOW}===================================================="
-    echo " ⚠️  PROOT-DISTRO DETECTED"
-    echo "===================================================="
-    echo "   To fix fonts and terminal settings in Termux, please run the"
-    echo "   installer in your main Termux shell (outside the container):"
-    echo "   curl -fsSL https://github.com/akrista/.akrista/raw/master/install.ps1 | bash"
-    echo -e "====================================================${NC}"
+    echo -e "${YELLOW}PROOT-DISTRO DETECTED${NC}"
+    echo "To configure fonts and terminal settings in Termux, run the installer outside the container:"
+    echo "curl -fsSL https://github.com/akrista/.akrista/raw/master/install.ps1 | bash"
     echo ""
 else
-    # Install MesloLGS NF fonts for desktop terminal emulators (alacritty/ghostty)
     MESLO_FONT_DIR="$HOME/.local/share/fonts/MesloLGS NF"
     if [ ! -f "$MESLO_FONT_DIR/MesloLGS NF Regular.ttf" ]; then
-        log_info "Downloading and installing MesloLGS NF fonts..."
+        log_info "Downloading MesloLGS NF fonts..."
         mkdir -p "$MESLO_FONT_DIR"
         curl -fsSL -o "$MESLO_FONT_DIR/MesloLGS NF Regular.ttf" "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf"
         curl -fsSL -o "$MESLO_FONT_DIR/MesloLGS NF Bold.ttf" "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf"
@@ -576,16 +491,14 @@ else
     fi
 fi
 
-# Multi-platform development configurations (non-Termux architectures)
 if [ "$OS" != "Termux" ]; then
-    log_info "Setting up multi-platform runtime engines..."
+    log_info "Setting up runtime engines..."
 
-    # Bun Runtime
+    # Bun
     if command -v bun &> /dev/null; then
         log_info "Checking for Bun updates..."
         bun upgrade
     elif [ -d "$HOME/.bun" ]; then
-        log_success "Bun directory exists. Sourcing bun to check if upgrade is needed..."
         export BUN_INSTALL="$HOME/.bun"
         export PATH="$BUN_INSTALL/bin:$PATH"
         if command -v bun &> /dev/null; then
@@ -597,9 +510,9 @@ if [ "$OS" != "Termux" ]; then
         curl -fsSL https://bun.sh/install | bash
     fi
 
-    # Fast Node Manager (fnm)
+    # fnm
     if ! command -v fnm &> /dev/null && [ ! -d "$HOME/.local/share/fnm" ]; then
-        log_info "Installing Fast Node Manager (fnm)..."
+        log_info "Installing fnm..."
         curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
     else
         log_success "fnm is already installed."
@@ -607,12 +520,12 @@ if [ "$OS" != "Termux" ]; then
     export PATH="$HOME/.local/share/fnm:$PATH"
     if command -v fnm &> /dev/null; then
         eval "$(fnm env)"
-        log_info "Ensuring Node.js LTS is installed and configured via fnm..."
+        log_info "Configuring Node.js LTS via fnm..."
         fnm install --lts
         fnm default lts-latest
     fi
 
-    # Deno Runtime
+    # Deno
     if ! command -v deno &> /dev/null && [ ! -d "$HOME/.deno" ]; then
         log_info "Installing Deno..."
         curl -fsSL https://deno.land/install.sh | sh -s -- -y
@@ -621,7 +534,6 @@ if [ "$OS" != "Termux" ]; then
         deno upgrade 2>/dev/null || log_warn "Deno upgrade check failed."
     fi
 
-    # Generate dynamic shell completions for Deno
     if command -v deno &> /dev/null || [ -x "$HOME/.deno/bin/deno" ]; then
         DENO_BIN="$(command -v deno 2>/dev/null || echo "$HOME/.deno/bin/deno")"
         mkdir -p "$HOME/.zsh/completions"
@@ -630,16 +542,16 @@ if [ "$OS" != "Termux" ]; then
         "$DENO_BIN" completions bash > "$HOME/.local/share/bash-completion/completions/deno.bash" 2>/dev/null || true
     fi
 
-    # Astral uv (Fast Python Package & Tool Manager)
+    # uv
     if ! command -v uv &> /dev/null && [ ! -f "$HOME/.local/bin/uv" ]; then
-        log_info "Installing Astral uv (Python tool manager)..."
+        log_info "Installing uv..."
         curl -fsSL https://astral.sh/uv/install.sh | sh
     elif command -v uv &> /dev/null; then
         log_info "Checking for uv updates..."
         uv self update 2>/dev/null || true
     fi
 
-    # GitHub Copilot CLI helper
+    # GitHub Copilot CLI
     if command -v copilot &> /dev/null; then
         log_success "GitHub Copilot CLI is already installed."
     else
@@ -656,7 +568,7 @@ if [ "$OS" != "Termux" ]; then
         git clone -q https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"
     fi
 
-    # Rust toolchain
+    # Rust
     if command -v rustup &> /dev/null; then
         log_info "Checking for Rust updates..."
         rustup update
@@ -674,7 +586,7 @@ if [ "$OS" != "Termux" ]; then
         if ! command -v gitui &> /dev/null; then
             log_info "Installing gitui..."
             cargo install gitui --locked
-            log_success "GitUI installed successfully."
+            log_success "gitui installed."
         else
             log_success "gitui is already installed."
         fi
@@ -682,26 +594,23 @@ if [ "$OS" != "Termux" ]; then
         if ! command -v oxker &> /dev/null; then
             log_info "Installing oxker..."
             cargo install oxker --locked
-            log_success "oxker installed successfully."
+            log_success "oxker installed."
         else
             log_success "oxker is already installed."
         fi
     fi
 
-
-    # Homebrew OS abstraction
+    # Homebrew
     if ! command -v brew &> /dev/null && [ ! -d "/home/linuxbrew/.linuxbrew" ]; then
-        log_info "Installing Homebrew package manager..."
+        log_info "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     else
         log_success "Homebrew is already installed."
     fi
 fi
 
-# ------------------------------------------------------------------------------
-#  9. Shell Environments & Auto-completion Plugins
-# ------------------------------------------------------------------------------
-log_info "Bootstrapping Oh-My-Zsh & interactive shell environments..."
+# Shell configuration and plugins
+log_info "Bootstrapping Oh My Zsh and plugins..."
 
 if [ -d "$HOME/.oh-my-zsh" ]; then
     log_success "Oh My Zsh is already installed."
@@ -741,7 +650,7 @@ else
     rm -f "$HOME/.zcompdump"*
 fi
 
-# Oh My Posh shell prompt engine
+# Oh My Posh
 if command -v oh-my-posh &> /dev/null; then
     log_info "Checking for Oh My Posh updates..."
     oh-my-posh upgrade 2>/dev/null || log_warn "Oh My Posh upgrade check failed."
@@ -750,10 +659,9 @@ else
     curl -s https://ohmyposh.dev/install.sh | bash -s
 fi
 
-# Unified Global Node/NPM Packages & CLI Agents
-log_info "Configuring CLI agents and global packages..."
+# CLI agents and global packages
+log_info "Configuring CLI agents..."
 
-# CLI Agent Installation (Antigravity CLI)
 supports_agy=false
 if [ "$OS" != "Termux" ] && [ "$(uname -m)" = "x86_64" ] && grep -q -E "avx|avx2" /proc/cpuinfo 2>/dev/null; then
     supports_agy=true
@@ -763,52 +671,47 @@ if [ "$supports_agy" = true ]; then
     if [ ! -f "$HOME/.local/bin/agy" ]; then
         log_info "Installing Antigravity CLI (agy)..."
         curl -fsSL https://antigravity.google/cli/install.sh | bash
-        log_success "Antigravity CLI installed successfully."
+        log_success "Antigravity CLI installed."
     else
         log_info "Antigravity CLI (agy) is already installed."
     fi
 fi
 
-# OpenCode Installation (Non-Termux)
 if [ "$OS" != "Termux" ]; then
     if [ ! -f "$HOME/.opencode/bin/opencode" ]; then
         log_info "Installing OpenCode..."
         curl -fsSL https://opencode.ai/install | bash
-        log_success "OpenCode installed successfully."
+        log_success "OpenCode installed."
     else
         log_info "OpenCode is already installed."
     fi
 fi
 
-# Pi Coding Agent (installed via Bun)
 if command -v bun &> /dev/null; then
     if ! command -v pi &> /dev/null; then
         log_info "Installing Pi coding agent via Bun..."
         bun add -g @earendil-works/pi-coding-agent
-        log_success "Pi coding agent installed successfully."
+        log_success "Pi coding agent installed."
     else
         log_info "Updating Pi coding agent via Bun..."
         bun update -g @earendil-works/pi-coding-agent
-        log_success "Pi coding agent updated successfully."
+        log_success "Pi coding agent updated."
     fi
 elif command -v npm &> /dev/null; then
     if ! command -v pi &> /dev/null; then
         log_info "Installing Pi coding agent via npm..."
         npm i -g --ignore-scripts @earendil-works/pi-coding-agent
-        log_success "Pi coding agent installed successfully."
+        log_success "Pi coding agent installed."
     else
         log_info "Updating Pi coding agent via npm..."
         npm update -g @earendil-works/pi-coding-agent
-        log_success "Pi coding agent updated successfully."
+        log_success "Pi coding agent updated."
     fi
 else
-    log_warn "Neither bun nor npm found. Skipping global packages installation/updates."
+    log_warn "Neither bun nor npm found. Skipping global packages."
 fi
 
-# ------------------------------------------------------------------------------
-#  10. Post-Installation Cleanup & Maintenance
-# ------------------------------------------------------------------------------
-log_info "Performing post-installation package cleanup..."
+# Post-installation package cleanup
 if [ "$PACKAGER" = "pkg" ]; then
     log_info "Cleaning up Termux packages..."
     pkg autoclean -y
@@ -820,18 +723,14 @@ elif [ "$PACKAGER" = "apt" ]; then
     sudo apt-get clean
 fi
 
-# ------------------------------------------------------------------------------
-#  11. Symlink Dotfile Setup
-# ------------------------------------------------------------------------------
-log_info "Symlinking runtime configurations..."
+# Symlink dotfiles
+log_info "Symlinking configuration files..."
 link_file "$DOTFILES_DIR/config/zsh/.zshrc" "$HOME/.zshrc" ".zshrc"
 link_file "$DOTFILES_DIR/config/bash/.bashrc" "$HOME/.bashrc" ".bashrc"
 link_file "$DOTFILES_DIR/config/git/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
 link_file "$DOTFILES_DIR/config/sqlite/.sqliterc" "$HOME/.sqliterc" ".sqliterc"
 link_file "$DOTFILES_DIR/config/tmux/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
 
-# oxker reads config from $XDG_CONFIG_HOME/oxker/config.toml — ask which
-# container backend it should target (Docker or Podman's rootless socket).
 OXKER_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/oxker"
 OXKER_CONFIG_FILE="$OXKER_CONFIG_DIR/config.toml"
 mkdir -p "$OXKER_CONFIG_DIR"
@@ -859,17 +758,14 @@ else
     log_success "oxker config already exists at $OXKER_CONFIG_FILE. Use --force to reconfigure."
 fi
 
-# Alacritty reads config from $XDG_CONFIG_HOME/alacritty/alacritty.toml
 ALACRITTY_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/alacritty"
 mkdir -p "$ALACRITTY_CONFIG_DIR"
 link_file "$DOTFILES_DIR/config/alacritty/alacritty.toml" "$ALACRITTY_CONFIG_DIR/alacritty.toml" "alacritty.toml"
 
-# Zellij reads config from $XDG_CONFIG_HOME/zellij/config.kdl
 ZELLIJ_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zellij"
 mkdir -p "$ZELLIJ_CONFIG_DIR"
 link_file "$DOTFILES_DIR/config/zellij/config.kdl" "$ZELLIJ_CONFIG_DIR/config.kdl" "zellij config.kdl"
 
-# Zed Editor config (~/.config/zed/settings.json - Gitignored local file symlinked from repo)
 ZED_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zed"
 mkdir -p "$ZED_CONFIG_DIR"
 ZED_REPO_LOCAL="$DOTFILES_DIR/config/zed/settings.json"
@@ -882,7 +778,6 @@ if [ ! -f "$ZED_REPO_LOCAL" ]; then
 fi
 link_file "$ZED_REPO_LOCAL" "$ZED_CONFIG_DIR/settings.json" "zed settings.json"
 
-# Claude Code configuration (~/.claude/settings.json - Gitignored local file symlinked from repo)
 CLAUDE_DIR="$HOME/.claude"
 mkdir -p "$CLAUDE_DIR"
 CLAUDE_REPO_LOCAL="$DOTFILES_DIR/slop/claude/settings.json"
@@ -895,7 +790,6 @@ if [ ! -f "$CLAUDE_REPO_LOCAL" ]; then
 fi
 link_file "$CLAUDE_REPO_LOCAL" "$CLAUDE_DIR/settings.json" "claude settings.json"
 
-# Claude Code global profile (~/.claude.json - Gitignored local file symlinked from repo)
 CLAUDE_JSON_LOCAL="$DOTFILES_DIR/slop/claude/.claude.json"
 if [ ! -f "$CLAUDE_JSON_LOCAL" ]; then
     log_info "Initializing slop/claude/.claude.json from template..."
@@ -906,7 +800,6 @@ if [ ! -f "$CLAUDE_JSON_LOCAL" ]; then
 fi
 link_file "$CLAUDE_JSON_LOCAL" "$HOME/.claude.json" ".claude.json"
 
-# OpenCode configuration (~/.config/opencode/opencode.json - Gitignored local file symlinked from repo)
 OPENCODE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
 mkdir -p "$OPENCODE_CONFIG_DIR"
 OPENCODE_REPO_LOCAL="$DOTFILES_DIR/slop/opencode/opencode.json"
@@ -920,7 +813,6 @@ fi
 link_file "$OPENCODE_REPO_LOCAL" "$OPENCODE_CONFIG_DIR/opencode.json" "opencode opencode.json"
 link_file "$OPENCODE_REPO_LOCAL" "$OPENCODE_CONFIG_DIR/config.json" "opencode config.json"
 
-# OpenCode Desktop App State (~/.config/ai.opencode.desktop/opencode.global.dat)
 OPENCODE_DESKTOP_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ai.opencode.desktop"
 mkdir -p "$OPENCODE_DESKTOP_DIR"
 OPENCODE_DAT_LOCAL="$DOTFILES_DIR/slop/opencode/opencode.global.dat"
@@ -933,7 +825,6 @@ if [ ! -f "$OPENCODE_DAT_LOCAL" ]; then
 fi
 link_file "$OPENCODE_DAT_LOCAL" "$OPENCODE_DESKTOP_DIR/opencode.global.dat" "opencode desktop global.dat"
 
-# Antigravity (agy) configuration (~/.gemini/config/{config.json,mcp_config.json} - Gitignored local file symlinked from repo)
 GEMINI_CONFIG_DIR="$HOME/.gemini/config"
 mkdir -p "$GEMINI_CONFIG_DIR"
 
@@ -957,19 +848,13 @@ if [ ! -f "$AGY_MCP_LOCAL" ]; then
 fi
 link_file "$AGY_MCP_LOCAL" "$GEMINI_CONFIG_DIR/mcp_config.json" "antigravity mcp_config.json"
 
-# Agent Skills Global Installation & Synchronization
 link_file "$DOTFILES_DIR/slop/skills-lock.json" "$HOME/skills-lock.json" "skills-lock.json"
 
-# Restore ALL skills — community and custom alike — from skills-lock.json.
-# Custom skills (slop/skills/<name>/) are tracked in skills-lock.json the
-# same way as community ones (source: Akrista/.akrista); there is no separate
-# direct-symlink step — the skills CLI is the single mechanism for all of them.
 if [ -f "$DOTFILES_DIR/slop/skills-lock.json" ] && command -v bunx &> /dev/null; then
     log_info "Synchronizing Agent Skills via bunx skills..."
     (cd "$HOME" && bunx -y skills experimental_install 2>/dev/null || true)
 fi
 
-# Link the global AI guideline file to every tool's global instructions path
 GUIDELINES_FILE="$DOTFILES_DIR/slop/guidelines/AGENTS.md"
 if [ -f "$GUIDELINES_FILE" ]; then
     link_file "$GUIDELINES_FILE" "$HOME/.claude/CLAUDE.md" "Claude Code global CLAUDE.md"
@@ -981,7 +866,6 @@ if [ -f "$GUIDELINES_FILE" ]; then
     link_file "$GUIDELINES_FILE" "$HOME/.pi/agent/AGENTS.md" "Pi global AGENTS.md"
 fi
 
-# Symlink bat and fd for standard naming on Debian/Ubuntu
 mkdir -p "$HOME/.local/bin"
 if command -v batcat &> /dev/null && [ ! -e "$HOME/.local/bin/bat" ]; then
     ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
@@ -990,19 +874,15 @@ if command -v fdfind &> /dev/null && [ ! -e "$HOME/.local/bin/fd" ]; then
     ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
 fi
 
-# Tmux Plugin Manager & Plugin compilation logic
 if command -v tmux &> /dev/null && [ -d "$HOME/.tmux/plugins/tpm" ]; then
-    log_info "Installing/Updating tmux plugins..."
+    log_info "Installing/updating tmux plugins..."
     export TMUX_PLUGIN_MANAGER_PATH="$HOME/.tmux/plugins"
     "$HOME/.tmux/plugins/tpm/bin/install_plugins" || log_warn "Could not install tmux plugins automatically."
 
-    # Crucial CRLF formatting cleanup. Often, files cloned on Windows and mapped into Unix directories
-    # get marked with CRLF line-endings, breaking bash runtime executions.
     log_info "Fixing line endings in tmux plugins (CRLF to LF)..."
     find "$HOME/.tmux/plugins" -type f \( -name "*.tmux" -o -name "*.sh" \) -exec dos2unix {} +
 fi
 
-# Local Git Configuration (~/.gitconfig.local - Gitignored local file symlinked from repo)
 GIT_REPO_LOCAL="$DOTFILES_DIR/config/git/.gitconfig.local"
 if [ ! -f "$GIT_REPO_LOCAL" ]; then
     log_info "Initializing config/git/.gitconfig.local from template..."
@@ -1015,7 +895,6 @@ if [ ! -f "$GIT_REPO_LOCAL" ]; then
 fi
 link_file "$GIT_REPO_LOCAL" "$HOME/.gitconfig.local" ".gitconfig.local"
 
-# Local Environment Variables (~/.env.local - Gitignored local file symlinked from repo)
 ENV_REPO_LOCAL="$DOTFILES_DIR/config/env/.env.local"
 if [ ! -f "$ENV_REPO_LOCAL" ]; then
     log_info "Initializing config/env/.env.local from template..."
@@ -1028,7 +907,6 @@ if [ ! -f "$ENV_REPO_LOCAL" ]; then
 fi
 link_file "$ENV_REPO_LOCAL" "$HOME/.env.local" ".env.local"
 
-# SSH Client Configuration (~/.ssh/config with Include pattern & gitignored config.local)
 SSH_DIR="$HOME/.ssh"
 mkdir -p "$SSH_DIR" && chmod 700 "$SSH_DIR"
 SSH_REPO_LOCAL="$DOTFILES_DIR/config/ssh/config.local"
@@ -1045,30 +923,18 @@ link_file "$SSH_REPO_LOCAL" "$SSH_DIR/config.local" ".ssh/config.local"
 
 SSH_CONFIG_FILE="$SSH_DIR/config"
 if [ "$FORCE" = true ] || [ ! -f "$SSH_CONFIG_FILE" ]; then
-    log_info "Populating ~/.ssh/config with Include directives..."
+    log_info "Populating ~/.ssh/config..."
     cat << 'EOF' > "$SSH_CONFIG_FILE"
-# ==============================================================================
-#  🔑 OpenSSH Client Configuration
-# ==============================================================================
-# Local/Private host overrides (untracked)
 Include ~/.ssh/config.local
-
-# Base shared configurations from .akrista dotfiles
 Include ~/.akrista/config/ssh/config
 EOF
     chmod 600 "$SSH_CONFIG_FILE"
     log_success "~/.ssh/config configured."
 fi
 
-# ------------------------------------------------------------------------------
-#  12. Interactive Shell Integration (Default to ZSH)
-# ------------------------------------------------------------------------------
 echo ""
-echo -e "${GREEN}============================================"
-echo " 🎉 Installation completed successfully!"
-echo -e " ⚠️  Please reload your shell or restart your terminal"
-echo "    to ensure all changes and utilities are fully functional."
-echo -e "============================================${NC}"
+echo -e "${GREEN}Installation completed.${NC}"
+echo "Reload your shell or restart your terminal to apply changes."
 echo ""
 
 case "$SHELL" in
@@ -1097,11 +963,8 @@ exit
 '@
 # '
 
-# ==============================================================================
-#  PowerShell Block - Executes on Windows Environments
-# ==============================================================================
+# PowerShell installer for Windows
 
-#region 1. PowerShell Logger Helpers
 function Write-LogInfo ($message) {
     Write-Host "[INFO] $message" -ForegroundColor Blue
 }
@@ -1117,39 +980,31 @@ function Write-LogWarning ($message) {
 function Write-LogError ($message) {
     Write-Host "[ERROR] $message" -ForegroundColor Red
 }
-#endregion
 
-#region 2. Initialize Windows Setup Block
-Write-LogInfo "Initializing Windows PowerShell setup block..."
+Write-LogInfo "Initializing Windows setup..."
 
-# Command-line parameters / override parsing
 $Force = $args -contains "--force" -or $args -contains "-f"
 
 if ($Force) {
-    Write-LogInfo "Force installation flag enabled."
+    Write-LogInfo "Force flag enabled."
 }
-#endregion
 
-#region 3. Core Tools Installation (winget)
+# Tools installation (winget)
 if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
     Write-LogSuccess "Oh My Posh is already installed."
 } else {
-    Write-LogInfo "Installing Oh My Posh via Windows Package Manager (winget)..."
+    Write-LogInfo "Installing Oh My Posh..."
     winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh --source winget
 }
 
-# Astral uv (Fast Python Package & Tool Manager)
 if (Get-Command uv -ErrorAction SilentlyContinue) {
     Write-LogSuccess "Astral uv is already installed."
 } else {
-    Write-LogInfo "Installing Astral uv via official installer..."
+    Write-LogInfo "Installing Astral uv..."
     Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression
 }
-#endregion
 
-#region 4. File Linking Helper (PowerShell)
-# Helper designed to symlink repository configs into Windows active home profile directories.
-# Performs safety copy fallback if the console user lacks Admin/Dev Mode context.
+# Windows symlink helper with fallback
 function Link-File {
     param (
         [string]$SourcePath,
@@ -1160,11 +1015,10 @@ function Link-File {
         $alreadyLinked = $false
         if (Test-Path $TargetPath) {
             $item = Get-Item $TargetPath
-            # Verify if path is already symbolic link
             if ($item.Attributes -match "ReparsePoint") {
                 $target = $item.Target
                 if ($target -eq $SourcePath -or $target -eq (Get-Item $SourcePath).FullName) {
-                    Write-LogSuccess "$Name is already linked to the repository's version."
+                    Write-LogSuccess "$Name is already linked to the repository version."
                     $alreadyLinked = $true
                 }
             }
@@ -1179,7 +1033,7 @@ function Link-File {
                 try {
                     New-Item -ItemType SymbolicLink -Path $TargetPath -Value $SourcePath -ErrorAction Stop | Out-Null
                 } catch {
-                    Write-LogWarning "Failed to create symlink (requires Admin or Developer Mode). Copying file instead..."
+                    Write-LogWarning "Failed to create symlink. Copying file instead..."
                     Copy-Item $SourcePath $TargetPath -Force
                 }
             }
@@ -1194,15 +1048,14 @@ function Link-File {
         }
     }
 }
-#endregion
 
-#region 5. Clones & Workspaces Configuration
+# Repositories
 $nvimConfigPath = Join-Path $env:LOCALAPPDATA "nvim"
 if (-not (Test-Path $nvimConfigPath)) {
     Write-LogInfo "Cloning Neovim configuration..."
     git clone -b akrista https://github.com/akrista/nvim $nvimConfigPath
 } else {
-    Write-LogInfo "Neovim configuration already exists at $nvimConfigPath. Pulling updates..."
+    Write-LogInfo "Neovim configuration exists at $nvimConfigPath. Pulling updates..."
     git -C $nvimConfigPath pull
 }
 
@@ -1211,7 +1064,7 @@ if (-not (Test-Path $dotfilesPath)) {
     Write-LogInfo "Cloning .akrista repository..."
     git clone https://github.com/akrista/.akrista $dotfilesPath
 } else {
-    Write-LogInfo ".akrista repository already exists at $dotfilesPath. Pulling updates..."
+    Write-LogInfo ".akrista repository exists at $dotfilesPath. Pulling updates..."
     git -C $dotfilesPath pull
 }
 
@@ -1225,38 +1078,33 @@ if (-not (Test-Path $pwshPfPath)) {
     Write-LogInfo "Cloning pwsh-pf repository..."
     git clone https://github.com/akrista/pwsh-pf $pwshPfPath
 } else {
-    Write-LogInfo "pwsh-pf repository already exists at $pwshPfPath. Pulling updates..."
+    Write-LogInfo "pwsh-pf repository exists at $pwshPfPath. Pulling updates..."
     git -C $pwshPfPath pull
 }
-#endregion
 
-#region 6. PowerShell Profile Setup (pwsh-pf)
-Write-LogInfo "Setting up PowerShell profile and tools via pwsh-pf setup..."
+# PowerShell profile setup (pwsh-pf)
+Write-LogInfo "Running pwsh-pf setup..."
 $pwshPfSetupScript = Join-Path $pwshPfPath "setup.ps1"
 if (Test-Path $pwshPfSetupScript) {
     & $pwshPfSetupScript
 } else {
-    Write-LogInfo "Fetching and executing pwsh-pf setup script from repository..."
+    Write-LogInfo "Fetching pwsh-pf setup script..."
     Invoke-Expression (Invoke-RestMethod -Uri "https://raw.githubusercontent.com/akrista/pwsh-pf/master/setup.ps1")
 }
-#endregion
 
-#region 7. Linking Windows Configurations
-Write-LogInfo "Linking local configuration dotfiles..."
+# Configuration dotfiles
+Write-LogInfo "Linking configuration files..."
 Link-File -SourcePath (Join-Path $dotfilesPath "config/git/.gitconfig") -TargetPath (Join-Path $HOME ".gitconfig") -Name ".gitconfig"
 Link-File -SourcePath (Join-Path $dotfilesPath "config/sqlite/.sqliterc") -TargetPath (Join-Path $HOME ".sqliterc") -Name ".sqliterc"
 
-# Alacritty reads config from %APPDATA%\alacritty\alacritty.toml (Windows overlay imports the shared base)
 $alacrittyDir = Join-Path $env:APPDATA "alacritty"
 New-Item -ItemType Directory -Path $alacrittyDir -Force | Out-Null
 Link-File -SourcePath (Join-Path $dotfilesPath "config/alacritty/alacritty.windows.toml") -TargetPath (Join-Path $alacrittyDir "alacritty.toml") -Name "alacritty.toml"
 
-# Zellij reads config from %APPDATA%\zellij\config.kdl or $HOME\.config\zellij\config.kdl
 $zellijDir = Join-Path $HOME ".config\zellij"
 New-Item -ItemType Directory -Path $zellijDir -Force | Out-Null
 Link-File -SourcePath (Join-Path $dotfilesPath "config/zellij/config.kdl") -TargetPath (Join-Path $zellijDir "config.kdl") -Name "zellij config.kdl"
 
-# Zed Editor config (%APPDATA%\Zed\settings.json - Gitignored local file symlinked from repo)
 $zedDir = Join-Path $env:APPDATA "Zed"
 New-Item -ItemType Directory -Path $zedDir -Force | Out-Null
 $zedRepoLocal = Join-Path $dotfilesPath "config/zed/settings.json"
@@ -1269,7 +1117,6 @@ if (-not (Test-Path $zedRepoLocal)) {
 }
 Link-File -SourcePath $zedRepoLocal -TargetPath (Join-Path $zedDir "settings.json") -Name "zed settings.json"
 
-# Claude Code configuration (%USERPROFILE%\.claude\settings.json - Gitignored local file symlinked from repo)
 $claudeDir = Join-Path $HOME ".claude"
 New-Item -ItemType Directory -Path $claudeDir -Force | Out-Null
 $claudeRepoLocal = Join-Path $dotfilesPath "slop/claude/settings.json"
@@ -1282,7 +1129,6 @@ if (-not (Test-Path $claudeRepoLocal)) {
 }
 Link-File -SourcePath $claudeRepoLocal -TargetPath (Join-Path $claudeDir "settings.json") -Name "claude settings.json"
 
-# Claude Code global profile (%USERPROFILE%\.claude.json)
 $claudeJsonLocal = Join-Path $dotfilesPath "slop/claude/.claude.json"
 if (-not (Test-Path $claudeJsonLocal)) {
     Write-LogInfo "Initializing slop/claude/.claude.json from template..."
@@ -1293,7 +1139,6 @@ if (-not (Test-Path $claudeJsonLocal)) {
 }
 Link-File -SourcePath $claudeJsonLocal -TargetPath (Join-Path $HOME ".claude.json") -Name ".claude.json"
 
-# OpenCode configuration (%USERPROFILE%\.config\opencode\opencode.json - Gitignored local file symlinked from repo)
 $opencodeDir = Join-Path $HOME ".config\opencode"
 New-Item -ItemType Directory -Path $opencodeDir -Force | Out-Null
 $opencodeRepoLocal = Join-Path $dotfilesPath "slop/opencode/opencode.json"
@@ -1307,7 +1152,6 @@ if (-not (Test-Path $opencodeRepoLocal)) {
 Link-File -SourcePath $opencodeRepoLocal -TargetPath (Join-Path $opencodeDir "opencode.json") -Name "opencode.json"
 Link-File -SourcePath $opencodeRepoLocal -TargetPath (Join-Path $opencodeDir "config.json") -Name "opencode config.json"
 
-# OpenCode Desktop App State (%APPDATA%\ai.opencode.desktop\opencode.global.dat)
 $opencodeDesktopDir = Join-Path $env:APPDATA "ai.opencode.desktop"
 New-Item -ItemType Directory -Path $opencodeDesktopDir -Force | Out-Null
 $opencodeDatLocal = Join-Path $dotfilesPath "slop/opencode/opencode.global.dat"
@@ -1321,7 +1165,6 @@ if (-not (Test-Path $opencodeDatLocal)) {
 }
 Link-File -SourcePath $opencodeDatLocal -TargetPath (Join-Path $opencodeDesktopDir "opencode.global.dat") -Name "opencode desktop global.dat"
 
-# Antigravity (agy) configuration (%USERPROFILE%\.gemini\config\{config.json,mcp_config.json} - Gitignored local file symlinked from repo)
 $geminiConfigDir = Join-Path $HOME ".gemini\config"
 New-Item -ItemType Directory -Path $geminiConfigDir -Force | Out-Null
 
@@ -1345,14 +1188,9 @@ if (-not (Test-Path $agyMcpLocal)) {
 }
 Link-File -SourcePath $agyMcpLocal -TargetPath (Join-Path $geminiConfigDir "mcp_config.json") -Name "antigravity mcp_config.json"
 
-# Agent Skills Global Installation & Synchronization
 $skillsLockLocal = Join-Path $dotfilesPath "slop/skills-lock.json"
 Link-File -SourcePath $skillsLockLocal -TargetPath (Join-Path $HOME "skills-lock.json") -Name "skills-lock.json"
 
-# Restore ALL skills — community and custom alike — from skills-lock.json.
-# Custom skills (slop/skills/<name>/) are tracked in skills-lock.json the
-# same way as community ones (source: Akrista/.akrista); there is no separate
-# direct-symlink step — the skills CLI is the single mechanism for all of them.
 if ((Test-Path $skillsLockLocal) -and (Get-Command bunx -ErrorAction SilentlyContinue)) {
     Write-LogInfo "Synchronizing Agent Skills via bunx skills..."
     try {
@@ -1365,7 +1203,6 @@ if ((Test-Path $skillsLockLocal) -and (Get-Command bunx -ErrorAction SilentlyCon
     }
 }
 
-# Link the global AI guideline file to every tool's global instructions path
 $guidelinesFile = Join-Path $dotfilesPath "slop/guidelines/AGENTS.md"
 if (Test-Path $guidelinesFile) {
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $HOME ".claude\CLAUDE.md") -Name "Claude Code global CLAUDE.md"
@@ -1381,7 +1218,6 @@ if (Test-Path $guidelinesFile) {
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $piAgentDir "AGENTS.md") -Name "Pi global AGENTS.md"
 }
 
-# Local Git Configuration (~/.gitconfig.local - Gitignored local file symlinked from repo)
 $gitRepoLocal = Join-Path $dotfilesPath "config/git/.gitconfig.local"
 if (-not (Test-Path $gitRepoLocal)) {
     Write-LogInfo "Initializing config/git/.gitconfig.local from template..."
@@ -1394,7 +1230,6 @@ if (-not (Test-Path $gitRepoLocal)) {
 }
 Link-File -SourcePath $gitRepoLocal -TargetPath (Join-Path $HOME ".gitconfig.local") -Name ".gitconfig.local"
 
-# Local Environment Variables (~/.env.local - Gitignored local file symlinked from repo)
 $envRepoLocal = Join-Path $dotfilesPath "config/env/.env.local"
 if (-not (Test-Path $envRepoLocal)) {
     Write-LogInfo "Initializing config/env/.env.local from template..."
@@ -1407,7 +1242,6 @@ if (-not (Test-Path $envRepoLocal)) {
 }
 Link-File -SourcePath $envRepoLocal -TargetPath (Join-Path $HOME ".env.local") -Name ".env.local"
 
-# SSH Client Configuration (%USERPROFILE%\.ssh\config & gitignored config.local)
 $sshDir = Join-Path $HOME ".ssh"
 if (-not (Test-Path $sshDir)) {
     New-Item -ItemType Directory -Path $sshDir -Force | Out-Null
@@ -1429,24 +1263,12 @@ $sshConfigFile = Join-Path $sshDir "config"
 if ($Force -or (-not (Test-Path $sshConfigFile))) {
     Write-LogInfo "Populating ~/.ssh/config..."
     @"
-# ==============================================================================
-#  🔑 OpenSSH Client Configuration
-# ==============================================================================
-# Local/Private host overrides (untracked)
 Include ~/.ssh/config.local
-
-# Base shared configurations from .akrista dotfiles
 Include ~/.akrista/config/ssh/config
 "@ | Out-File -FilePath $sshConfigFile -Encoding utf8
 }
-#endregion
 
-#region 8. Finish Notification
 Write-Host ""
-Write-Host "================================================================" -ForegroundColor Green
-Write-Host " 🎉 Installation completed successfully!" -ForegroundColor Green
-Write-Host " ⚠️  Please reload your shell or restart your terminal" -ForegroundColor Yellow
-Write-Host "    to ensure all changes and utilities are fully functional." -ForegroundColor Yellow
-Write-Host "================================================================" -ForegroundColor Green
+Write-Host "Installation completed." -ForegroundColor Green
+Write-Host "Reload your shell or restart your terminal to apply changes." -ForegroundColor Yellow
 Write-Host ""
-#endregion

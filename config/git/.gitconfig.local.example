@@ -1,10 +1,3 @@
-# ==============================================================================
-#  🔒 Local Git Configuration Template (~/.gitconfig.local)
-# ==============================================================================
-#  This file is untracked by Git. Define machine-specific or work git settings,
-#  signing keys, or credentials here.
-# ==============================================================================
-
 # [user]
 #     name = My Work Name
 #     email = work@example.com

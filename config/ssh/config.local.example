@@ -1,41 +1,29 @@
-# ==============================================================================
-#  🔒 Local / Private SSH Hosts Template (~/.ssh/config.local)
-# ==============================================================================
-#  This file is untracked by Git. Copy this file to ~/.ssh/config.local to define
-#  your machine-specific servers, bastion jumps, private IPs, and key paths.
-# ==============================================================================
-
-# --- 1. Standard Server with Custom Port & Key ---
 # Host server1
 #     HostName 192.168.1.100
 #     User myuser
 #     Port 2222
 #     IdentityFile ~/.ssh/id_ed25519
 
-# --- 2. Embedded Device / Router ---
 # Host router
 #     HostName 192.168.1.1
 #     User root
 #     Port 22
 #     IdentityFile ~/.ssh/id_ed25519
 
-# --- 3. Mobile Device / Termux ---
 # Host mobile
 #     HostName 192.168.1.50
 #     User u0_a123
 #     Port 8022
 
-# --- 4. Cloud VPS with Port Forwarding / Database Tunnels ---
 # Host cloud-vps
 #     HostName 203.0.113.10
 #     User deploy
 #     Port 22
 #     IdentityFile ~/.ssh/id_ed25519
-#     LocalForward 3306 127.0.0.1:3306   # Forward remote MySQL/MariaDB locally
-#     LocalForward 5432 127.0.0.1:5432   # Forward remote PostgreSQL locally
-#     LocalForward 8080 127.0.0.1:8080   # Forward remote Web app
+#     LocalForward 3306 127.0.0.1:3306
+#     LocalForward 5432 127.0.0.1:5432
+#     LocalForward 8080 127.0.0.1:8080
 
-# --- 5. Bastion / Jump Host with Internal Network Target ---
 # Host bastion
 #     HostName 203.0.113.20
 #     User bastion-admin
@@ -47,7 +35,6 @@
 #     ProxyJump bastion
 #     IdentityFile ~/.ssh/id_rsa_job
 
-# --- 6. Legacy / Password-Only Authenticated Host ---
 # Host legacy-box
 #     HostName 198.51.100.25
 #     User admin
