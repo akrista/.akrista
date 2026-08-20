@@ -20,7 +20,7 @@
       "computedHash": "1a3a53abba9b2ad29be75d9fbe3b97db5ed0bd52df727669cc6f76dfdf571662"
     },
     "bizkit-upgrade": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/bizkit-upgrade/SKILL.md",
       "computedHash": "acd53c40700a5c399c63401f9b9ac82533fd0c482ae84e58d7530d51e42bce69"
@@ -200,13 +200,13 @@
       "computedHash": "a31502bff8a93a3f9a32a3a42ca7aea0bf832427db05d2c3df0d4d6af4b3879e"
     },
     "masonite-best-practices": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/masonite-best-practices/SKILL.md",
       "computedHash": "109d4fb377abe98b1540b1057d8cea9254eaaabcd396b347a585ee63a975ba24"
     },
     "masonite-permission-development": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/masonite-permission-development/SKILL.md",
       "computedHash": "8910614303331339280561e270b6b534e55f14b59f0c9b069f67629dca80d407"
@@ -266,31 +266,31 @@
       "computedHash": "d52c86d4efaa6c1af50e00ba0626dfc2a8948dd2665f7aa3cb472d0ccec21436"
     },
     "rockery-daily-note": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-daily-note/SKILL.md",
       "computedHash": "d64bff2aeff146dab2e831e5edef6963ea987f9b504e997cc60b04e6c4e5696e"
     },
     "rockery-idea": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-idea/SKILL.md",
       "computedHash": "e2d81090a3159920ae114ba7199de130eda6c33521ce5f4ce5c08a14f9b60db5"
     },
     "rockery-project": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-project/SKILL.md",
       "computedHash": "8d321d9d3b7f9d1ffec6ad9bceac47f8346e7f6e46c9169c907629dfe722f172"
     },
     "rockery-task-manager": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-task-manager/SKILL.md",
       "computedHash": "e08023c89abe4d6360679bcdf605f25ca2052bafa8c8549473f4acba8ee1d8b4"
     },
     "rockery-topic": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-topic/SKILL.md",
       "computedHash": "02043e730000fd53f45ca7f0c9c087a9f379581ec0e374660837b2c5241d8ccf"
@@ -356,22 +356,22 @@
       "computedHash": "1d1fa932791cc8ea1cb6db39437c29585c22579278a61ee3931856edc44ee750"
     },
     "tiger-style": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/tiger-style/SKILL.md",
       "computedHash": "29858e989c662d75756cbd7e6efd8f8a4913e63c6068ddc40908f8ebd72fde4a"
     },
     "tsql-data-exploration": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/tsql-data-exploration/SKILL.md",
-      "computedHash": "2d93bc54c70d273cc4b64768d874056d43cc700681c8c801914b8e7175205df0"
+      "computedHash": "649becac669b6c18ef47f9e0d13d042833e1d93ae93a0c38aa2d6700e2c4b7d3"
     },
     "tsql-development": {
-      "source": "Akrista/.akrista",
+      "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/tsql-development/SKILL.md",
-      "computedHash": "b994c1d5a91aed4e030a49b37d9907d4fcef3868b5e198343aa3b853435eb556"
+      "computedHash": "a09a8089e19800da7c96ca4841c001d973bb76642d66fc556c666a36cfce1d74"
     },
     "typst-creator": {
       "source": "buYoung/skills",
