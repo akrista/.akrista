@@ -139,7 +139,7 @@ link_file() {
         rm -f "$target_file"
     fi
 
-    [ ! -f "$source_file" ] && log_warn "Repository's $name not found at $source_file" && return
+    [ ! -e "$source_file" ] && log_warn "Repository's $name not found at $source_file" && return
 
     if [ -L "$target_file" ] && [ "$(readlink "$target_file")" = "$source_file" ]; then
         log_success "$name is already linked to the repository version."
@@ -462,6 +462,45 @@ else
     git clone https://github.com/akrista/.akrista "$DOTFILES_DIR"
 fi
 [ -d "$DOTFILES_DIR" ] && touch "$DOTFILES_DIR/.last_update_check" 2>/dev/null
+
+FIREFOX_DIR="$HOME/Projects/notakrista/.firefox"
+if [ -d "$FIREFOX_DIR/.git" ]; then
+    log_info ".firefox repository exists at $FIREFOX_DIR. Pulling updates..."
+    git -C "$FIREFOX_DIR" pull
+else
+    log_info "Cloning .firefox repository..."
+    if [ -d "$FIREFOX_DIR" ]; then
+        log_warn "$FIREFOX_DIR exists but is not a git repository. Backing up..."
+        rm -rf "${FIREFOX_DIR}.bak"
+        mv "$FIREFOX_DIR" "${FIREFOX_DIR}.bak"
+    fi
+    mkdir -p "$(dirname "$FIREFOX_DIR")"
+    git clone -b akrista https://github.com/akrista/.firefox "$FIREFOX_DIR"
+fi
+
+# Deploy the Firefox Mod Blur customization into whichever profile Firefox
+# actually launches into (the profiles.ini [Install...] Default= entry),
+# not a hardcoded profile hash.
+FF_PROFILES_INI="$HOME/.mozilla/firefox/profiles.ini"
+if [ -d "$FIREFOX_DIR" ] && [ -f "$FF_PROFILES_INI" ]; then
+    FF_INSTALL_REL=$(awk -F= '/^\[Install/{flag=1; next} /^\[/{flag=0} flag && /^Default=/{print $2; exit}' "$FF_PROFILES_INI")
+    if [ -n "$FF_INSTALL_REL" ]; then
+        FF_PROFILE_DIR="$HOME/.mozilla/firefox/$FF_INSTALL_REL"
+        mkdir -p "$FF_PROFILE_DIR/chrome"
+        link_file "$FIREFOX_DIR/user.js" "$FF_PROFILE_DIR/user.js" "Firefox user.js"
+        for item in "$FIREFOX_DIR"/*; do
+            base="$(basename "$item")"
+            case "$base" in
+                "EXTRA MODS"|README.md|user.js) continue ;;
+            esac
+            link_file "$item" "$FF_PROFILE_DIR/chrome/$base" "Firefox chrome/$base"
+        done
+    else
+        log_warn "Could not determine the active Firefox profile from $FF_PROFILES_INI. Skipping Firefox customization."
+    fi
+else
+    log_warn "No Firefox profile found. Skipping Firefox customization."
+fi
 
 # Environment-specific configuration
 if [ "$OS" = "Termux" ]; then
@@ -1043,7 +1082,7 @@ function Link-File {
                     New-Item -ItemType SymbolicLink -Path $TargetPath -Value $SourcePath -ErrorAction Stop | Out-Null
                 } catch {
                     Write-LogWarning "Failed to create symlink. Copying file instead..."
-                    Copy-Item $SourcePath $TargetPath -Force
+                    Copy-Item $SourcePath $TargetPath -Force -Recurse
                 }
             }
         } else {
@@ -1052,7 +1091,7 @@ function Link-File {
                 New-Item -ItemType SymbolicLink -Path $TargetPath -Value $SourcePath -ErrorAction Stop | Out-Null
             } catch {
                 Write-LogWarning "Failed to create symlink. Copying file instead..."
-                Copy-Item $SourcePath $TargetPath -Force
+                Copy-Item $SourcePath $TargetPath -Force -Recurse
             }
         }
     }
@@ -1080,6 +1119,48 @@ if (-not (Test-Path $dotfilesPath)) {
 if (Test-Path $dotfilesPath) {
     $checkFile = Join-Path $dotfilesPath ".last_update_check"
     New-Item -ItemType File -Path $checkFile -Force | Out-Null
+}
+
+$firefoxDir = Join-Path $HOME "Projects\notakrista\.firefox"
+if (-not (Test-Path $firefoxDir)) {
+    Write-LogInfo "Cloning .firefox repository..."
+    New-Item -ItemType Directory -Path (Split-Path $firefoxDir -Parent) -Force | Out-Null
+    git clone -b akrista https://github.com/akrista/.firefox $firefoxDir
+} else {
+    Write-LogInfo ".firefox repository exists at $firefoxDir. Pulling updates..."
+    git -C $firefoxDir pull
+}
+
+# Deploy the Firefox Mod Blur customization into whichever profile Firefox
+# actually launches into (the profiles.ini [Install...] Default= entry),
+# not a hardcoded profile hash.
+$ffProfilesIni = Join-Path $env:APPDATA "Mozilla\Firefox\profiles.ini"
+if ((Test-Path $firefoxDir) -and (Test-Path $ffProfilesIni)) {
+    $ffInstallRel = $null
+    $inInstallSection = $false
+    foreach ($line in Get-Content $ffProfilesIni) {
+        if ($line -match '^\[Install') { $inInstallSection = $true; continue }
+        if ($line -match '^\[') { $inInstallSection = $false; continue }
+        if ($inInstallSection -and $line -match '^Default=(.*)$') {
+            $ffInstallRel = $Matches[1]
+            break
+        }
+    }
+    if ($ffInstallRel) {
+        $ffProfileDir = Join-Path (Split-Path $ffProfilesIni -Parent) $ffInstallRel
+        $ffChromeDir = Join-Path $ffProfileDir "chrome"
+        New-Item -ItemType Directory -Path $ffChromeDir -Force | Out-Null
+        Link-File -SourcePath (Join-Path $firefoxDir "user.js") -TargetPath (Join-Path $ffProfileDir "user.js") -Name "Firefox user.js"
+        Get-ChildItem -Path $firefoxDir | Where-Object {
+            $_.Name -notin @("EXTRA MODS", "README.md", "user.js", ".git")
+        } | ForEach-Object {
+            Link-File -SourcePath $_.FullName -TargetPath (Join-Path $ffChromeDir $_.Name) -Name "Firefox chrome/$($_.Name)"
+        }
+    } else {
+        Write-LogWarning "Could not determine the active Firefox profile from $ffProfilesIni. Skipping Firefox customization."
+    }
+} else {
+    Write-LogWarning "No Firefox profile found. Skipping Firefox customization."
 }
 
 $pwshPfPath = Join-Path $HOME ".pwsh-pf"

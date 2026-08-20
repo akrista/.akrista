@@ -4,10 +4,6 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "model": "sonnet[1m]",
-  "statusLine": {
-    "type": "command",
-    "command": "claudeline"
-  },
   "enabledPlugins": {
     "atlassian@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
@@ -16,7 +12,6 @@
     "skill-creator@claude-plugins-official": true,
     "pr-review-toolkit@claude-plugins-official": true,
     "claude-code-wakatime@wakatime": true,
-    "claudeline@claudeline": true,
     "notion@claude-plugins-official": true,
     "ponytail@ponytail": true
   },
@@ -25,12 +20,6 @@
       "source": {
         "source": "git",
         "url": "https://github.com/wakatime/claude-code-wakatime.git"
-      }
-    },
-    "claudeline": {
-      "source": {
-        "source": "github",
-        "repo": "fredrikaverpil/claudeline"
       }
     },
     "ponytail": {

@@ -73,7 +73,7 @@ To prevent private credentials (API keys, SSH hosts, proxy URLs, database connec
 
 The `slop/` module centralizes configurations for terminal-native and autonomous AI coding agents:
 
-* **Claude Code (`slop/claude/`)**: Configured with custom marketplaces (`wakatime`, `claudeline`, `ponytail`, `last30days-skill`), enabled plugins, an optional custom `ANTHROPIC_BASE_URL` proxy, and dark fullscreen TUI.
+* **Claude Code (`slop/claude/`)**: Configured with custom marketplaces (`wakatime`, `ponytail`, `last30days-skill`), enabled plugins, an optional custom `ANTHROPIC_BASE_URL` proxy, and dark fullscreen TUI.
 * **OpenCode (`slop/opencode/`)**: Configured with active plugins (`opencode-wakatime`, `@tarquinen/opencode-dcp`, `@dietrichgebert/ponytail`) and local/remote MCP definitions.
 * **Shared MCP Catalog (`slop/mcp/`)**: Reference catalog for stdio/SSE servers (Context7, DBHub, Astro, Svelte, Shadcn, NextJs, Metabase, Stitch).
 * **Pi Coding Agent (`slop/pi/`)**: Terminal-native coding agent configurations.
