@@ -79,10 +79,7 @@ if command -v zoxide >/dev/null 2>&1; then
   [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Zoxide"
 fi
 
-# Bun
-if [ -s "$HOME/.bun/_bun" ]; then
-  source "$HOME/.bun/_bun"
-fi
+
 
 # Load prompt settings
 if [ -f "$ZDOTDIR/.zsh_prompt" ]; then
@@ -131,3 +128,6 @@ if [ -d "$HOME/.local/share/zsh/site-functions" ]; then
   fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
 fi
 autoload -Uz compinit && compinit
+
+# bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
