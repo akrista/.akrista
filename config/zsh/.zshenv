@@ -20,6 +20,17 @@ if [ -d "/home/linuxbrew/.linuxbrew" ]; then
   [[ -n "$ZSH_STARTUP_DEBUG" ]] && declare -f _log_time >/dev/null && _log_time "After Brew"
 fi
 
+# Source machine-specific local environment if present
+if [ -f "$HOME/.env.local" ]; then
+  source "$HOME/.env.local"
+fi
+
+# Go binary path
+path=(/usr/local/go/bin $path)
+if command -v go >/dev/null 2>&1; then
+  path=($(go env GOPATH)/bin $path)
+fi
+
 # Set up default paths
 path=(
   $HOME/bin
@@ -32,10 +43,10 @@ path=(
 export BUN_INSTALL="$HOME/.bun"
 path=($BUN_INSTALL/bin $path)
 
+# Fast Node Manager (fnm)
+path=($HOME/.local/share/fnm $path)
+
 # Cargo, OpenCode, and Composer paths
 path=($HOME/.cargo/bin $path)
 path=($HOME/.opencode/bin $path)
 path=($HOME/.composer/vendor/bin $path)
-
-# Node Version Manager path
-export NVM_DIR="$HOME/.nvm"

@@ -1,0 +1,5 @@
+import = ["~/.akrista/config/alacritty/alacritty.toml"]
+
+[terminal.shell]
+program = "pwsh"
+args = ["--NoLogo"]

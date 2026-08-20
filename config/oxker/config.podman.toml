@@ -1,0 +1,116 @@
+# oxker config file — https://github.com/mrjackwills/oxker
+# Colors below are the standard Gruvbox Dark palette.
+# Points at Podman's rootless socket instead of Docker's. __OXKER_UID__ is
+# replaced with the real `id -u` by install.ps1 at install time — this file is
+# a template, not meant to be symlinked as-is. Requires the socket enabled:
+#   systemctl --user enable --now podman.socket
+host = "/run/user/__OXKER_UID__/podman/podman.sock"
+
+#################
+# Gruvbox Dark  #
+#################
+
+[colors.headers_bar]
+background = "#504945"
+loading_spinner = "#fabd2f"
+text = "#ebdbb2"
+text_selected = "#fe8019"
+
+[colors.borders]
+selected = "#fe8019"
+unselected = "#665c54"
+
+[colors.containers]
+icon = "#fabd2f"
+background = "#282828"
+text = "#83a598"
+text_rx = "#b8bb26"
+text_tx = "#fb4934"
+
+[colors.logs]
+background = "#1d2021"
+text = "#ebdbb2"
+
+[colors.container_state]
+dead = "#fb4934"
+exited = "#cc241d"
+paused = "#fabd2f"
+removing = "#fe8019"
+restarting = "#8ec07c"
+running_healthy = "#b8bb26"
+running_unhealthy = "#fabd2f"
+unknown = "#928374"
+
+[colors.filter]
+background = "#282828"
+text = "#a89984"
+selected_filter_background = "#504945"
+selected_filter_text = "#fbf1c7"
+highlight = "#fe8019"
+
+[colors.log_search]
+background = "#282828"
+text = "#a89984"
+button_text = "#1d2021"
+highlight = "#fe8019"
+
+[colors.commands]
+background = "#282828"
+pause = "#fabd2f"
+restart = "#d3869b"
+stop = "#fb4934"
+delete = "#928374"
+resume = "#83a598"
+start = "#b8bb26"
+
+[colors.chart_cpu]
+background = "#282828"
+border = "#665c54"
+title = "#b8bb26"
+max = "#fe8019"
+points = "#fabd2f"
+y_axis = "#a89984"
+
+[colors.chart_memory]
+background = "#282828"
+border = "#665c54"
+title = "#83a598"
+max = "#fe8019"
+points = "#8ec07c"
+y_axis = "#a89984"
+
+[colors.chart_bandwidth]
+background = "#282828"
+border = "#665c54"
+max_rx = "#b8bb26"
+max_tx = "#fb4934"
+points_rx = "#b8bb26"
+points_tx = "#fb4934"
+title_tx = "#fb4934"
+title_rx = "#b8bb26"
+y_axis = "#a89984"
+
+[colors.chart_ports]
+background = "#282828"
+border = "#665c54"
+title = "#b8bb26"
+headings = "#fabd2f"
+text = "#ebdbb2"
+
+[colors.popup_help]
+background = "#504945"
+text = "#ebdbb2"
+text_highlight = "#fe8019"
+
+[colors.popup_info]
+background = "#458588"
+text = "#fbf1c7"
+
+[colors.popup_delete]
+background = "#fbf1c7"
+text = "#282828"
+text_highlight = "#fb4934"
+
+[colors.popup_error]
+background = "#cc241d"
+text = "#fbf1c7"

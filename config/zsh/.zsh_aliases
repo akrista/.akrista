@@ -21,9 +21,11 @@ if command -v nvim >/dev/null 2>&1; then
   alias nv="nvim"
   alias v="nvim"
   alias ezsh="nvim ~/.zshrc"
+  alias ebash="nvim ~/.bashrc"
 fi
 
 alias uzsh="source ~/.zshrc"
+alias ubash="source ~/.bashrc"
 
 # --- Termux-Specific Enhancements ---
 if [ -n "$TERMUX_VERSION" ]; then

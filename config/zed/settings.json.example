@@ -1,0 +1,153 @@
+// Zed settings template (.akrista)
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "session": {
+    "trust_all_worktrees": true
+  },
+  "diff_view_style": "unified",
+  "context_servers": {
+    "Home <DATABASE_NAME>": {
+      "enabled": false,
+      "remote": false,
+      "command": "dbhub",
+      "args": [
+        "--transport",
+        "stdio",
+        "--dsn",
+        "sqlserver://<user>:<password>@<host>:1433/<database>"
+      ]
+    },
+    "astro": {
+      "enabled": false,
+      "url": "https://mcp.docs.astro.build/mcp"
+    },
+    "stitch": {
+      "enabled": false,
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "<YOUR_GOOGLE_API_KEY>"
+      }
+    },
+    "svelte": {
+      "enabled": false,
+      "url": "https://mcp.svelte.dev/mcp"
+    },
+    "context7": {
+      "enabled": true,
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "<YOUR_CONTEXT7_API_KEY>"
+      }
+    }
+  },
+  "soft_wrap": "editor_width",
+  "cli_default_open_behavior": "existing_window",
+  "minimap": {
+    "show": "always",
+    "thumb": "always",
+    "thumb_border": "left_open",
+    "current_line_highlight": "all"
+  },
+  "agent_servers": {
+    "pi-acp": {
+      "type": "registry"
+    },
+    "opencode": {
+      "type": "registry"
+    },
+    "github-copilot-cli": {
+      "type": "registry"
+    },
+    "claude-acp": {
+      "default_config_options": {
+        "mode": "bypassPermissions"
+      },
+      "type": "registry"
+    }
+  },
+  "edit_predictions": {
+    "provider": "copilot"
+  },
+  "agent": {
+    "tool_permissions": {
+      "default": "allow",
+      "tools": {}
+    },
+    "dock": "left",
+    "favorite_models": [],
+    "model_parameters": [],
+    "play_sound_when_agent_done": "always",
+    "default_profile": "write",
+    "default_model": {
+      "effort": "medium",
+      "enable_thinking": true,
+      "provider": "google",
+      "model": "gemini-3.5-flash"
+    }
+  },
+  "icon_theme": "Zed (Default)",
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "project_panel": {
+    "dock": "right",
+    "entry_spacing": "standard"
+  },
+  "outline_panel": {
+    "dock": "right"
+  },
+  "collaboration_panel": {
+    "dock": "right"
+  },
+  "git_panel": {
+    "group_by": "staging",
+    "tree_view": true,
+    "dock": "right"
+  },
+  "base_keymap": "VSCode",
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": "Gruvbox Dark Hard",
+  "terminal": {
+    "font_family": "MesloLGS NF"
+  },
+  "buffer_line_height": { "custom": 1.4 },
+  "buffer_font_family": "MesloLGS NF",
+  "buffer_font_features": {
+    "calt": false
+  },
+  "buffer_font_weight": 300,
+  "toolbar": {
+    "breadcrumbs": false,
+    "quick_actions": false,
+    "selections_menu": true
+  },
+  "tabs": {
+    "file_icons": true
+  },
+  "git": {
+    "blame": {
+      "show_avatar": false
+    },
+    "inline_blame": {
+      "show_commit_summary": true,
+      "enabled": true
+    }
+  },
+  "format_on_save": "off",
+  "hard_tabs": true,
+  "tab_size": 4,
+  "current_line_highlight": "none",
+  "double_click_in_multibuffer": "open",
+  "show_whitespaces": "all",
+  "show_completions_on_input": true,
+  "show_completion_documentation": true,
+  "when_closing_with_no_tabs": "keep_window_open"
+}

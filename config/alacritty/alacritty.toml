@@ -74,9 +74,8 @@ white = "#FCFCFA"
 save_to_clipboard = true
 semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
 
-[terminal.shell]
-program = "pwsh"
-args = ["--NoLogo"]
+[terminal]
+osc52 = "CopyPaste"
 
 [mouse]
 hide_when_typing = false

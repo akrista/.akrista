@@ -119,6 +119,10 @@ if [ -d "$HOME/.zsh/zsh-completions/src" ]; then
   fpath=("$HOME/.zsh/zsh-completions/src" $fpath)
 fi
 
+if [ -d "$HOME/.zsh/completions" ]; then
+  fpath=("$HOME/.zsh/completions" $fpath)
+fi
+
 [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Oh My Zsh"
 source $ZSH/oh-my-zsh.sh
 [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Oh My Zsh"
@@ -163,23 +167,6 @@ if command -v zoxide >/dev/null 2>&1; then
   [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Zoxide"
 fi
 
-# NVM Lazy Loading
-if [ -s "$NVM_DIR/nvm.sh" ]; then
-  lazy_nvm() {
-    unset -f nvm node npm npx yarn pnpm corepack
-    [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Lazy Loading NVM"
-    source "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
-    [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "NVM Loaded (Lazy)"
-  }
-
-  for cmd in nvm node npm npx yarn pnpm corepack; do
-    eval "$cmd() { lazy_nvm; $cmd \"\$@\"; }"
-  done
-else
-  [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "NVM not found"
-fi
-
 # Bun
 if [ -s "$HOME/.bun/_bun" ]; then
   source "$HOME/.bun/_bun"
@@ -210,3 +197,25 @@ fi
 if declare -f _check_update >/dev/null; then
   _check_update
 fi
+
+
+
+# Fast Node Manager (fnm)
+if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env --use-on-cd)"
+fi
+
+# Deno
+if [ -s "$HOME/.deno/env" ]; then
+  . "$HOME/.deno/env"
+fi
+
+# Lerd
+if [ -d "$HOME/.local/share/lerd/bin" ]; then
+  export PATH="$HOME/.local/share/lerd/bin:$PATH"
+fi
+
+if [ -d "$HOME/.local/share/zsh/site-functions" ]; then
+  fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
+fi
+autoload -Uz compinit && compinit
