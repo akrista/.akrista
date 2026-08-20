@@ -287,11 +287,20 @@ install_debian_ubuntu_packages() {
         sudo apt-get remove -y neovim
     fi
 
+    log_info "Enabling contrib repository in apt sources..."
+    if [ -f /etc/apt/sources.list ]; then
+        sudo sed -i 's/^deb \(.*\) main$/deb \1 main contrib non-free-firmware/' /etc/apt/sources.list
+        sudo sed -i 's/^deb-src \(.*\) main$/deb-src \1 main contrib non-free-firmware/' /etc/apt/sources.list
+    fi
+
     log_info "Updating system package lists and upgrading packages..."
     sudo apt update -y && sudo apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
     log_info "Installing development dependencies and CLI tools..."
     sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli git xclip wl-clipboard curl wget unzip zip tar rsync jq socat lsof p7zip-full gnupg mosh axel zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala locales dos2unix btop alacritty
+
+    log_info "Installing Android tools (adb, scrcpy)..."
+    sudo apt install -y adb scrcpy || log_warn "Some Android tools may not be available in your repo. Install scrcpy via snap or from GitHub releases if needed."
 
     log_info "Configuring UTF-8 locales..."
     if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
