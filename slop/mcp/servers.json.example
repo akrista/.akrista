@@ -51,7 +51,7 @@
     },
     "metabase": {
       "type": "remote",
-      "url": "https://metabase.notakrista.com/api/metabase-mcp"
+      "url": "${METABASE_MCP_URL}"
     }
   }
 }

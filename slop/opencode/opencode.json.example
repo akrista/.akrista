@@ -9,7 +9,7 @@
   "provider": {
     "openai": {
       "options": {
-        "baseURL": "https://claude.notakrista.com/"
+        "baseURL": "${ANTHROPIC_BASE_URL}"
       }
     }
   },
@@ -54,7 +54,7 @@
     "Metabase": {
       "type": "remote",
       "enabled": false,
-      "url": "https://metabase.notakrista.com/api/metabase-mcp"
+      "url": "${METABASE_MCP_URL}"
     }
   }
 }
