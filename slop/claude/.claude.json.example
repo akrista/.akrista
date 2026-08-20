@@ -1,0 +1,9 @@
+{
+  "installMethod": "native",
+  "autoUpdates": false,
+  "theme": "dark",
+  "customApiKeyResponses": {
+    "approved": []
+  },
+  "trustedDirectories": []
+}

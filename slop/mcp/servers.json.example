@@ -1,0 +1,57 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "<YOUR_CONTEXT7_API_KEY>"
+      }
+    },
+    "stitch": {
+      "type": "remote",
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "${GOOGLE_STITCH_API_KEY}"
+      }
+    },
+    "dbhub": {
+      "type": "local",
+      "command": "dbhub",
+      "args": [
+        "--transport",
+        "stdio",
+        "--dsn",
+        "${DATABASE_URL}"
+      ]
+    },
+    "astro": {
+      "type": "remote",
+      "url": "https://mcp.docs.astro.build/mcp"
+    },
+    "svelte": {
+      "type": "remote",
+      "url": "https://mcp.svelte.dev/mcp"
+    },
+    "shadcn": {
+      "type": "local",
+      "command": "bunx",
+      "args": [
+        "-y",
+        "shadcn@latest",
+        "mcp"
+      ]
+    },
+    "nextjs": {
+      "type": "local",
+      "command": "bunx",
+      "args": [
+        "-y",
+        "next-devtools-mcp@latest"
+      ]
+    },
+    "metabase": {
+      "type": "remote",
+      "url": "https://metabase.notakrista.com/api/metabase-mcp"
+    }
+  }
+}

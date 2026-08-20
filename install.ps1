@@ -299,7 +299,7 @@ install_termux_packages() {
     fi
 
     log_info "Installing comprehensive development suite..."
-    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite php composer gh lua-language-server stylua dos2unix glibc-runner
+    pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite gh lua-language-server stylua dos2unix glibc-runner
 
     # Verify key utilities are functional and repair dependencies if broken
     if ! curl --version &>/dev/null || ! git --version &>/dev/null; then
@@ -344,7 +344,7 @@ install_debian_ubuntu_packages() {
     sudo apt update -y && sudo apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
     log_info "Installing development dependencies and CLI tools..."
-    sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli git xclip curl wget unzip zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala locales dos2unix btop
+    sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli git xclip wl-clipboard curl wget unzip zip tar rsync jq socat lsof p7zip-full gnupg mosh axel zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala locales dos2unix btop alacritty
 
     log_info "Configuring UTF-8 locales..."
     if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
@@ -412,50 +412,39 @@ install_debian_ubuntu_packages() {
         log_info "GitHub CLI (gh) is already installed."
     fi
 
-    # PHP 8.5 installation (Sury repository)
-    if ! pkg_is_installed php8.5; then
-        log_info "Setting up packages.sury.org/php repository..."
-        sudo apt update
-        sudo apt install -y lsb-release ca-certificates curl
-        sudo curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
-        sudo dpkg -i /tmp/debsuryorg-archive-keyring.deb
-        sudo tee /etc/apt/sources.list.d/php.sources <<EOF
-Types: deb
-URIs: https://packages.sury.org/php/
-Suites: $(lsb_release -sc)
-Components: main
-Signed-By: /usr/share/keyrings/debsuryorg-archive-keyring.gpg
-EOF
-        sudo apt update
-        log_info "Installing PHP 8.5..."
-        sudo apt install -y php8.5
-        log_success "PHP 8.5 installed successfully."
-    else
-        log_info "PHP 8.5 is already installed."
-    fi
-
-    # Composer installation
-    if ! command -v composer &> /dev/null; then
-        log_info "Installing Composer..."
-        TEMP_DIR=$(mktemp -d)
-        (
-            cd "$TEMP_DIR" || exit 1
-            php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-            php -r "if (hash_file('sha384', 'composer-setup.php') === 'c8b085408188070d5f52bcfe4ecfbee5f727afa458b2573b8eaaf77b3419b0bf2768dc67c86944da1544f06fa544fd47') { echo 'Installer verified'.PHP_EOL; } else { echo 'Installer corrupt'.PHP_EOL; unlink('composer-setup.php'); exit(1); }"
-            php composer-setup.php
-            php -r "unlink('composer-setup.php');"
-            sudo mv composer.phar /usr/local/bin/composer
-        )
-        rm -rf "$TEMP_DIR"
-        log_success "Composer installed successfully."
-    else
-        log_info "Checking for Composer updates..."
-        if [ "$OS" = "Termux" ]; then
-            composer self-update --quiet 2>/dev/null || log_warn "Composer self-update failed."
-        else
-            sudo composer self-update --quiet 2>/dev/null || log_warn "Composer self-update failed."
+    # Docker daemon configuration
+    if [ -f "$DOTFILES_DIR/config/docker/daemon.json" ]; then
+        if command -v docker &> /dev/null || [ -d "/etc/docker" ]; then
+            log_info "Configuring Docker daemon settings (/etc/docker/daemon.json)..."
+            sudo mkdir -p /etc/docker
+            if [ ! -f /etc/docker/daemon.json ] || [ "$FORCE" = true ]; then
+                sudo cp "$DOTFILES_DIR/config/docker/daemon.json" /etc/docker/daemon.json
+                log_success "Docker daemon.json configured."
+            fi
         fi
     fi
+
+    # OpenSSH Server daemon hardening (Debian/Ubuntu)
+    if [ -f "$DOTFILES_DIR/config/sshd/99-hardening.conf" ]; then
+        if [ -d "/etc/ssh/sshd_config.d" ] || command -v sshd &> /dev/null; then
+            log_info "Deploying SSHD hardening configuration (/etc/ssh/sshd_config.d/99-hardening.conf)..."
+            sudo mkdir -p /etc/ssh/sshd_config.d
+            sudo cp "$DOTFILES_DIR/config/sshd/99-hardening.conf" /etc/ssh/sshd_config.d/99-hardening.conf
+            sudo chmod 644 /etc/ssh/sshd_config.d/99-hardening.conf
+
+            # Validate syntax before reloading service
+            if sudo sshd -t 2>/dev/null; then
+                log_success "SSHD configuration validated successfully."
+                if systemctl is-active --quiet ssh 2>/dev/null; then
+                    sudo systemctl reload ssh 2>/dev/null || true
+                fi
+            else
+                log_warn "SSHD configuration test failed. Reverting 99-hardening.conf..."
+                sudo rm -f /etc/ssh/sshd_config.d/99-hardening.conf
+            fi
+        fi
+    fi
+
 }
 
 # --- 5.3 FEDORA INSTALLER ---
@@ -570,27 +559,26 @@ elif [ "$IS_PROOT_DISTRO" = true ]; then
     echo "   curl -fsSL https://github.com/akrista/.akrista/raw/master/install.ps1 | bash"
     echo -e "====================================================${NC}"
     echo ""
+else
+    # Install MesloLGS NF fonts for desktop terminal emulators (alacritty/ghostty)
+    MESLO_FONT_DIR="$HOME/.local/share/fonts/MesloLGS NF"
+    if [ ! -f "$MESLO_FONT_DIR/MesloLGS NF Regular.ttf" ]; then
+        log_info "Downloading and installing MesloLGS NF fonts..."
+        mkdir -p "$MESLO_FONT_DIR"
+        curl -fsSL -o "$MESLO_FONT_DIR/MesloLGS NF Regular.ttf" "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf"
+        curl -fsSL -o "$MESLO_FONT_DIR/MesloLGS NF Bold.ttf" "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf"
+        curl -fsSL -o "$MESLO_FONT_DIR/MesloLGS NF Italic.ttf" "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf"
+        curl -fsSL -o "$MESLO_FONT_DIR/MesloLGS NF Bold Italic.ttf" "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf"
+        command -v fc-cache &> /dev/null && fc-cache -f "$MESLO_FONT_DIR"
+        log_success "MesloLGS NF fonts installed."
+    else
+        log_success "MesloLGS NF fonts are already installed."
+    fi
 fi
 
 # Multi-platform development configurations (non-Termux architectures)
 if [ "$OS" != "Termux" ]; then
     log_info "Setting up multi-platform runtime engines..."
-
-    # Node Version Manager (NVM)
-    if [ ! -d "$HOME/.nvm" ]; then
-        log_info "Installing NVM..."
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
-    else
-        log_success "NVM is already installed."
-    fi
-    export NVM_DIR="$HOME/.nvm"
-    if [ -s "$NVM_DIR/nvm.sh" ]; then
-        . "$NVM_DIR/nvm.sh"
-        log_info "Ensuring Node.js LTS is installed and configured..."
-        nvm install --lts
-        nvm use --lts
-        nvm alias default 'lts/*'
-    fi
 
     # Bun Runtime
     if command -v bun &> /dev/null; then
@@ -607,6 +595,48 @@ if [ "$OS" != "Termux" ]; then
     else
         log_info "Installing Bun..."
         curl -fsSL https://bun.sh/install | bash
+    fi
+
+    # Fast Node Manager (fnm)
+    if ! command -v fnm &> /dev/null && [ ! -d "$HOME/.local/share/fnm" ]; then
+        log_info "Installing Fast Node Manager (fnm)..."
+        curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
+    else
+        log_success "fnm is already installed."
+    fi
+    export PATH="$HOME/.local/share/fnm:$PATH"
+    if command -v fnm &> /dev/null; then
+        eval "$(fnm env)"
+        log_info "Ensuring Node.js LTS is installed and configured via fnm..."
+        fnm install --lts
+        fnm default lts-latest
+    fi
+
+    # Deno Runtime
+    if ! command -v deno &> /dev/null && [ ! -d "$HOME/.deno" ]; then
+        log_info "Installing Deno..."
+        curl -fsSL https://deno.land/install.sh | sh -s -- -y
+    elif command -v deno &> /dev/null; then
+        log_info "Checking for Deno updates..."
+        deno upgrade 2>/dev/null || log_warn "Deno upgrade check failed."
+    fi
+
+    # Generate dynamic shell completions for Deno
+    if command -v deno &> /dev/null || [ -x "$HOME/.deno/bin/deno" ]; then
+        DENO_BIN="$(command -v deno 2>/dev/null || echo "$HOME/.deno/bin/deno")"
+        mkdir -p "$HOME/.zsh/completions"
+        "$DENO_BIN" completions zsh > "$HOME/.zsh/completions/_deno" 2>/dev/null || true
+        mkdir -p "$HOME/.local/share/bash-completion/completions"
+        "$DENO_BIN" completions bash > "$HOME/.local/share/bash-completion/completions/deno.bash" 2>/dev/null || true
+    fi
+
+    # Astral uv (Fast Python Package & Tool Manager)
+    if ! command -v uv &> /dev/null && [ ! -f "$HOME/.local/bin/uv" ]; then
+        log_info "Installing Astral uv (Python tool manager)..."
+        curl -fsSL https://astral.sh/uv/install.sh | sh
+    elif command -v uv &> /dev/null; then
+        log_info "Checking for uv updates..."
+        uv self update 2>/dev/null || true
     fi
 
     # GitHub Copilot CLI helper
@@ -750,19 +780,29 @@ if [ "$OS" != "Termux" ]; then
     fi
 fi
 
-if command -v npm &> /dev/null; then
-    # Pi Coding Agent
+# Pi Coding Agent (installed via Bun)
+if command -v bun &> /dev/null; then
     if ! command -v pi &> /dev/null; then
-        log_info "Installing Pi coding agent..."
+        log_info "Installing Pi coding agent via Bun..."
+        bun add -g @earendil-works/pi-coding-agent
+        log_success "Pi coding agent installed successfully."
+    else
+        log_info "Updating Pi coding agent via Bun..."
+        bun update -g @earendil-works/pi-coding-agent
+        log_success "Pi coding agent updated successfully."
+    fi
+elif command -v npm &> /dev/null; then
+    if ! command -v pi &> /dev/null; then
+        log_info "Installing Pi coding agent via npm..."
         npm i -g --ignore-scripts @earendil-works/pi-coding-agent
         log_success "Pi coding agent installed successfully."
     else
-        log_info "Updating Pi coding agent..."
+        log_info "Updating Pi coding agent via npm..."
         npm update -g @earendil-works/pi-coding-agent
         log_success "Pi coding agent updated successfully."
     fi
 else
-    log_warn "npm not found. Skipping global NPM packages installation/updates."
+    log_warn "Neither bun nor npm found. Skipping global packages installation/updates."
 fi
 
 # ------------------------------------------------------------------------------
@@ -785,9 +825,170 @@ fi
 # ------------------------------------------------------------------------------
 log_info "Symlinking runtime configurations..."
 link_file "$DOTFILES_DIR/config/zsh/.zshrc" "$HOME/.zshrc" ".zshrc"
+link_file "$DOTFILES_DIR/config/bash/.bashrc" "$HOME/.bashrc" ".bashrc"
 link_file "$DOTFILES_DIR/config/git/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
 link_file "$DOTFILES_DIR/config/sqlite/.sqliterc" "$HOME/.sqliterc" ".sqliterc"
 link_file "$DOTFILES_DIR/config/tmux/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
+
+# oxker reads config from $XDG_CONFIG_HOME/oxker/config.toml — ask which
+# container backend it should target (Docker or Podman's rootless socket).
+OXKER_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/oxker"
+OXKER_CONFIG_FILE="$OXKER_CONFIG_DIR/config.toml"
+mkdir -p "$OXKER_CONFIG_DIR"
+
+if [ "$FORCE" = true ] || [ ! -e "$OXKER_CONFIG_FILE" ]; then
+    OXKER_BACKEND="docker"
+    if [ -t 0 ]; then
+        echo ""
+        read -rp "Configure oxker for Podman instead of Docker? [y/N] " oxker_ans
+        [[ "$oxker_ans" =~ ^[Yy]$ ]] && OXKER_BACKEND="podman"
+    fi
+
+    if [ "$OXKER_BACKEND" = "podman" ]; then
+        log_info "Configuring oxker for Podman (uid $(id -u))..."
+        sed "s/__OXKER_UID__/$(id -u)/" "$DOTFILES_DIR/config/oxker/config.podman.toml" > "$OXKER_CONFIG_FILE"
+        if command -v podman &> /dev/null && ! systemctl --user is-active --quiet podman.socket; then
+            log_info "Enabling podman.socket (user) for oxker..."
+            systemctl --user enable --now podman.socket
+        fi
+        log_success "oxker configured for Podman."
+    else
+        link_file "$DOTFILES_DIR/config/oxker/config.docker.toml" "$OXKER_CONFIG_FILE" "oxker config.toml (docker)"
+    fi
+else
+    log_success "oxker config already exists at $OXKER_CONFIG_FILE. Use --force to reconfigure."
+fi
+
+# Alacritty reads config from $XDG_CONFIG_HOME/alacritty/alacritty.toml
+ALACRITTY_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/alacritty"
+mkdir -p "$ALACRITTY_CONFIG_DIR"
+link_file "$DOTFILES_DIR/config/alacritty/alacritty.toml" "$ALACRITTY_CONFIG_DIR/alacritty.toml" "alacritty.toml"
+
+# Zellij reads config from $XDG_CONFIG_HOME/zellij/config.kdl
+ZELLIJ_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zellij"
+mkdir -p "$ZELLIJ_CONFIG_DIR"
+link_file "$DOTFILES_DIR/config/zellij/config.kdl" "$ZELLIJ_CONFIG_DIR/config.kdl" "zellij config.kdl"
+
+# Zed Editor config (~/.config/zed/settings.json - Gitignored local file symlinked from repo)
+ZED_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zed"
+mkdir -p "$ZED_CONFIG_DIR"
+ZED_REPO_LOCAL="$DOTFILES_DIR/config/zed/settings.json"
+if [ ! -f "$ZED_REPO_LOCAL" ]; then
+    log_info "Initializing config/zed/settings.json from template..."
+    if [ -f "$DOTFILES_DIR/config/zed/settings.json.example" ]; then
+        cp "$DOTFILES_DIR/config/zed/settings.json.example" "$ZED_REPO_LOCAL"
+        chmod 600 "$ZED_REPO_LOCAL"
+    fi
+fi
+link_file "$ZED_REPO_LOCAL" "$ZED_CONFIG_DIR/settings.json" "zed settings.json"
+
+# Claude Code configuration (~/.claude/settings.json - Gitignored local file symlinked from repo)
+CLAUDE_DIR="$HOME/.claude"
+mkdir -p "$CLAUDE_DIR"
+CLAUDE_REPO_LOCAL="$DOTFILES_DIR/slop/claude/settings.json"
+if [ ! -f "$CLAUDE_REPO_LOCAL" ]; then
+    log_info "Initializing slop/claude/settings.json from template..."
+    if [ -f "$DOTFILES_DIR/slop/claude/settings.json.example" ]; then
+        cp "$DOTFILES_DIR/slop/claude/settings.json.example" "$CLAUDE_REPO_LOCAL"
+        chmod 600 "$CLAUDE_REPO_LOCAL"
+    fi
+fi
+link_file "$CLAUDE_REPO_LOCAL" "$CLAUDE_DIR/settings.json" "claude settings.json"
+
+# Claude Code global profile (~/.claude.json - Gitignored local file symlinked from repo)
+CLAUDE_JSON_LOCAL="$DOTFILES_DIR/slop/claude/.claude.json"
+if [ ! -f "$CLAUDE_JSON_LOCAL" ]; then
+    log_info "Initializing slop/claude/.claude.json from template..."
+    if [ -f "$DOTFILES_DIR/slop/claude/.claude.json.example" ]; then
+        cp "$DOTFILES_DIR/slop/claude/.claude.json.example" "$CLAUDE_JSON_LOCAL"
+        chmod 600 "$CLAUDE_JSON_LOCAL"
+    fi
+fi
+link_file "$CLAUDE_JSON_LOCAL" "$HOME/.claude.json" ".claude.json"
+
+# OpenCode configuration (~/.config/opencode/opencode.json - Gitignored local file symlinked from repo)
+OPENCODE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
+mkdir -p "$OPENCODE_CONFIG_DIR"
+OPENCODE_REPO_LOCAL="$DOTFILES_DIR/slop/opencode/opencode.json"
+if [ ! -f "$OPENCODE_REPO_LOCAL" ]; then
+    log_info "Initializing slop/opencode/opencode.json from template..."
+    if [ -f "$DOTFILES_DIR/slop/opencode/opencode.json.example" ]; then
+        cp "$DOTFILES_DIR/slop/opencode/opencode.json.example" "$OPENCODE_REPO_LOCAL"
+        chmod 600 "$OPENCODE_REPO_LOCAL"
+    fi
+fi
+link_file "$OPENCODE_REPO_LOCAL" "$OPENCODE_CONFIG_DIR/opencode.json" "opencode opencode.json"
+link_file "$OPENCODE_REPO_LOCAL" "$OPENCODE_CONFIG_DIR/config.json" "opencode config.json"
+
+# OpenCode Desktop App State (~/.config/ai.opencode.desktop/opencode.global.dat)
+OPENCODE_DESKTOP_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ai.opencode.desktop"
+mkdir -p "$OPENCODE_DESKTOP_DIR"
+OPENCODE_DAT_LOCAL="$DOTFILES_DIR/slop/opencode/opencode.global.dat"
+if [ ! -f "$OPENCODE_DAT_LOCAL" ]; then
+    if [ -f "$DOTFILES_DIR/slop/opencode/opencode.global.dat.example" ]; then
+        cp "$DOTFILES_DIR/slop/opencode/opencode.global.dat.example" "$OPENCODE_DAT_LOCAL"
+    else
+        touch "$OPENCODE_DAT_LOCAL"
+    fi
+fi
+link_file "$OPENCODE_DAT_LOCAL" "$OPENCODE_DESKTOP_DIR/opencode.global.dat" "opencode desktop global.dat"
+
+# Antigravity (agy) configuration (~/.gemini/config/{config.json,mcp_config.json} - Gitignored local file symlinked from repo)
+GEMINI_CONFIG_DIR="$HOME/.gemini/config"
+mkdir -p "$GEMINI_CONFIG_DIR"
+
+AGY_CONFIG_LOCAL="$DOTFILES_DIR/slop/agy/config.json"
+if [ ! -f "$AGY_CONFIG_LOCAL" ]; then
+    log_info "Initializing slop/agy/config.json from template..."
+    if [ -f "$DOTFILES_DIR/slop/agy/config.json.example" ]; then
+        cp "$DOTFILES_DIR/slop/agy/config.json.example" "$AGY_CONFIG_LOCAL"
+        chmod 600 "$AGY_CONFIG_LOCAL"
+    fi
+fi
+link_file "$AGY_CONFIG_LOCAL" "$GEMINI_CONFIG_DIR/config.json" "antigravity config.json"
+
+AGY_MCP_LOCAL="$DOTFILES_DIR/slop/agy/mcp_config.json"
+if [ ! -f "$AGY_MCP_LOCAL" ]; then
+    log_info "Initializing slop/agy/mcp_config.json from template..."
+    if [ -f "$DOTFILES_DIR/slop/agy/mcp_config.json.example" ]; then
+        cp "$DOTFILES_DIR/slop/agy/mcp_config.json.example" "$AGY_MCP_LOCAL"
+        chmod 600 "$AGY_MCP_LOCAL"
+    fi
+fi
+link_file "$AGY_MCP_LOCAL" "$GEMINI_CONFIG_DIR/mcp_config.json" "antigravity mcp_config.json"
+
+# Agent Skills Global Installation & Synchronization
+link_file "$DOTFILES_DIR/slop/skills-lock.json" "$HOME/skills-lock.json" "skills-lock.json"
+
+# Restore ALL skills — community and custom alike — from skills-lock.json.
+# Custom skills (slop/skills/custom/skills/) are tracked in skills-lock.json the
+# same way as community ones (source: Akrista/.akrista); there is no separate
+# direct-symlink step — the skills CLI is the single mechanism for all of them.
+if [ -f "$DOTFILES_DIR/slop/skills-lock.json" ] && command -v bunx &> /dev/null; then
+    log_info "Synchronizing Agent Skills via bunx skills..."
+    (cd "$HOME" && bunx -y skills experimental_install 2>/dev/null || true)
+fi
+
+# Link the global AI guideline file to every tool's global instructions path
+GUIDELINES_FILE="$DOTFILES_DIR/slop/guidelines/AGENTS.md"
+if [ -f "$GUIDELINES_FILE" ]; then
+    link_file "$GUIDELINES_FILE" "$HOME/.claude/CLAUDE.md" "Claude Code global CLAUDE.md"
+    mkdir -p "$HOME/.config/opencode"
+    link_file "$GUIDELINES_FILE" "$HOME/.config/opencode/AGENTS.md" "OpenCode global AGENTS.md"
+    mkdir -p "$HOME/.gemini" "$HOME/.pi/agent"
+    link_file "$GUIDELINES_FILE" "$HOME/.gemini/GEMINI.md" "Antigravity (agy) global GEMINI.md"
+    link_file "$GUIDELINES_FILE" "$HOME/.gemini/AGENTS.md" "Antigravity (agy) global AGENTS.md (cross-tool)"
+    link_file "$GUIDELINES_FILE" "$HOME/.pi/agent/AGENTS.md" "Pi global AGENTS.md"
+fi
+
+# Symlink bat and fd for standard naming on Debian/Ubuntu
+mkdir -p "$HOME/.local/bin"
+if command -v batcat &> /dev/null && [ ! -e "$HOME/.local/bin/bat" ]; then
+    ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"
+fi
+if command -v fdfind &> /dev/null && [ ! -e "$HOME/.local/bin/fd" ]; then
+    ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
+fi
 
 # Tmux Plugin Manager & Plugin compilation logic
 if command -v tmux &> /dev/null && [ -d "$HOME/.tmux/plugins/tpm" ]; then
@@ -801,12 +1002,62 @@ if command -v tmux &> /dev/null && [ -d "$HOME/.tmux/plugins/tpm" ]; then
     find "$HOME/.tmux/plugins" -type f \( -name "*.tmux" -o -name "*.sh" \) -exec dos2unix {} +
 fi
 
-GITCONFIG_LOCAL="$HOME/.gitconfig.local"
-if [ -f "$GITCONFIG_LOCAL" ]; then
-    log_success ".gitconfig.local already exists."
-else
-    log_info "Creating empty .gitconfig.local..."
-    touch "$GITCONFIG_LOCAL"
+# Local Git Configuration (~/.gitconfig.local - Gitignored local file symlinked from repo)
+GIT_REPO_LOCAL="$DOTFILES_DIR/config/git/.gitconfig.local"
+if [ ! -f "$GIT_REPO_LOCAL" ]; then
+    log_info "Initializing config/git/.gitconfig.local from template..."
+    if [ -f "$DOTFILES_DIR/config/git/.gitconfig.local.example" ]; then
+        cp "$DOTFILES_DIR/config/git/.gitconfig.local.example" "$GIT_REPO_LOCAL"
+    else
+        touch "$GIT_REPO_LOCAL"
+    fi
+    chmod 600 "$GIT_REPO_LOCAL"
+fi
+link_file "$GIT_REPO_LOCAL" "$HOME/.gitconfig.local" ".gitconfig.local"
+
+# Local Environment Variables (~/.env.local - Gitignored local file symlinked from repo)
+ENV_REPO_LOCAL="$DOTFILES_DIR/config/env/.env.local"
+if [ ! -f "$ENV_REPO_LOCAL" ]; then
+    log_info "Initializing config/env/.env.local from template..."
+    if [ -f "$DOTFILES_DIR/config/env/.env.local.example" ]; then
+        cp "$DOTFILES_DIR/config/env/.env.local.example" "$ENV_REPO_LOCAL"
+    else
+        touch "$ENV_REPO_LOCAL"
+    fi
+    chmod 600 "$ENV_REPO_LOCAL"
+fi
+link_file "$ENV_REPO_LOCAL" "$HOME/.env.local" ".env.local"
+
+# SSH Client Configuration (~/.ssh/config with Include pattern & gitignored config.local)
+SSH_DIR="$HOME/.ssh"
+mkdir -p "$SSH_DIR" && chmod 700 "$SSH_DIR"
+SSH_REPO_LOCAL="$DOTFILES_DIR/config/ssh/config.local"
+if [ ! -f "$SSH_REPO_LOCAL" ]; then
+    log_info "Initializing config/ssh/config.local from template..."
+    if [ -f "$DOTFILES_DIR/config/ssh/config.local.example" ]; then
+        cp "$DOTFILES_DIR/config/ssh/config.local.example" "$SSH_REPO_LOCAL"
+    else
+        touch "$SSH_REPO_LOCAL"
+    fi
+    chmod 600 "$SSH_REPO_LOCAL"
+fi
+link_file "$SSH_REPO_LOCAL" "$SSH_DIR/config.local" ".ssh/config.local"
+
+SSH_CONFIG_FILE="$SSH_DIR/config"
+if [ "$FORCE" = true ] || [ ! -f "$SSH_CONFIG_FILE" ]; then
+    log_info "Populating ~/.ssh/config with Include directives..."
+    cat << 'EOF' > "$SSH_CONFIG_FILE"
+# ==============================================================================
+#  🔑 OpenSSH Client Configuration
+# ==============================================================================
+# Local/Private host overrides (untracked)
+Include ~/.ssh/config.local
+
+# Base shared configurations from .akrista dotfiles
+Include ~/.akrista/config/ssh/config
+EOF
+    chmod 600 "$SSH_CONFIG_FILE"
+    log_success "~/.ssh/config configured."
 fi
 
 # ------------------------------------------------------------------------------
@@ -886,6 +1137,14 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
     Write-LogInfo "Installing Oh My Posh via Windows Package Manager (winget)..."
     winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh --source winget
 }
+
+# Astral uv (Fast Python Package & Tool Manager)
+if (Get-Command uv -ErrorAction SilentlyContinue) {
+    Write-LogSuccess "Astral uv is already installed."
+} else {
+    Write-LogInfo "Installing Astral uv via official installer..."
+    Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression
+}
 #endregion
 
 #region 4. File Linking Helper (PowerShell)
@@ -960,21 +1219,229 @@ if (Test-Path $dotfilesPath) {
     $checkFile = Join-Path $dotfilesPath ".last_update_check"
     New-Item -ItemType File -Path $checkFile -Force | Out-Null
 }
+
+$pwshPfPath = Join-Path $HOME ".pwsh-pf"
+if (-not (Test-Path $pwshPfPath)) {
+    Write-LogInfo "Cloning pwsh-pf repository..."
+    git clone https://github.com/akrista/pwsh-pf $pwshPfPath
+} else {
+    Write-LogInfo "pwsh-pf repository already exists at $pwshPfPath. Pulling updates..."
+    git -C $pwshPfPath pull
+}
 #endregion
 
-#region 6. Linking Windows Configurations
+#region 6. PowerShell Profile Setup (pwsh-pf)
+Write-LogInfo "Setting up PowerShell profile and tools via pwsh-pf setup..."
+$pwshPfSetupScript = Join-Path $pwshPfPath "setup.ps1"
+if (Test-Path $pwshPfSetupScript) {
+    & $pwshPfSetupScript
+} else {
+    Write-LogInfo "Fetching and executing pwsh-pf setup script from repository..."
+    Invoke-Expression (Invoke-RestMethod -Uri "https://raw.githubusercontent.com/akrista/pwsh-pf/master/setup.ps1")
+}
+#endregion
+
+#region 7. Linking Windows Configurations
 Write-LogInfo "Linking local configuration dotfiles..."
 Link-File -SourcePath (Join-Path $dotfilesPath "config/git/.gitconfig") -TargetPath (Join-Path $HOME ".gitconfig") -Name ".gitconfig"
 Link-File -SourcePath (Join-Path $dotfilesPath "config/sqlite/.sqliterc") -TargetPath (Join-Path $HOME ".sqliterc") -Name ".sqliterc"
 
-$gitConfigLocal = Join-Path $HOME ".gitconfig.local"
-if (-not (Test-Path $gitConfigLocal)) {
-    Write-LogInfo "Creating empty $gitConfigLocal..."
-    New-Item -ItemType File -Path $gitConfigLocal -Force | Out-Null
+# Alacritty reads config from %APPDATA%\alacritty\alacritty.toml (Windows overlay imports the shared base)
+$alacrittyDir = Join-Path $env:APPDATA "alacritty"
+New-Item -ItemType Directory -Path $alacrittyDir -Force | Out-Null
+Link-File -SourcePath (Join-Path $dotfilesPath "config/alacritty/alacritty.windows.toml") -TargetPath (Join-Path $alacrittyDir "alacritty.toml") -Name "alacritty.toml"
+
+# Zellij reads config from %APPDATA%\zellij\config.kdl or $HOME\.config\zellij\config.kdl
+$zellijDir = Join-Path $HOME ".config\zellij"
+New-Item -ItemType Directory -Path $zellijDir -Force | Out-Null
+Link-File -SourcePath (Join-Path $dotfilesPath "config/zellij/config.kdl") -TargetPath (Join-Path $zellijDir "config.kdl") -Name "zellij config.kdl"
+
+# Zed Editor config (%APPDATA%\Zed\settings.json - Gitignored local file symlinked from repo)
+$zedDir = Join-Path $env:APPDATA "Zed"
+New-Item -ItemType Directory -Path $zedDir -Force | Out-Null
+$zedRepoLocal = Join-Path $dotfilesPath "config/zed/settings.json"
+if (-not (Test-Path $zedRepoLocal)) {
+    Write-LogInfo "Initializing config/zed/settings.json from template..."
+    $zedExample = Join-Path $dotfilesPath "config/zed/settings.json.example"
+    if (Test-Path $zedExample) {
+        Copy-Item $zedExample $zedRepoLocal
+    }
+}
+Link-File -SourcePath $zedRepoLocal -TargetPath (Join-Path $zedDir "settings.json") -Name "zed settings.json"
+
+# Claude Code configuration (%USERPROFILE%\.claude\settings.json - Gitignored local file symlinked from repo)
+$claudeDir = Join-Path $HOME ".claude"
+New-Item -ItemType Directory -Path $claudeDir -Force | Out-Null
+$claudeRepoLocal = Join-Path $dotfilesPath "slop/claude/settings.json"
+if (-not (Test-Path $claudeRepoLocal)) {
+    Write-LogInfo "Initializing slop/claude/settings.json from template..."
+    $claudeExample = Join-Path $dotfilesPath "slop/claude/settings.json.example"
+    if (Test-Path $claudeExample) {
+        Copy-Item $claudeExample $claudeRepoLocal
+    }
+}
+Link-File -SourcePath $claudeRepoLocal -TargetPath (Join-Path $claudeDir "settings.json") -Name "claude settings.json"
+
+# Claude Code global profile (%USERPROFILE%\.claude.json)
+$claudeJsonLocal = Join-Path $dotfilesPath "slop/claude/.claude.json"
+if (-not (Test-Path $claudeJsonLocal)) {
+    Write-LogInfo "Initializing slop/claude/.claude.json from template..."
+    $claudeJsonExample = Join-Path $dotfilesPath "slop/claude/.claude.json.example"
+    if (Test-Path $claudeJsonExample) {
+        Copy-Item $claudeJsonExample $claudeJsonLocal
+    }
+}
+Link-File -SourcePath $claudeJsonLocal -TargetPath (Join-Path $HOME ".claude.json") -Name ".claude.json"
+
+# OpenCode configuration (%USERPROFILE%\.config\opencode\opencode.json - Gitignored local file symlinked from repo)
+$opencodeDir = Join-Path $HOME ".config\opencode"
+New-Item -ItemType Directory -Path $opencodeDir -Force | Out-Null
+$opencodeRepoLocal = Join-Path $dotfilesPath "slop/opencode/opencode.json"
+if (-not (Test-Path $opencodeRepoLocal)) {
+    Write-LogInfo "Initializing slop/opencode/opencode.json from template..."
+    $opencodeExample = Join-Path $dotfilesPath "slop/opencode/opencode.json.example"
+    if (Test-Path $opencodeExample) {
+        Copy-Item $opencodeExample $opencodeRepoLocal
+    }
+}
+Link-File -SourcePath $opencodeRepoLocal -TargetPath (Join-Path $opencodeDir "opencode.json") -Name "opencode.json"
+Link-File -SourcePath $opencodeRepoLocal -TargetPath (Join-Path $opencodeDir "config.json") -Name "opencode config.json"
+
+# OpenCode Desktop App State (%APPDATA%\ai.opencode.desktop\opencode.global.dat)
+$opencodeDesktopDir = Join-Path $env:APPDATA "ai.opencode.desktop"
+New-Item -ItemType Directory -Path $opencodeDesktopDir -Force | Out-Null
+$opencodeDatLocal = Join-Path $dotfilesPath "slop/opencode/opencode.global.dat"
+if (-not (Test-Path $opencodeDatLocal)) {
+    $opencodeDatExample = Join-Path $dotfilesPath "slop/opencode/opencode.global.dat.example"
+    if (Test-Path $opencodeDatExample) {
+        Copy-Item $opencodeDatExample $opencodeDatLocal
+    } else {
+        New-Item -ItemType File -Path $opencodeDatLocal -Force | Out-Null
+    }
+}
+Link-File -SourcePath $opencodeDatLocal -TargetPath (Join-Path $opencodeDesktopDir "opencode.global.dat") -Name "opencode desktop global.dat"
+
+# Antigravity (agy) configuration (%USERPROFILE%\.gemini\config\{config.json,mcp_config.json} - Gitignored local file symlinked from repo)
+$geminiConfigDir = Join-Path $HOME ".gemini\config"
+New-Item -ItemType Directory -Path $geminiConfigDir -Force | Out-Null
+
+$agyConfigLocal = Join-Path $dotfilesPath "slop/agy/config.json"
+if (-not (Test-Path $agyConfigLocal)) {
+    Write-LogInfo "Initializing slop/agy/config.json from template..."
+    $agyConfigExample = Join-Path $dotfilesPath "slop/agy/config.json.example"
+    if (Test-Path $agyConfigExample) {
+        Copy-Item $agyConfigExample $agyConfigLocal
+    }
+}
+Link-File -SourcePath $agyConfigLocal -TargetPath (Join-Path $geminiConfigDir "config.json") -Name "antigravity config.json"
+
+$agyMcpLocal = Join-Path $dotfilesPath "slop/agy/mcp_config.json"
+if (-not (Test-Path $agyMcpLocal)) {
+    Write-LogInfo "Initializing slop/agy/mcp_config.json from template..."
+    $agyMcpExample = Join-Path $dotfilesPath "slop/agy/mcp_config.json.example"
+    if (Test-Path $agyMcpExample) {
+        Copy-Item $agyMcpExample $agyMcpLocal
+    }
+}
+Link-File -SourcePath $agyMcpLocal -TargetPath (Join-Path $geminiConfigDir "mcp_config.json") -Name "antigravity mcp_config.json"
+
+# Agent Skills Global Installation & Synchronization
+$skillsLockLocal = Join-Path $dotfilesPath "slop/skills-lock.json"
+Link-File -SourcePath $skillsLockLocal -TargetPath (Join-Path $HOME "skills-lock.json") -Name "skills-lock.json"
+
+# Restore ALL skills — community and custom alike — from skills-lock.json.
+# Custom skills (slop/skills/custom/skills/) are tracked in skills-lock.json the
+# same way as community ones (source: Akrista/.akrista); there is no separate
+# direct-symlink step — the skills CLI is the single mechanism for all of them.
+if ((Test-Path $skillsLockLocal) -and (Get-Command bunx -ErrorAction SilentlyContinue)) {
+    Write-LogInfo "Synchronizing Agent Skills via bunx skills..."
+    try {
+        Push-Location $HOME
+        bunx -y skills experimental_install 2>$null
+    } catch {
+        Write-LogWarning "Could not run skills automatically."
+    } finally {
+        Pop-Location
+    }
+}
+
+# Link the global AI guideline file to every tool's global instructions path
+$guidelinesFile = Join-Path $dotfilesPath "slop/guidelines/AGENTS.md"
+if (Test-Path $guidelinesFile) {
+    Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $HOME ".claude\CLAUDE.md") -Name "Claude Code global CLAUDE.md"
+    $opencodeGlobalDir = Join-Path $HOME ".config\opencode"
+    New-Item -ItemType Directory -Path $opencodeGlobalDir -Force | Out-Null
+    Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $opencodeGlobalDir "AGENTS.md") -Name "OpenCode global AGENTS.md"
+    $geminiDir = Join-Path $HOME ".gemini"
+    $piAgentDir = Join-Path $HOME ".pi\agent"
+    New-Item -ItemType Directory -Path $geminiDir -Force | Out-Null
+    New-Item -ItemType Directory -Path $piAgentDir -Force | Out-Null
+    Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $geminiDir "GEMINI.md") -Name "Antigravity (agy) global GEMINI.md"
+    Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $geminiDir "AGENTS.md") -Name "Antigravity (agy) global AGENTS.md (cross-tool)"
+    Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $piAgentDir "AGENTS.md") -Name "Pi global AGENTS.md"
+}
+
+# Local Git Configuration (~/.gitconfig.local - Gitignored local file symlinked from repo)
+$gitRepoLocal = Join-Path $dotfilesPath "config/git/.gitconfig.local"
+if (-not (Test-Path $gitRepoLocal)) {
+    Write-LogInfo "Initializing config/git/.gitconfig.local from template..."
+    $gitExample = Join-Path $dotfilesPath "config/git/.gitconfig.local.example"
+    if (Test-Path $gitExample) {
+        Copy-Item $gitExample $gitRepoLocal
+    } else {
+        New-Item -ItemType File -Path $gitRepoLocal -Force | Out-Null
+    }
+}
+Link-File -SourcePath $gitRepoLocal -TargetPath (Join-Path $HOME ".gitconfig.local") -Name ".gitconfig.local"
+
+# Local Environment Variables (~/.env.local - Gitignored local file symlinked from repo)
+$envRepoLocal = Join-Path $dotfilesPath "config/env/.env.local"
+if (-not (Test-Path $envRepoLocal)) {
+    Write-LogInfo "Initializing config/env/.env.local from template..."
+    $envExample = Join-Path $dotfilesPath "config/env/.env.local.example"
+    if (Test-Path $envExample) {
+        Copy-Item $envExample $envRepoLocal
+    } else {
+        New-Item -ItemType File -Path $envRepoLocal -Force | Out-Null
+    }
+}
+Link-File -SourcePath $envRepoLocal -TargetPath (Join-Path $HOME ".env.local") -Name ".env.local"
+
+# SSH Client Configuration (%USERPROFILE%\.ssh\config & gitignored config.local)
+$sshDir = Join-Path $HOME ".ssh"
+if (-not (Test-Path $sshDir)) {
+    New-Item -ItemType Directory -Path $sshDir -Force | Out-Null
+}
+
+$sshRepoLocal = Join-Path $dotfilesPath "config/ssh/config.local"
+if (-not (Test-Path $sshRepoLocal)) {
+    Write-LogInfo "Initializing config/ssh/config.local from template..."
+    $sshExample = Join-Path $dotfilesPath "config/ssh/config.local.example"
+    if (Test-Path $sshExample) {
+        Copy-Item $sshExample $sshRepoLocal
+    } else {
+        New-Item -ItemType File -Path $sshRepoLocal -Force | Out-Null
+    }
+}
+Link-File -SourcePath $sshRepoLocal -TargetPath (Join-Path $sshDir "config.local") -Name ".ssh/config.local"
+
+$sshConfigFile = Join-Path $sshDir "config"
+if ($Force -or (-not (Test-Path $sshConfigFile))) {
+    Write-LogInfo "Populating ~/.ssh/config..."
+    @"
+# ==============================================================================
+#  🔑 OpenSSH Client Configuration
+# ==============================================================================
+# Local/Private host overrides (untracked)
+Include ~/.ssh/config.local
+
+# Base shared configurations from .akrista dotfiles
+Include ~/.akrista/config/ssh/config
+"@ | Out-File -FilePath $sshConfigFile -Encoding utf8
 }
 #endregion
 
-#region 7. Finish Notification
+#region 8. Finish Notification
 Write-Host ""
 Write-Host "================================================================" -ForegroundColor Green
 Write-Host " 🎉 Installation completed successfully!" -ForegroundColor Green

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": "allow",
+  "plugin": [
+    "opencode-wakatime",
+    "@tarquinen/opencode-dcp@latest",
+    "@dietrichgebert/ponytail"
+  ],
+  "provider": {
+    "openai": {
+      "options": {
+        "baseURL": "https://claude.notakrista.com/"
+      }
+    }
+  },
+  "mcp": {
+    "Context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true,
+      "headers": {
+        "CONTEXT7_API_KEY": "<YOUR_CONTEXT7_API_KEY>"
+      }
+    },
+    "Astro Docs": {
+      "type": "remote",
+      "enabled": false,
+      "url": "https://mcp.docs.astro.build/mcp"
+    },
+    "Svelte": {
+      "type": "remote",
+      "enabled": false,
+      "url": "https://mcp.svelte.dev/mcp"
+    },
+    "Shadcn": {
+      "type": "local",
+      "enabled": false,
+      "command": [
+        "bunx",
+        "-y",
+        "shadcn@latest",
+        "mcp"
+      ]
+    },
+    "NextJs": {
+      "type": "local",
+      "enabled": false,
+      "command": [
+        "bunx",
+        "-y",
+        "next-devtools-mcp@latest"
+      ]
+    },
+    "Metabase": {
+      "type": "remote",
+      "enabled": false,
+      "url": "https://metabase.notakrista.com/api/metabase-mcp"
+    }
+  }
+}
