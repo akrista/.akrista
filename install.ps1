@@ -961,7 +961,7 @@ link_file "$AGY_MCP_LOCAL" "$GEMINI_CONFIG_DIR/mcp_config.json" "antigravity mcp
 link_file "$DOTFILES_DIR/slop/skills-lock.json" "$HOME/skills-lock.json" "skills-lock.json"
 
 # Restore ALL skills — community and custom alike — from skills-lock.json.
-# Custom skills (slop/skills/custom/skills/) are tracked in skills-lock.json the
+# Custom skills (slop/skills/<name>/) are tracked in skills-lock.json the
 # same way as community ones (source: Akrista/.akrista); there is no separate
 # direct-symlink step — the skills CLI is the single mechanism for all of them.
 if [ -f "$DOTFILES_DIR/slop/skills-lock.json" ] && command -v bunx &> /dev/null; then
@@ -1350,7 +1350,7 @@ $skillsLockLocal = Join-Path $dotfilesPath "slop/skills-lock.json"
 Link-File -SourcePath $skillsLockLocal -TargetPath (Join-Path $HOME "skills-lock.json") -Name "skills-lock.json"
 
 # Restore ALL skills — community and custom alike — from skills-lock.json.
-# Custom skills (slop/skills/custom/skills/) are tracked in skills-lock.json the
+# Custom skills (slop/skills/<name>/) are tracked in skills-lock.json the
 # same way as community ones (source: Akrista/.akrista); there is no separate
 # direct-symlink step — the skills CLI is the single mechanism for all of them.
 if ((Test-Path $skillsLockLocal) -and (Get-Command bunx -ErrorAction SilentlyContinue)) {
