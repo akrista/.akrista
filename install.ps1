@@ -156,6 +156,8 @@ link_file() {
 pkg_is_installed() {
     if [ "$PACKAGER" = "pkg" ] || [ "$PACKAGER" = "apt" ]; then
         dpkg -s "$1" &> /dev/null
+    elif [ "$PACKAGER" = "dnf" ]; then
+        rpm -q "$1" &> /dev/null || command -v "$1" &> /dev/null
     else
         command -v "$1" &> /dev/null
     fi
@@ -287,6 +289,15 @@ install_debian_ubuntu_packages() {
         sudo apt-get remove -y neovim
     fi
 
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        if [ "$ID" = "debian" ] && [ "${VERSION_ID:-0}" -le 12 ]; then
+            log_warn "Debian $VERSION_ID ($VERSION_CODENAME) detected."
+            log_warn "Several modern developer packages (eza, fastfetch, tree-sitter, scrcpy) are not available in Debian 12 apt repositories."
+            log_warn "Upgrading to Debian 13 (Trixie)+ is recommended for full native package management."
+        fi
+    fi
+
     log_info "Enabling contrib repository in apt sources..."
     if [ -f /etc/apt/sources.list ]; then
         sudo sed -i 's/^deb \(.*\) main$/deb \1 main contrib non-free-firmware/' /etc/apt/sources.list
@@ -297,10 +308,11 @@ install_debian_ubuntu_packages() {
     sudo apt update -y && sudo apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
     log_info "Installing development dependencies and CLI tools..."
-    sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli git xclip wl-clipboard curl wget unzip zip tar rsync jq socat lsof p7zip-full gnupg mosh axel zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala locales dos2unix btop alacritty fastfetch
+    sudo apt install -y make gcc ripgrep fd-find git xclip wl-clipboard curl wget unzip zip tar rsync jq socat lsof p7zip-full gnupg mosh axel zsh ssh bat sqlite3 zoxide fzf nnn clang tmux locales dos2unix btop adb || true
 
-    log_info "Installing Android tools (adb, scrcpy)..."
-    sudo apt install -y adb scrcpy || log_warn "Some Android tools may not be available in your repo. Install scrcpy via snap or from GitHub releases if needed."
+    for opt_pkg in tree-sitter-cli fastfetch scrcpy alacritty nala eza; do
+        sudo apt install -y "$opt_pkg" 2>/dev/null || true
+    done
 
     log_info "Configuring UTF-8 locales..."
     if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
@@ -398,7 +410,91 @@ install_debian_ubuntu_packages() {
 
 install_fedora_packages() {
     log_info "Starting package installation for Fedora..."
-    log_warn "Fedora package list configuration placeholder."
+
+    if pkg_is_installed neovim; then
+        log_warn "Removing distro Neovim to prevent collisions with official release..."
+        sudo dnf remove -y neovim
+    fi
+
+    log_info "Updating system package lists and upgrading packages..."
+    sudo dnf update -y
+
+    log_info "Installing development dependencies and CLI tools..."
+    sudo dnf install -y make gcc ripgrep fd-find tree-sitter-cli git xclip wl-clipboard curl wget unzip zip tar rsync jq socat lsof p7zip p7zip-plugins gnupg2 mosh axel zsh openssh-clients eza bat sqlite zoxide fzf nnn clang tmux dos2unix btop alacritty fastfetch android-tools scrcpy gh
+
+    log_info "Configuring UTF-8 locales..."
+    if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen 2>/dev/null; then
+        if [ -f /etc/locale.gen ]; then
+            echo "en_US.UTF-8 UTF-8" | sudo tee -a /etc/locale.gen
+            sudo locale-gen en_US.UTF-8 2>/dev/null || true
+        fi
+    fi
+    sudo localectl set-locale LANG=en_US.UTF-8 2>/dev/null || sudo update-locale LANG=en_US.UTF-8 2>/dev/null || true
+
+    if [ "$FORCE" = true ] || ! command -v nvim &> /dev/null; then
+        log_info "Installing official Neovim build..."
+        ARCH=$(uname -m)
+        case "$ARCH" in
+            x86_64) NVIM_ARCH="x86_64" ;;
+            aarch64|arm64) NVIM_ARCH="arm64" ;;
+            *)
+                log_warn "Unsupported architecture for official Neovim build: $ARCH. Falling back to dnf."
+                sudo dnf install -y neovim
+                NVIM_ARCH="unknown"
+                ;;
+        esac
+
+        if [ "$NVIM_ARCH" != "unknown" ]; then
+            TEMP_DIR=$(mktemp -d)
+            (
+                cd "$TEMP_DIR" || exit 1
+                NVIM_TAR="nvim-linux-$NVIM_ARCH.tar.gz"
+                log_info "Downloading $NVIM_TAR..."
+                curl -LO "https://github.com/neovim/neovim/releases/latest/download/$NVIM_TAR"
+                sudo rm -rf "/opt/nvim-linux-$NVIM_ARCH"
+                sudo mkdir -p "/opt/nvim-linux-$NVIM_ARCH"
+                sudo tar -C /opt -xzf "$NVIM_TAR"
+                sudo chmod -R a+rX "/opt/nvim-linux-$NVIM_ARCH"
+                sudo ln -sf "/opt/nvim-linux-$NVIM_ARCH/bin/nvim" /usr/local/bin/nvim
+            )
+            rm -rf "$TEMP_DIR"
+            log_success "Neovim installation completed."
+        fi
+    else
+        log_info "Neovim is already installed."
+    fi
+
+    if [ -f "$DOTFILES_DIR/config/docker/daemon.json" ]; then
+        if command -v docker &> /dev/null || [ -d "/etc/docker" ]; then
+            log_info "Configuring Docker daemon..."
+            sudo mkdir -p /etc/docker
+            if [ ! -f /etc/docker/daemon.json ] || [ "$FORCE" = true ]; then
+                sudo cp "$DOTFILES_DIR/config/docker/daemon.json" /etc/docker/daemon.json
+                log_success "Docker daemon.json configured."
+            fi
+        fi
+    fi
+
+    if [ -f "$DOTFILES_DIR/config/sshd/99-hardening.conf" ]; then
+        if [ -d "/etc/ssh/sshd_config.d" ] || command -v sshd &> /dev/null; then
+            log_info "Deploying SSHD hardening configuration..."
+            sudo mkdir -p /etc/ssh/sshd_config.d
+            sudo cp "$DOTFILES_DIR/config/sshd/99-hardening.conf" /etc/ssh/sshd_config.d/99-hardening.conf
+            sudo chmod 644 /etc/ssh/sshd_config.d/99-hardening.conf
+
+            if sudo sshd -t 2>/dev/null; then
+                log_success "SSHD configuration validated."
+                if systemctl is-active --quiet ssh 2>/dev/null; then
+                    sudo systemctl reload ssh 2>/dev/null || true
+                elif systemctl is-active --quiet sshd 2>/dev/null; then
+                    sudo systemctl reload sshd 2>/dev/null || true
+                fi
+            else
+                log_warn "SSHD configuration test failed. Reverting..."
+                sudo rm -f /etc/ssh/sshd_config.d/99-hardening.conf
+            fi
+        fi
+    fi
 }
 
 install_arch_packages() {
@@ -626,7 +722,7 @@ if [ "$OS" != "Termux" ]; then
     fi
 
     # Cargo binaries
-    if [ "$OS" = "Debian/Ubuntu" ]; then
+    if [ "$OS" = "Debian/Ubuntu" ] || [ "$OS" = "Fedora" ]; then
         if [ -f "$HOME/.cargo/env" ]; then
             . "$HOME/.cargo/env"
         fi
@@ -645,6 +741,21 @@ if [ "$OS" != "Termux" ]; then
             log_success "oxker installed."
         else
             log_success "oxker is already installed."
+        fi
+
+        if ! command -v eza &> /dev/null; then
+            log_info "Installing eza via Cargo..."
+            cargo install eza --locked
+            log_success "eza installed."
+        else
+            log_success "eza is already installed."
+        fi
+
+        if ! command -v tree-sitter &> /dev/null; then
+            if command -v bun &> /dev/null; then
+                log_info "Installing tree-sitter-cli via Bun..."
+                bun add -g tree-sitter-cli
+            fi
         fi
     fi
 
@@ -769,6 +880,10 @@ elif [ "$PACKAGER" = "apt" ]; then
     sudo apt-get autoremove -y
     sudo apt-get autoclean -y
     sudo apt-get clean
+elif [ "$PACKAGER" = "dnf" ]; then
+    log_info "Cleaning up Fedora packages..."
+    sudo dnf autoremove -y
+    sudo dnf clean all
 fi
 
 # Symlink dotfiles

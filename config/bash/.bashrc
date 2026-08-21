@@ -107,6 +107,16 @@ alias ebash="nvim ~/.bashrc"
 
 uak() {
   local doc_dir="$HOME/.akrista"
+
+  if [ -f /etc/os-release ]; then
+    local distro_id distro_ver
+    distro_id=$(grep -E '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
+    distro_ver=$(grep -E '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
+    if [[ "$distro_id" == "debian" && "$distro_ver" -le 12 ]]; then
+      printf "\n\033[1;33m[NOTICE]\033[0m You are running Debian %s. Upgrading to Debian 13 (Trixie)+ is recommended for full native package support (eza, fastfetch, scrcpy, tree-sitter).\n\n" "$distro_ver"
+    fi
+  fi
+
   if [[ -d "$doc_dir" ]]; then
     echo "Updating .akrista repository..."
     git -C "$doc_dir" pull
