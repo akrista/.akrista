@@ -1,3 +1,5 @@
+host = "/var/run/docker.sock"
+
 [colors.headers_bar]
 background = "#504945"
 loading_spinner = "#fabd2f"

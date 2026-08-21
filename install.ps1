@@ -825,6 +825,7 @@ if [ ! -f "$ZED_REPO_LOCAL" ]; then
     fi
 fi
 link_file "$ZED_REPO_LOCAL" "$ZED_CONFIG_DIR/settings.json" "zed settings.json"
+link_file "$DOTFILES_DIR/config/zed/keymap.json" "$ZED_CONFIG_DIR/keymap.json" "zed keymap.json"
 
 CLAUDE_DIR="$HOME/.claude"
 mkdir -p "$CLAUDE_DIR"
@@ -1206,6 +1207,7 @@ if (-not (Test-Path $zedRepoLocal)) {
     }
 }
 Link-File -SourcePath $zedRepoLocal -TargetPath (Join-Path $zedDir "settings.json") -Name "zed settings.json"
+Link-File -SourcePath (Join-Path $dotfilesPath "config/zed/keymap.json") -TargetPath (Join-Path $zedDir "keymap.json") -Name "zed keymap.json"
 
 $claudeDir = Join-Path $HOME ".claude"
 New-Item -ItemType Directory -Path $claudeDir -Force | Out-Null
