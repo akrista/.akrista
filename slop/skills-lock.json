@@ -85,17 +85,11 @@
       "skillPath": "skills/taste-skill-v1/SKILL.md",
       "computedHash": "d704ab912c4d0ca954ffa858983da755ae4cd5cad9ba22554db5557382f5bd34"
     },
-    "doc-coauthoring": {
+    "document-writing": {
       "source": "buYoung/skills",
       "sourceType": "github",
-      "skillPath": "skills/doc-coauthoring/SKILL.md",
-      "computedHash": "5d3dcf5d1c43b8e9293869bbf85e0e797d2b5578bce0d2e9f260604c84d39c2c"
-    },
-    "feature-design-doc": {
-      "source": "buYoung/skills",
-      "sourceType": "github",
-      "skillPath": "skills/feature-design-doc/SKILL.md",
-      "computedHash": "6bd38780c0ffb8989768fb88bff0b627662412deb42119b460df3f5dd6927c70"
+      "skillPath": "skills/document-writing/SKILL.md",
+      "computedHash": "9f86ee07050741b239ec7147280a13fd48804d31535570932f059ed534c07301"
     },
     "full-output-enforcement": {
       "source": "Leonxlnx/taste-skill",

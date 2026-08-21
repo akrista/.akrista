@@ -287,6 +287,15 @@ install_debian_ubuntu_packages() {
         sudo apt-get remove -y neovim
     fi
 
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        if [ "$ID" = "debian" ] && [ "${VERSION_ID:-0}" -le 12 ]; then
+            log_warn "Debian $VERSION_ID ($VERSION_CODENAME) detected."
+            log_warn "Several modern developer packages (eza, fastfetch, tree-sitter, scrcpy) are not available in Debian 12 apt repositories."
+            log_warn "Upgrading to Debian 13 (Trixie)+ is recommended for full native package management."
+        fi
+    fi
+
     log_info "Enabling contrib repository in apt sources..."
     if [ -f /etc/apt/sources.list ]; then
         sudo sed -i 's/^deb \(.*\) main$/deb \1 main contrib non-free-firmware/' /etc/apt/sources.list
@@ -297,10 +306,11 @@ install_debian_ubuntu_packages() {
     sudo apt update -y && sudo apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
 
     log_info "Installing development dependencies and CLI tools..."
-    sudo apt install -y make gcc ripgrep fd-find tree-sitter-cli git xclip wl-clipboard curl wget unzip zip tar rsync jq socat lsof p7zip-full gnupg mosh axel zsh ssh eza bat sqlite3 zoxide fzf nnn clang tmux nala locales dos2unix btop alacritty fastfetch
+    sudo apt install -y make gcc ripgrep fd-find git xclip wl-clipboard curl wget unzip zip tar rsync jq socat lsof p7zip-full gnupg mosh axel zsh ssh bat sqlite3 zoxide fzf nnn clang tmux locales dos2unix btop adb || true
 
-    log_info "Installing Android tools (adb, scrcpy)..."
-    sudo apt install -y adb scrcpy || log_warn "Some Android tools may not be available in your repo. Install scrcpy via snap or from GitHub releases if needed."
+    for opt_pkg in tree-sitter-cli fastfetch scrcpy alacritty nala eza; do
+        sudo apt install -y "$opt_pkg" 2>/dev/null || true
+    done
 
     log_info "Configuring UTF-8 locales..."
     if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
@@ -645,6 +655,21 @@ if [ "$OS" != "Termux" ]; then
             log_success "oxker installed."
         else
             log_success "oxker is already installed."
+        fi
+
+        if ! command -v eza &> /dev/null; then
+            log_info "Installing eza via Cargo..."
+            cargo install eza --locked
+            log_success "eza installed."
+        else
+            log_success "eza is already installed."
+        fi
+
+        if ! command -v tree-sitter &> /dev/null; then
+            if command -v bun &> /dev/null; then
+                log_info "Installing tree-sitter-cli via Bun..."
+                bun add -g tree-sitter-cli
+            fi
         fi
     fi
 
