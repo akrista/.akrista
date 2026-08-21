@@ -908,6 +908,7 @@ if [ "$FORCE" = true ] || [ ! -e "$OXKER_CONFIG_FILE" ]; then
 
     if [ "$OXKER_BACKEND" = "podman" ]; then
         log_info "Configuring oxker for Podman (uid $(id -u))..."
+        rm -f "$OXKER_CONFIG_FILE"
         sed "s/__OXKER_UID__/$(id -u)/" "$DOTFILES_DIR/config/oxker/config.podman.toml" > "$OXKER_CONFIG_FILE"
         if command -v podman &> /dev/null && ! systemctl --user is-active --quiet podman.socket; then
             log_info "Enabling podman.socket (user) for oxker..."
