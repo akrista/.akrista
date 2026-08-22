@@ -3,7 +3,7 @@ name: masonite-best-practices
 description: "Apply this skill whenever writing, reviewing, or refactoring Masonite Python code. This includes creating or modifying controllers, models, migrations, validation, jobs, scheduled commands, service providers, and Masonite ORM queries. Triggers for N+1 and query performance issues, caching strategies, authorization and security patterns, validation, error handling, queue and job configuration, route definitions, and architectural decisions. Also use for Masonite code reviews and refactoring existing Masonite code to follow best practices. Covers any task involving Masonite backend Python code patterns."
 license: MIT
 metadata:
-  author: masonite
+  author: Jorge Thomas
 ---
 
 # Masonite Best Practices
