@@ -16,6 +16,10 @@ if command -v git >/dev/null 2>&1; then
   alias g="git"
 fi
 
+if command -v workmux >/dev/null 2>&1; then
+  alias wm="workmux"
+fi
+
 if command -v nvim >/dev/null 2>&1; then
   alias nv="nvim"
   alias v="nvim"

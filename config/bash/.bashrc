@@ -44,7 +44,7 @@ if command -v go >/dev/null 2>&1; then
   export PATH="$(go env GOPATH)/bin:$PATH"
 fi
 
-export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:/usr/games:$PATH"
 
 # uv
 export UV_PYTHON="3.12"
@@ -58,6 +58,11 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.local/share/fnm:$PATH"
 if command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --use-on-cd)"
+fi
+
+# mise
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate bash)"
 fi
 
 # Rust

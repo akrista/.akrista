@@ -32,6 +32,7 @@ irm https://raw.githubusercontent.com/akrista/.akrista/master/install.ps1 | iex
 │   ├── env/                     # .env.local machine-specific environment overrides
 │   ├── ghostty/                 # Ghostty terminal configuration
 │   ├── git/                     # Base .gitconfig + .gitconfig.local
+│   ├── mise/                    # Mise polyglot tool version manager config.toml
 │   ├── omp/                     # Oh My Posh lambdageneration theme
 │   ├── oxker/                   # Docker/Podman TUI container manager
 │   ├── sqlite/                  # .sqliterc prompt & column formatting
@@ -39,6 +40,7 @@ irm https://raw.githubusercontent.com/akrista/.akrista/master/install.ps1 | iex
 │   ├── sshd/                    # 99-hardening.conf server daemon security
 │   ├── termux/                  # Android Termux customizations
 │   ├── tmux/                    # .tmux.conf + TPM plugins
+│   ├── workmux/                 # Workmux git worktree + tmux orchestrator config
 │   ├── zed/                     # Zed Editor settings.json template & MCP servers
 │   ├── zellij/                  # Zellij terminal workspace multiplexer
 │   └── zsh/                     # .zshrc, .zshenv, aliases, prompt, functions (uak)
@@ -63,9 +65,9 @@ irm https://raw.githubusercontent.com/akrista/.akrista/master/install.ps1 | iex
 
 To prevent private credentials (API keys, SSH hosts, proxy URLs, database connection strings) from being tracked by Git while keeping everything organized in a single repository:
 
-1. **Templates in Git**: Clean `.example` files (`settings.json.example`, `.claude.json.example`, `.env.local.example`, `config.local.example`, `opencode.json.example`, `servers.json.example`, `config.json.example`, `mcp_config.json.example`) are tracked in Git.
-2. **Local Active Files**: Real working files (`settings.json`, `.claude.json`, `.env.local`, `config.local`, `opencode.json`, `opencode.global.dat`, `config.json`, `mcp_config.json`) live directly inside `.akrista/config/` and `.akrista/slop/` but are **ignored by `.gitignore`**.
-3. **OS Symlinks**: System target paths (`~/.config/zed/settings.json`, `~/.config/opencode/opencode.json`, `~/.claude/settings.json`, `~/.claude.json`, `~/.gemini/config/config.json`, `~/.gemini/config/mcp_config.json`, `~/.env.local`, `~/.ssh/config.local`) are symlinked directly to their centralized `.akrista` paths.
+1. **Templates in Git**: Clean `.example` files (`settings.json.example`, `.claude.json.example`, `.env.local.example`, `config.local.example`, `opencode.json.example`, `servers.json.example`, `config.json.example`, `mcp_config.json.example`, `hooks.json.example`) are tracked in Git.
+2. **Local Active Files**: Real working files (`settings.json`, `.claude.json`, `.env.local`, `config.local`, `opencode.json`, `opencode.global.dat`, `config.json`, `mcp_config.json`, `hooks.json`) live directly inside `.akrista/config/` and `.akrista/slop/` but are **ignored by `.gitignore`**.
+3. **OS Symlinks**: System target paths (`~/.config/zed/settings.json`, `~/.config/opencode/opencode.json`, `~/.claude/settings.json`, `~/.claude.json`, `~/.gemini/config/config.json`, `~/.gemini/config/mcp_config.json`, `~/.gemini/config/hooks.json`, `~/.env.local`, `~/.ssh/config.local`) are symlinked directly to their centralized `.akrista` paths.
 
 ---
 
@@ -77,7 +79,7 @@ The `slop/` module centralizes configurations for terminal-native and autonomous
 * **OpenCode (`slop/opencode/`)**: Configured with active plugins (`opencode-wakatime`, `@tarquinen/opencode-dcp`, `@dietrichgebert/ponytail`) and local/remote MCP definitions.
 * **Shared MCP Catalog (`slop/mcp/`)**: Reference catalog for stdio/SSE servers (Context7, DBHub, Astro, Svelte, Shadcn, NextJs, Metabase, Stitch).
 * **Pi Coding Agent (`slop/pi/`)**: Terminal-native coding agent configurations.
-* **Antigravity CLI (`slop/agy/`)**: Configured with user settings (`config.json`) and global MCP server definitions (`mcp_config.json`).
+* **Antigravity CLI (`slop/agy/`)**: Configured with user settings (`config.json`), global MCP definitions (`mcp_config.json`), and safe lifecycle hooks (`hooks.json`).
 
 ---
 

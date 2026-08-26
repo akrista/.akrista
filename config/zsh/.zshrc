@@ -114,6 +114,11 @@ if command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --use-on-cd)"
 fi
 
+# mise
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
+
 # Deno
 if [ -s "$HOME/.deno/env" ]; then
   . "$HOME/.deno/env"

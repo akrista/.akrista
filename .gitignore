@@ -10,3 +10,4 @@ slop/claude/.claude.json
 slop/opencode/opencode.global.dat
 slop/agy/config.json
 slop/agy/mcp_config.json
+slop/agy/hooks.json

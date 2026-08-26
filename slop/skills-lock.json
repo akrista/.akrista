@@ -131,7 +131,7 @@
       "source": "pbakaus/impeccable",
       "sourceType": "github",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "computedHash": "37354ec7825c618102ef4c03062c866f95752d799f7825da69438c697e0ee05e"
+      "computedHash": "74a370e8c3daa8045dedbb03b5edabea46043bcf73404dffab1c2d76793df672"
     },
     "industrial-brutalist-ui": {
       "source": "Leonxlnx/taste-skill",
@@ -173,7 +173,7 @@
       "source": "mvanhorn/last30days-skill",
       "sourceType": "github",
       "skillPath": "skills/last30days/SKILL.md",
-      "computedHash": "cf601f245cbbd8aea0cf25d881064a58bf6e89db381d6a1cd3354c0b209e3649"
+      "computedHash": "0fa1adf30cd437a5ff4f6b79ad0dd887520a19f69d46b0dc63776dc72d46ca29"
     },
     "linear-issue-creator": {
       "source": "buYoung/skills",
@@ -197,13 +197,19 @@
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/masonite-best-practices/SKILL.md",
-      "computedHash": "109d4fb377abe98b1540b1057d8cea9254eaaabcd396b347a585ee63a975ba24"
+      "computedHash": "8a2acf9dd5a1d9861c2626b4d14f40262f1c100e1c9c3a5dc81e80ffdc281cc0"
     },
     "masonite-permission-development": {
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/masonite-permission-development/SKILL.md",
       "computedHash": "8910614303331339280561e270b6b534e55f14b59f0c9b069f67629dca80d407"
+    },
+    "masonite-tailwindcss-development": {
+      "source": "akrista/.akrista",
+      "sourceType": "github",
+      "skillPath": "slop/skills/masonite-tailwindcss-development/SKILL.md",
+      "computedHash": "0ad02655fab6238cf908d889a6424efb84cc5b3f9fdf458106ab0bed58cfc7a4"
     },
     "minimalist-ui": {
       "source": "Leonxlnx/taste-skill",

@@ -406,6 +406,14 @@ install_debian_ubuntu_packages() {
             fi
         fi
     fi
+
+    if [ -f "$DOTFILES_DIR/config/environment.d/10-path.conf" ]; then
+        if [ -d "/etc/environment.d" ]; then
+            log_info "Deploying system-wide environment.d configuration..."
+            sudo ln -sf "$DOTFILES_DIR/config/environment.d/10-path.conf" /etc/environment.d/10-path.conf
+            log_success "System-wide environment.d 10-path.conf configured."
+        fi
+    fi
 }
 
 install_fedora_packages() {
@@ -493,6 +501,14 @@ install_fedora_packages() {
                 log_warn "SSHD configuration test failed. Reverting..."
                 sudo rm -f /etc/ssh/sshd_config.d/99-hardening.conf
             fi
+        fi
+    fi
+
+    if [ -f "$DOTFILES_DIR/config/environment.d/10-path.conf" ]; then
+        if [ -d "/etc/environment.d" ]; then
+            log_info "Deploying system-wide environment.d configuration..."
+            sudo ln -sf "$DOTFILES_DIR/config/environment.d/10-path.conf" /etc/environment.d/10-path.conf
+            log_success "System-wide environment.d 10-path.conf configured."
         fi
     fi
 }
@@ -695,12 +711,44 @@ if [ "$OS" != "Termux" ]; then
         uv self update 2>/dev/null || true
     fi
 
+    # mise
+    if ! command -v mise &> /dev/null && [ ! -f "$HOME/.local/bin/mise" ]; then
+        log_info "Installing mise..."
+        curl -fsSL https://mise.run | sh
+    elif command -v mise &> /dev/null || [ -x "$HOME/.local/bin/mise" ]; then
+        log_info "Checking for mise updates..."
+        MISE_BIN="$(command -v mise 2>/dev/null || echo "$HOME/.local/bin/mise")"
+        "$MISE_BIN" self-update -y 2>/dev/null || true
+    fi
+
     # GitHub Copilot CLI
     if command -v copilot &> /dev/null; then
         log_success "GitHub Copilot CLI is already installed."
     else
         log_info "Installing GitHub Copilot CLI..."
         curl -fsSL https://gh.io/copilot-install | bash
+    fi
+
+    if command -v copilot &> /dev/null; then
+        mkdir -p "$HOME/.zsh/completions" "$HOME/.local/share/bash-completion/completions"
+        copilot completion zsh > "$HOME/.zsh/completions/_copilot"
+        copilot completion bash > "$HOME/.local/share/bash-completion/completions/copilot"
+    fi
+
+    # workmux
+    if command -v workmux &> /dev/null || [ -x "$HOME/.local/bin/workmux" ]; then
+        log_info "Checking for workmux updates..."
+        workmux update 2>/dev/null || true
+    else
+        log_info "Installing workmux..."
+        curl -fsSL https://raw.githubusercontent.com/raine/workmux/main/scripts/install.sh | bash
+    fi
+
+    if command -v workmux &> /dev/null || [ -x "$HOME/.local/bin/workmux" ]; then
+        WORKMUX_BIN="$(command -v workmux 2>/dev/null || echo "$HOME/.local/bin/workmux")"
+        mkdir -p "$HOME/.zsh/completions" "$HOME/.local/share/bash-completion/completions"
+        "$WORKMUX_BIN" completions zsh > "$HOME/.zsh/completions/_workmux" 2>/dev/null || true
+        "$WORKMUX_BIN" completions bash > "$HOME/.local/share/bash-completion/completions/workmux" 2>/dev/null || true
     fi
 
     # Tmux Pack (tpack / lightweight TPM)
@@ -922,6 +970,10 @@ else
     log_success "oxker config already exists at $OXKER_CONFIG_FILE. Use --force to reconfigure."
 fi
 
+CONTAINERS_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/containers"
+mkdir -p "$CONTAINERS_CONFIG_DIR"
+link_file "$DOTFILES_DIR/config/containers/containers.conf" "$CONTAINERS_CONFIG_DIR/containers.conf" "containers.conf"
+
 ALACRITTY_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/alacritty"
 mkdir -p "$ALACRITTY_CONFIG_DIR"
 link_file "$DOTFILES_DIR/config/alacritty/alacritty.toml" "$ALACRITTY_CONFIG_DIR/alacritty.toml" "alacritty.toml"
@@ -929,6 +981,14 @@ link_file "$DOTFILES_DIR/config/alacritty/alacritty.toml" "$ALACRITTY_CONFIG_DIR
 ZELLIJ_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zellij"
 mkdir -p "$ZELLIJ_CONFIG_DIR"
 link_file "$DOTFILES_DIR/config/zellij/config.kdl" "$ZELLIJ_CONFIG_DIR/config.kdl" "zellij config.kdl"
+
+MISE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+mkdir -p "$MISE_CONFIG_DIR"
+link_file "$DOTFILES_DIR/config/mise/config.toml" "$MISE_CONFIG_DIR/config.toml" "mise config.toml"
+
+WORKMUX_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/workmux"
+mkdir -p "$WORKMUX_CONFIG_DIR"
+link_file "$DOTFILES_DIR/config/workmux/config.yaml" "$WORKMUX_CONFIG_DIR/config.yaml" "workmux config.yaml"
 
 ZED_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zed"
 mkdir -p "$ZED_CONFIG_DIR"
@@ -942,6 +1002,10 @@ if [ ! -f "$ZED_REPO_LOCAL" ]; then
 fi
 link_file "$ZED_REPO_LOCAL" "$ZED_CONFIG_DIR/settings.json" "zed settings.json"
 link_file "$DOTFILES_DIR/config/zed/keymap.json" "$ZED_CONFIG_DIR/keymap.json" "zed keymap.json"
+
+ENVIRONMENT_D_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/environment.d"
+mkdir -p "$ENVIRONMENT_D_CONFIG_DIR"
+link_file "$DOTFILES_DIR/config/environment.d/10-path.conf" "$ENVIRONMENT_D_CONFIG_DIR/10-path.conf" "environment.d 10-path.conf"
 
 CLAUDE_DIR="$HOME/.claude"
 mkdir -p "$CLAUDE_DIR"
@@ -1013,6 +1077,16 @@ if [ ! -f "$AGY_MCP_LOCAL" ]; then
 fi
 link_file "$AGY_MCP_LOCAL" "$GEMINI_CONFIG_DIR/mcp_config.json" "antigravity mcp_config.json"
 
+AGY_HOOKS_LOCAL="$DOTFILES_DIR/slop/agy/hooks.json"
+if [ ! -f "$AGY_HOOKS_LOCAL" ]; then
+    log_info "Initializing slop/agy/hooks.json from template..."
+    if [ -f "$DOTFILES_DIR/slop/agy/hooks.json.example" ]; then
+        cp "$DOTFILES_DIR/slop/agy/hooks.json.example" "$AGY_HOOKS_LOCAL"
+        chmod 600 "$AGY_HOOKS_LOCAL"
+    fi
+fi
+link_file "$AGY_HOOKS_LOCAL" "$GEMINI_CONFIG_DIR/hooks.json" "antigravity hooks.json"
+
 link_file "$DOTFILES_DIR/slop/skills-lock.json" "$HOME/skills-lock.json" "skills-lock.json"
 
 if [ -f "$DOTFILES_DIR/slop/skills-lock.json" ] && command -v bunx &> /dev/null; then
@@ -1023,6 +1097,8 @@ fi
 GUIDELINES_FILE="$DOTFILES_DIR/slop/guidelines/AGENTS.md"
 if [ -f "$GUIDELINES_FILE" ]; then
     link_file "$GUIDELINES_FILE" "$HOME/.claude/CLAUDE.md" "Claude Code global CLAUDE.md"
+    mkdir -p "$HOME/.copilot"
+    link_file "$GUIDELINES_FILE" "$HOME/.copilot/AGENTS.md" "GitHub Copilot CLI global AGENTS.md"
     mkdir -p "$HOME/.config/opencode"
     link_file "$GUIDELINES_FILE" "$HOME/.config/opencode/AGENTS.md" "OpenCode global AGENTS.md"
     mkdir -p "$HOME/.gemini" "$HOME/.pi/agent"
@@ -1169,6 +1245,13 @@ if (Get-Command uv -ErrorAction SilentlyContinue) {
     Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression
 }
 
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+    Write-LogSuccess "mise is already installed."
+} else {
+    Write-LogInfo "Installing mise..."
+    winget install -e --accept-source-agreements --accept-package-agreements jdx.mise --source winget
+}
+
 # Windows symlink helper with fallback
 function Link-File {
     param (
@@ -1312,6 +1395,14 @@ $zellijDir = Join-Path $HOME ".config\zellij"
 New-Item -ItemType Directory -Path $zellijDir -Force | Out-Null
 Link-File -SourcePath (Join-Path $dotfilesPath "config/zellij/config.kdl") -TargetPath (Join-Path $zellijDir "config.kdl") -Name "zellij config.kdl"
 
+$miseDir = Join-Path $HOME ".config\mise"
+New-Item -ItemType Directory -Path $miseDir -Force | Out-Null
+Link-File -SourcePath (Join-Path $dotfilesPath "config/mise/config.toml") -TargetPath (Join-Path $miseDir "config.toml") -Name "mise config.toml"
+
+$workmuxDir = Join-Path $HOME ".config\workmux"
+New-Item -ItemType Directory -Path $workmuxDir -Force | Out-Null
+Link-File -SourcePath (Join-Path $dotfilesPath "config/workmux/config.yaml") -TargetPath (Join-Path $workmuxDir "config.yaml") -Name "workmux config.yaml"
+
 $zedDir = Join-Path $env:APPDATA "Zed"
 New-Item -ItemType Directory -Path $zedDir -Force | Out-Null
 $zedRepoLocal = Join-Path $dotfilesPath "config/zed/settings.json"
@@ -1396,6 +1487,16 @@ if (-not (Test-Path $agyMcpLocal)) {
 }
 Link-File -SourcePath $agyMcpLocal -TargetPath (Join-Path $geminiConfigDir "mcp_config.json") -Name "antigravity mcp_config.json"
 
+$agyHooksLocal = Join-Path $dotfilesPath "slop/agy/hooks.json"
+if (-not (Test-Path $agyHooksLocal)) {
+    Write-LogInfo "Initializing slop/agy/hooks.json from template..."
+    $agyHooksExample = Join-Path $dotfilesPath "slop/agy/hooks.json.example"
+    if (Test-Path $agyHooksExample) {
+        Copy-Item $agyHooksExample $agyHooksLocal
+    }
+}
+Link-File -SourcePath $agyHooksLocal -TargetPath (Join-Path $geminiConfigDir "hooks.json") -Name "antigravity hooks.json"
+
 $skillsLockLocal = Join-Path $dotfilesPath "slop/skills-lock.json"
 Link-File -SourcePath $skillsLockLocal -TargetPath (Join-Path $HOME "skills-lock.json") -Name "skills-lock.json"
 
@@ -1414,6 +1515,9 @@ if ((Test-Path $skillsLockLocal) -and (Get-Command bunx -ErrorAction SilentlyCon
 $guidelinesFile = Join-Path $dotfilesPath "slop/guidelines/AGENTS.md"
 if (Test-Path $guidelinesFile) {
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $HOME ".claude\CLAUDE.md") -Name "Claude Code global CLAUDE.md"
+    $copilotDir = Join-Path $HOME ".copilot"
+    New-Item -ItemType Directory -Path $copilotDir -Force | Out-Null
+    Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $copilotDir "AGENTS.md") -Name "GitHub Copilot CLI global AGENTS.md"
     $opencodeGlobalDir = Join-Path $HOME ".config\opencode"
     New-Item -ItemType Directory -Path $opencodeGlobalDir -Force | Out-Null
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $opencodeGlobalDir "AGENTS.md") -Name "OpenCode global AGENTS.md"

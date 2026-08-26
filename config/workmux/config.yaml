@@ -1,0 +1,53 @@
+nerdfont: true
+status_format: true
+
+status_icons:
+  working: "🤖"
+  waiting: "💬"
+  done: "✅"
+
+agent: opencode
+
+agents:
+  agy: "agy --dangerously-skip-permissions"
+  claude: "claude --allow-dangerously-skip-permissions"
+  copilot: "copilot --allow-all"
+  opencode: opencode
+  pi: pi
+
+mode: session
+
+windows:
+  - name: editor
+    panes:
+      - command: nvim
+        name: nvim
+        focus: true
+  - name: agy
+    panes:
+      - command: <agent:agy>
+        name: agy
+  - name: opencode
+    panes:
+      - command: <agent:opencode>
+        name: opencode
+  - name: copilot
+    panes:
+      - command: <agent:copilot>
+        name: copilot
+
+files:
+  copy:
+    - .env
+    - .env.local
+    - .env.testing
+  symlink:
+    - .agents
+    - .ai
+    - .claude/settings.local.json
+    - .impeccable/config.local.json
+    - .opencode
+    - .pi
+    - node_modules
+    - vendor
+    - .venv
