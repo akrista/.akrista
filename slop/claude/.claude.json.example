@@ -1,0 +1,83 @@
+{
+  "installMethod": "native",
+  "autoUpdates": false,
+  "theme": "dark",
+  "customApiKeyResponses": {
+    "approved": []
+  },
+  "trustedDirectories": [],
+  "enabledMcpServers": [
+    "context7"
+  ],
+  "disabledMcpServers": [
+    "Astro Docs",
+    "Svelte",
+    "Google Stitch",
+    "Shadcn",
+    "NextJs",
+    "plugin:laravel-boost:laravel-boost",
+    "plugin:atlassian:atlassian",
+    "plugin:Notion:notion"
+  ],
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "<YOUR_CONTEXT7_API_KEY>"
+      }
+    },
+    "Google Stitch": {
+      "type": "http",
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "<YOUR_GOOGLE_API_KEY>"
+      }
+    },
+    "Astro Docs": {
+      "type": "http",
+      "url": "https://mcp.docs.astro.build/mcp"
+    },
+    "Svelte": {
+      "type": "http",
+      "url": "https://mcp.svelte.dev/mcp"
+    },
+    "Shadcn": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "-y",
+        "shadcn@latest",
+        "mcp"
+      ]
+    },
+    "NextJs": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "-y",
+        "next-devtools-mcp@latest"
+      ]
+    },
+    "Metabase": {
+      "type": "http",
+      "url": "${METABASE_MCP_URL}"
+    },
+    "Home <DATABASE_NAME>": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "dbhub",
+        "--transport",
+        "stdio",
+        "--dsn",
+        "sqlserver://<user>:<password>@<host>:1433/<database>"
+      ]
+    }
+  }
+}

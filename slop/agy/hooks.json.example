@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "command": "sh",
+        "args": ["-c", "[ -n \"$TMUX\" ] && workmux set-window-status working || true"]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "command": "sh",
+        "args": ["-c", "[ -n \"$TMUX\" ] && workmux set-window-status working || true"]
+      }
+    ],
+    "AgentIdle": [
+      {
+        "command": "sh",
+        "args": ["-c", "[ -n \"$TMUX\" ] && workmux set-window-status done || true"]
+      }
+    ]
+  }
+}

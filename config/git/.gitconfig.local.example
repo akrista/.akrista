@@ -1,0 +1,7 @@
+# [user]
+#     name = My Work Name
+#     email = work@example.com
+#     signingkey = YOUR_GPG_OR_SSH_KEY
+
+# [commit]
+#     gpgsign = true

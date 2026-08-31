@@ -1,0 +1,21 @@
+type: settings
+config:
+    core:
+        log:
+            level: error
+    dns:
+        nameservers:
+            - dns://192.168.1.1
+            - dns://194.242.2.9
+            - dot://cloudflare-dns.com?ip=1.1.1.2&name=Cloudflare&blockedif=zeroip
+            - dot://cloudflare-dns.com?ip=1.0.0.2&name=Cloudflare&blockedif=zeroip
+            - dns://8.8.8.8
+            - dns://8.8.4.4
+            - dns://1.1.1.1
+            - dns://1.0.0.1
+    filter:
+        blockInbound: false
+        endpoints:
+            - + analytics.google.com
+            - + vpn.hunsterverse.net
+            - + 192.168.1.1/24

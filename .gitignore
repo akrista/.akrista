@@ -1,3 +1,13 @@
 .last_update_check
 .last_upgrade
 .zcompdump*
+*.local
+.env.local
+config/zed/settings.json
+slop/opencode/opencode.json
+slop/claude/settings.json
+slop/claude/.claude.json
+slop/opencode/opencode.global.dat
+slop/agy/config.json
+slop/agy/mcp_config.json
+slop/agy/hooks.json
