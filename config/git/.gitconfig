@@ -3,7 +3,7 @@
 	email = 23145794+Akrista@users.noreply.github.com
 
 [core]
-	autocrlf = input
+	autocrlf = false
 	editor = nvim
 
 [init]
@@ -23,9 +23,3 @@
 
 [include]
 	path = ~/.gitconfig.local
-[credential "https://github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential

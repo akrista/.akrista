@@ -6,15 +6,6 @@ status_icons:
   waiting: "💬"
   done: "✅"
 
-agent: opencode
-
-agents:
-  agy: "agy --dangerously-skip-permissions"
-  claude: "claude --allow-dangerously-skip-permissions"
-  copilot: "copilot --allow-all"
-  opencode: opencode
-  pi: pi
-
 mode: session
 
 windows:
@@ -23,18 +14,27 @@ windows:
       - command: nvim
         name: nvim
         focus: true
-  - name: agy
-    panes:
-      - command: <agent:agy>
-        name: agy
-  - name: opencode
-    panes:
-      - command: <agent:opencode>
-        name: opencode
-  - name: copilot
-    panes:
-      - command: <agent:copilot>
-        name: copilot
+  # - name: agy
+  #   panes:
+  #     - command: <agent:agy>
+  #       name: agy
+  # - name: opencode
+  #   panes:
+  #     - command: <agent:opencode>
+  #       name: opencode
+  # - name: copilot
+  #   panes:
+  #     - command: <agent:copilot>
+  #       name: copilot
+
+agent: opencode
+
+agents:
+  agy: "agy --dangerously-skip-permissions"
+  claude: "claude --allow-dangerously-skip-permissions"
+  copilot: "copilot --allow-all"
+  opencode: opencode
+  pi: pi
 
 files:
   copy:
