@@ -136,3 +136,7 @@ autoload -Uz compinit && compinit
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# Lerd completions
+fpath=(/home/akrista/.local/share/zsh/site-functions $fpath)
+autoload -Uz compinit && compinit
