@@ -49,6 +49,12 @@
       "skillPath": "laravel-nightwatch/skills/configure-nightwatch/SKILL.md",
       "computedHash": "c47f582081a7ec6b9fc4ea72c863fddada67e3d55e2b9b95f979bc536eb9e674"
     },
+    "coordinator": {
+      "source": "raine/workmux",
+      "sourceType": "github",
+      "skillPath": "skills/coordinator/SKILL.md",
+      "computedHash": "915bd0df025927ec39247090774b60bcf99b00da947db1cade6a67a6208d3292"
+    },
     "dbhub": {
       "source": "bytebase/dbhub",
       "sourceType": "github",
@@ -211,6 +217,12 @@
       "skillPath": "slop/skills/masonite-tailwindcss-development/SKILL.md",
       "computedHash": "0ad02655fab6238cf908d889a6424efb84cc5b3f9fdf458106ab0bed58cfc7a4"
     },
+    "merge": {
+      "source": "raine/workmux",
+      "sourceType": "github",
+      "skillPath": "skills/merge/SKILL.md",
+      "computedHash": "2529104266e3368657c6e04b05c527dece31d37ada4917029ae2aa8648c38ee9"
+    },
     "minimalist-ui": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
@@ -241,6 +253,12 @@
       "skillPath": "skills/obsidian-markdown/SKILL.md",
       "computedHash": "0f47297035d7824e7bf0f1984e8145a59a123e2258b5d54c9ac9642f9f77e177"
     },
+    "open-pr": {
+      "source": "raine/workmux",
+      "sourceType": "github",
+      "skillPath": "skills/open-pr/SKILL.md",
+      "computedHash": "f79fdc14a6bbb5e4d0158a659b75a4ec2b0993d60c932e72dc683c4163f578ed"
+    },
     "orchestration": {
       "source": "buYoung/skills",
       "sourceType": "github",
@@ -252,6 +270,12 @@
       "sourceType": "github",
       "skillPath": "skills/react-guide/SKILL.md",
       "computedHash": "1b2420e4b1efe1b05a76fc254266c1a1ae7e509077e0d4f82acf073ead7939cc"
+    },
+    "rebase": {
+      "source": "raine/workmux",
+      "sourceType": "github",
+      "skillPath": "skills/rebase/SKILL.md",
+      "computedHash": "5f16d4376e643b1aaa5ed03c3009f36b0d011663348c965010be15bc969b43c3"
     },
     "redesign-existing-projects": {
       "source": "Leonxlnx/taste-skill",
@@ -390,6 +414,18 @@
       "sourceType": "github",
       "skillPath": "skills/vite-guide/SKILL.md",
       "computedHash": "201880e6dc34c5e3b4a357aa63b41b7f43c667f74c7b6a50dc3a204954e504e2"
+    },
+    "workmux": {
+      "source": "raine/workmux",
+      "sourceType": "github",
+      "skillPath": "skills/workmux/SKILL.md",
+      "computedHash": "831f772bda94807ff9f3e7e7804b4b95788e3e793df273ffbeced0eae8d3b29e"
+    },
+    "worktree": {
+      "source": "raine/workmux",
+      "sourceType": "github",
+      "skillPath": "skills/worktree/SKILL.md",
+      "computedHash": "5bff3a7ad8434ffc8f63ed06085f264d5b65c043bb8046644b6cc4a8dd9bafc5"
     }
   }
 }
