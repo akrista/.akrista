@@ -850,11 +850,17 @@ fi
 if [ -d "$HOME/.zsh/zsh-completions" ]; then
     log_info "Updating zsh-completions..."
     git -C "$HOME/.zsh/zsh-completions" pull -q
-    rm -f "$HOME/.zcompdump"*
+    rm -rf "$HOME/.zcompdump"* "$DOTFILES_DIR/config/zsh/.zcompdump"* 2>/dev/null || true
 else
     log_info "Installing zsh-completions..."
     git clone -q https://github.com/zsh-users/zsh-completions.git "$HOME/.zsh/zsh-completions"
-    rm -f "$HOME/.zcompdump"*
+    rm -rf "$HOME/.zcompdump"* "$DOTFILES_DIR/config/zsh/.zcompdump"* 2>/dev/null || true
+fi
+
+# Secure zsh completion directories against compaudit warnings
+chmod -R go-w "$HOME/.zsh" 2>/dev/null || true
+if [ -d "$HOME/.local/share/zsh" ]; then
+    chmod -R go-w "$HOME/.local/share/zsh" 2>/dev/null || true
 fi
 
 # Oh My Posh

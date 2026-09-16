@@ -44,21 +44,23 @@ export COMPOSE_BAKE=true
 
 # Oh My Zsh
 export ZSH="$HOME/.oh-my-zsh"
+export ZSH_DISABLE_COMPFIX="true"
 ZSH_THEME="robbyrussell"
 zstyle ':omz:update' mode disabled
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 plugins=()
 
-if [ -d "$HOME/.zsh/zsh-completions/src" ]; then
-  fpath=("$HOME/.zsh/zsh-completions/src" $fpath)
-fi
-
-if [ -d "$HOME/.zsh/completions" ]; then
-  fpath=("$HOME/.zsh/completions" $fpath)
-fi
+typeset -U fpath
+[ -d "$HOME/.zsh/zsh-completions/src" ] && fpath=("$HOME/.zsh/zsh-completions/src" $fpath)
+[ -d "$HOME/.zsh/completions" ] && fpath=("$HOME/.zsh/completions" $fpath)
+[ -d "$HOME/.local/share/zsh/site-functions" ] && fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
 
 [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Oh My Zsh"
-source $ZSH/oh-my-zsh.sh
+if [ -d "$ZSH" ] && [ -f "$ZSH/oh-my-zsh.sh" ]; then
+  source "$ZSH/oh-my-zsh.sh"
+else
+  autoload -Uz compinit && compinit -u -d "${ZDOTDIR:-$HOME}/.zcompdump"
+fi
 [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "After Oh My Zsh"
 
 if [ -f "$ZDOTDIR/.zsh_functions" ]; then
@@ -128,11 +130,6 @@ fi
 if [ -d "$HOME/.local/share/lerd/bin" ]; then
   export PATH="$HOME/.local/share/lerd/bin:$PATH"
 fi
-
-if [ -d "$HOME/.local/share/zsh/site-functions" ]; then
-  fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
-fi
-autoload -Uz compinit && compinit
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
