@@ -1100,6 +1100,14 @@ if [ -f "$DOTFILES_DIR/slop/skills-lock.json" ] && command -v bunx &> /dev/null;
     (cd "$HOME" && bunx -y skills experimental_install 2>/dev/null || true)
 fi
 
+# Copilot does not receive these shared workmux skills from the skills CLI on
+# every installation, so expose the canonical ~/.agents/skills copies.
+COPILOT_SKILLS_DIR="$HOME/.copilot/skills"
+mkdir -p "$COPILOT_SKILLS_DIR"
+for skill_name in coordinator merge open-pr rebase workmux worktree; do
+    link_file "$HOME/.agents/skills/$skill_name" "$COPILOT_SKILLS_DIR/$skill_name" "Copilot $skill_name skill"
+done
+
 GUIDELINES_FILE="$DOTFILES_DIR/slop/guidelines/AGENTS.md"
 if [ -f "$GUIDELINES_FILE" ]; then
     link_file "$GUIDELINES_FILE" "$HOME/.claude/CLAUDE.md" "Claude Code global CLAUDE.md"
@@ -1516,6 +1524,17 @@ if ((Test-Path $skillsLockLocal) -and (Get-Command bunx -ErrorAction SilentlyCon
     } finally {
         Pop-Location
     }
+}
+
+# Keep Copilot pointed at the canonical shared workmux skills restored by the
+# skills CLI.
+$copilotSkillsDir = Join-Path $HOME ".copilot\skills"
+New-Item -ItemType Directory -Path $copilotSkillsDir -Force | Out-Null
+@("coordinator", "merge", "open-pr", "rebase", "workmux", "worktree") | ForEach-Object {
+    $skillName = $_
+    Link-File -SourcePath (Join-Path $HOME ".agents\skills\$skillName") `
+        -TargetPath (Join-Path $copilotSkillsDir $skillName) `
+        -Name "Copilot $skillName skill"
 }
 
 $guidelinesFile = Join-Path $dotfilesPath "slop/guidelines/AGENTS.md"
