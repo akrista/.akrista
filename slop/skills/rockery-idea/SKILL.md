@@ -1,19 +1,19 @@
 ---
 name: rockery-idea
-description: Capture half-baked concepts, brainstorms, and rough thoughts for a Quartz/Obsidian digital garden. Use whenever the user says "capture an idea", "brainstorm", "idea note", "half-baked thought", "rough concept", "think out loud about", or wants to record an in-progress thought, hypothesis, or creative spark. Also use when the user has a raw concept that needs a home before it becomes a full topic or project. Do NOT use for daily notes, topics, projects, or tasks — those have their own skills.
+description: Capture half-baked concepts, brainstorms, and rough thoughts for a Quartz/Obsidian digital garden. Use whenever the user says "capture an idea", "brainstorm", "idea note", "half-baked thought", "rough concept", "think out loud about", or wants to record an in-progress thought, hypothesis, or creative spark. Also use when the user has a raw concept that needs a home before it becomes a full topic or project. Do NOT use for daily notes, topics, projects, or tasks: those have their own skills.
 license: MIT
 metadata:
   author: Jorge Thomas
 ---
 
-Capture idea notes — half-baked concepts, brainstorms, and rough thoughts that don't yet warrant a full topic or project doc. You are generating a complete, production-ready markdown file in the established Rockery style.
+Capture idea notes: half-baked concepts, brainstorms, and rough thoughts that don't yet warrant a full topic or project doc. You are generating a complete, production-ready markdown file in the established Rockery style.
 
 ## Content routing
 
 Determine privacy:
 
-- **Public**: `content/ideas/<slug>.md` — for half-baked concepts you're comfortable sharing
-- **Private**: `content/private/ideas/<slug>.md` — for personal brainstorms or sensitive concepts
+- **Public**: `content/ideas/<slug>.md`: for half-baked concepts you're comfortable sharing
+- **Private**: `content/private/ideas/<slug>.md`: for personal brainstorms or sensitive concepts
 
 Default to **private** when in doubt about sensitivity. If the idea references company names, people, or anything non-public, route to private.
 
@@ -70,7 +70,7 @@ Why does this idea have potential? What problem does it solve or what curiosity 
 
 ### For raw, loosely-formed ideas
 
-Free-form is fine — a bullet list, a paragraph, even a single question. Examples of valid formats:
+Free-form is fine: a bullet list, a paragraph, even a single question. Examples of valid formats:
 
 - A list of questions about a topic
 - A rough sketch of a system or flow
@@ -95,4 +95,4 @@ Use generic placeholders for any sensitive references:
 
 ## Evolving an idea
 
-Ideas are the seed stage. A user may later ask to promote an idea into a topic or project — that's handled by those respective skills. This skill is only for the initial capture.
+Ideas are the seed stage. A user may later ask to promote an idea into a topic or project; that is handled by those respective skills. This skill is only for the initial capture.

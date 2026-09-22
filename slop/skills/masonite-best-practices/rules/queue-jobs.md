@@ -12,7 +12,7 @@ Jobs are classes with a `handle` method (and optionally a `failed` method). Buil
 
 ## Retries and Failure Handling
 
-- Design jobs to be idempotent — a retry must not duplicate effects (guard inserts with `first_or_create`, unique constraints, or a processed-flag).
+- Design jobs to be idempotent: a retry must not duplicate effects (guard inserts with `first_or_create`, unique constraints, or a processed-flag).
 - Implement `failed()` to log or notify instead of silently swallowing.
 - Keep job payloads small and serializable; pass IDs, not ORM objects.
 

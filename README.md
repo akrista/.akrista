@@ -1,4 +1,4 @@
-# 🛠️ .akrista — Cross-Platform Developer Environment & AI Toolbelt
+# 🛠️ .akrista: Cross-Platform Developer Environment & AI Toolbelt
 
 Unified, cross-platform configuration hub and AI agent environment powering developer workflows across **Debian/Ubuntu Linux**, **Android (Termux)**, and **Windows**.
 
@@ -54,7 +54,7 @@ irm https://raw.githubusercontent.com/akrista/.akrista/master/install.ps1 | iex
 │   │   └── AGENTS.md            # 🧭 Single global guideline file, symlinked into every tool
 │   ├── agy/                     # Antigravity CLI configuration (config.json, mcp_config.json)
 │   ├── pi/                      # Pi Coding Agent configurations
-│   └── skills-lock.json         # 🔒 Skills lockfile — custom AND community skills alike
+│   └── skills-lock.json         # 🔒 Skills lockfile for custom and community skills
 │
 └── install.ps1                  # Polyglot Bash/PowerShell cross-platform automated installer
 ```
@@ -85,7 +85,7 @@ The `slop/` module centralizes configurations for terminal-native and autonomous
 
 ## 🧠 Agent Skills Architecture
 
-There is a single mechanism for every skill, custom or community — the [`skills`](https://skills.sh) CLI and `slop/skills-lock.json`. There is no separate hand-symlinked path for skills you wrote yourself.
+There is a single mechanism for every skill, custom or community: the [`skills`](https://skills.sh) CLI and `slop/skills-lock.json`. There is no separate hand-symlinked path for skills you wrote yourself.
 
 1. **Custom Skills (`slop/skills/<skill-name>/`)**:
    Your own hand-authored skills, tracked directly in Git as a flat `SKILL.md` folder per skill (e.g. `slop/skills/tsql-development/`). They're registered in `slop/skills-lock.json` exactly like a community skill, just sourced from this repo itself (`source: "Akrista/.akrista"`) instead of someone else's.
@@ -100,6 +100,6 @@ There is a single mechanism for every skill, custom or community — the [`skill
    ```
    Installed skills are locked in `slop/skills-lock.json`.
 3. **Universal Deployment**:
-   `install.ps1` runs `bunx skills experimental_install`, which restores every locked skill — custom and community alike — to:
+   `install.ps1` runs `bunx skills experimental_install`, which restores every locked skill (custom and community alike) to:
    * **Universal Agent Skills**: `~/.agents/skills/` (read by Antigravity, OpenCode, Codex, Cursor)
    * **Claude Code Skills**: `~/.claude/skills/`

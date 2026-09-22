@@ -1,6 +1,6 @@
 ---
 name: tsql-development
-description: "Develops and maintains Transact-SQL (TSQL) objects for Microsoft SQL Server — stored procedures, views, functions, tables, and indexes. Activates when creating, modifying, or debugging SQL files; writing SELECT/INSERT/UPDATE/DELETE queries; designing stored procedures or views; working with JOINs, CTEs, MERGE, or window functions; handling date formatting, type conversions, error handling, or performance tuning; or when the user mentions SQL, TSQL, stored procedure, view, query, table, index, or any database schema work."
+description: "Develops and maintains Transact-SQL (TSQL) objects for Microsoft SQL Server (stored procedures, views, functions, tables, and indexes). Activates when creating, modifying, or debugging SQL files; writing SELECT/INSERT/UPDATE/DELETE queries; designing stored procedures or views; working with JOINs, CTEs, MERGE, or window functions; handling date formatting, type conversions, error handling, or performance tuning; or when the user mentions SQL, TSQL, stored procedure, view, query, table, index, or any database schema work."
 license: MIT
 metadata:
   author: Jorge Thomas
@@ -23,7 +23,7 @@ Activate this skill when:
 
 - Use 4 spaces for indentation (never tabs)
 - Keywords in UPPERCASE (`SELECT`, `FROM`, `WHERE`, `JOIN`, etc.)
-- Identifiers in PascalCase or snake_case — be consistent within a file
+- Identifiers in PascalCase or snake_case: be consistent within a file
 - Align columns vertically in SELECT statements when it improves readability
 
 ## Naming Conventions
@@ -54,7 +54,7 @@ Every stored procedure, function, and view must include a header block:
 
 ### Schema Qualification
 
-Always qualify objects with their schema — write `dbo.Customers`, never just `Customers`. This prevents ambiguity and accidental resolution to the wrong schema.
+Always qualify objects with their schema: write `dbo.Customers`, never just `Customers`. This prevents ambiguity and accidental resolution to the wrong schema.
 
 ### SET NOCOUNT ON
 
@@ -112,7 +112,7 @@ FROM dbo.Orders o;
 
 **Naming convention for formatted columns:** append `Formatted` to the original column name (e.g., `OrderDate` / `OrderDateFormatted`), or use a contextually clear alias if the view already has an established naming pattern.
 
-When the view or SP is purely for programmatic consumption (API, ETL, joins), skip the formatted column — raw dates are sufficient.
+When the view or SP is purely for programmatic consumption (API, ETL, joins), skip the formatted column; raw dates are sufficient.
 
 ## Type Conversions: Always Use TRY_ Variants
 
@@ -124,7 +124,7 @@ When converting or casting data types, **always use `TRY_CAST` and `TRY_CONVERT`
 | `TRY_CONVERT(DATE, value, 103)` | `CONVERT(DATE, value, 103)` |
 | `TRY_CAST(value AS DECIMAL(18,2))` | `CAST(value AS DECIMAL(18,2))` |
 
-**Example — safe date conversion:**
+**Example: safe date conversion:**
 
 ```sql
 SELECT
@@ -139,13 +139,13 @@ The only exception is when you are 100% certain the source data is clean and the
 
 ### Columns
 
-- Never use `SELECT *` in production code — explicitly list every column
+- Never use `SELECT *` in production code; explicitly list every column
 - Use meaningful table aliases (`o` for Orders, `c` for Customers) and reference them consistently
 
 ### Joins
 
 - Prefer `INNER JOIN` / `LEFT JOIN` syntax over comma-separated joins
-- Use `EXISTS` instead of `IN` for subquery existence checks — it short-circuits and performs better
+- Use `EXISTS` instead of `IN` for subquery existence checks: it short-circuits and performs better
 
 ### Null Handling
 
@@ -154,7 +154,7 @@ The only exception is when you are 100% certain the source data is clean and the
 
 ### Set Operations
 
-- Use `UNION ALL` instead of `UNION` when you know duplicates are not a concern — it avoids an expensive distinct sort
+- Use `UNION ALL` instead of `UNION` when you know duplicates are not a concern: it avoids an expensive distinct sort
 
 ### CTEs and Window Functions
 
@@ -169,14 +169,14 @@ Use the `MERGE` statement for insert-or-update patterns. Pair with the `OUTPUT` 
 ## Performance Considerations
 
 - Create indexes on foreign keys and frequently filtered columns
-- Avoid wrapping columns in functions inside `WHERE` clauses — this prevents index usage. Instead, transform the comparison value.
+- Avoid wrapping columns in functions inside `WHERE` clauses: this prevents index usage. Instead, transform the comparison value.
 - Use `TOP` or `OFFSET...FETCH NEXT` for pagination
-- Use `WITH (NOLOCK)` only when stale reads are acceptable — never on financial or transactional data
-- For dynamic SQL, use `EXEC sp_executesql @sql, @params` with parameters — never concatenate user input into SQL strings
+- Use `WITH (NOLOCK)` only when stale reads are acceptable; never on financial or transactional data
+- For dynamic SQL, use `EXEC sp_executesql @sql, @params` with parameters; never concatenate user input into SQL strings
 
 ## Security
 
-- Always use parameterized queries — never build SQL via string concatenation
+- Always use parameterized queries; never build SQL via string concatenation
 - Grant minimum required permissions (principle of least privilege)
 - Use schema-level security when appropriate
 - Prefer parameterized stored procedures over ad-hoc queries for application access
@@ -239,7 +239,7 @@ INNER JOIN dbo.Orders o ON c.CustomerId = o.CustomerId;
 
 ## Validation Before Finalizing
 
-This is the canonical validation workflow — other project-specific skills can reference this section instead of repeating it.
+This is the canonical validation workflow; other project-specific skills can reference this section instead of repeating it.
 
 Before writing or updating any SQL file on disk, validate the core query logic against real data:
 
@@ -250,9 +250,9 @@ Before writing or updating any SQL file on disk, validate the core query logic a
 5. Wait for explicit user confirmation that the output looks correct
 6. Only then write the file to disk
 
-If the query fails, fix it and re-run before showing results — never present broken SQL for approval.
+If the query fails, fix it and re-run before showing results; never present broken SQL for approval.
 
-**If the query times out** (common on heavy views): simplify — query a source table directly to verify the filter column values exist, or drop the `ORDER BY`. The goal is to confirm the logic is sound, not to replicate the full object's performance.
+**If the query times out** (common on heavy views): simplify by querying a source table directly to verify the filter column values exist, or drop the `ORDER BY`. The goal is to confirm the logic is sound, not to replicate the full object's performance.
 
 **Format for sharing results:**
 ```
@@ -266,11 +266,11 @@ Do the results look correct? Do you confirm creating the file?
 
 ## Common Pitfalls
 
-- Using `CAST` / `CONVERT` instead of `TRY_CAST` / `TRY_CONVERT` — leads to hard failures on dirty data
-- Missing the formatted date column on human-facing views — forces consumers to format dates themselves
-- Forgetting `SET NOCOUNT ON` — causes unnecessary row-count messages
-- Using `SELECT *` — breaks when columns change and hides intent
-- Missing schema qualification — can resolve to the wrong schema
-- Wrapping columns in functions in WHERE clauses — kills index usage
-- Using `UNION` when `UNION ALL` would suffice — adds unnecessary sort overhead
-- String-concatenated dynamic SQL — SQL injection risk
+- Using `CAST` / `CONVERT` instead of `TRY_CAST` / `TRY_CONVERT`: leads to hard failures on dirty data
+- Missing the formatted date column on human-facing views: forces consumers to format dates themselves
+- Forgetting `SET NOCOUNT ON`: causes unnecessary row-count messages
+- Using `SELECT *`: breaks when columns change and hides intent
+- Missing schema qualification: can resolve to the wrong schema
+- Wrapping columns in functions in WHERE clauses: kills index usage
+- Using `UNION` when `UNION ALL` would suffice: adds unnecessary sort overhead
+- String-concatenated dynamic SQL: SQL injection risk

@@ -1,6 +1,6 @@
 # Caching Best Practices
 
-Masonite's `CacheProvider` registers the `cache` container binding. Use it for expensive, slow-changing values — never as a substitute for correct queries.
+Masonite's `CacheProvider` registers the `cache` container binding. Use it for expensive, slow-changing values, never as a substitute for correct queries.
 
 ## Basic Usage
 
@@ -34,7 +34,7 @@ A short TTL (seconds to minutes) is a safety net, not the primary mechanism.
 
 ## Memoization
 
-For repeated pure computation inside a request, prefer Python-level memoization or module-level caching over the store — only cross-request data needs the cache service.
+For repeated pure computation inside a request, prefer Python-level memoization or module-level caching over the store; only cross-request data needs the cache service.
 
 ## Don't Cache What's Already Fast
 

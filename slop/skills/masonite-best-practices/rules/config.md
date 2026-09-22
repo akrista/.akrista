@@ -26,8 +26,8 @@ Match the repo's existing config access pattern.
 
 ## Provider Registration
 
-Services are enabled by registering providers in `config/providers.py` and, when needed, wiring them in `app/Kernel.py`. Adding a new framework feature means registering its provider — don't hand-roll the integration if the framework ships one.
+Services are enabled by registering providers in `config/providers.py` and, when needed, wiring them in `app/Kernel.py`. Adding a new framework feature means registering its provider; don't hand-roll the integration if the framework ships one.
 
 ## Keep Configuration Minimal
 
-Don't add config keys nothing reads. YAGNI — a value that never varies belongs in code, not config.
+Don't add config keys nothing reads. YAGNI: a value that never varies belongs in code, not config.

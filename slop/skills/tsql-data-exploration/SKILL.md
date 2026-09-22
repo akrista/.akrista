@@ -21,13 +21,13 @@ Activate this skill when:
 
 ## MCP Provider
 
-This project uses [`dbhub`](https://github.com/bytebase/dbhub) (`@bytebase/dbhub`) as its MCP provider — one dbhub server instance per database, each exposing two tools: `execute_sql` and `search_objects`. See dbhub's own README for the tools required to run it on your OS.
+This project uses [`dbhub`](https://github.com/bytebase/dbhub) (`@bytebase/dbhub`) as its MCP provider: one dbhub server instance per database, each exposing two tools: `execute_sql` and `search_objects`. See dbhub's own README for the tools required to run it on your OS.
 
-Connections are declared as MCP servers named after the database they point to (e.g. `SourceSystemDB`, `CentralDataWarehouse`). Set these up in a project-level `.mcp.json` (never committed — see `.gitignore` rules in `AGENTS.md`); copy `.mcp.json.example` and fill in your `.env` credentials. If your servers instead live in your global Claude Code config, the same server names and tools apply.
+Connections are declared as MCP servers named after the database they point to (e.g. `SourceSystemDB`, `CentralDataWarehouse`). Set these up in a project-level `.mcp.json` (never committed; see `.gitignore` rules in `AGENTS.md`); copy `.mcp.json.example` and fill in your `.env` credentials. If your servers instead live in your global Claude Code config, the same server names and tools apply.
 
 ### MCP Connections (SQL Server, unless noted)
 
-Naming is illustrative — adjust to whatever MCP server names your project actually uses.
+Naming is illustrative; adjust to whatever MCP server names your project actually uses.
 
 | MCP Server | Purpose |
 |------------|---------|
@@ -43,16 +43,16 @@ Naming is illustrative — adjust to whatever MCP server names your project actu
 | `AppDataFeedA` / `AppDataFeedB` | Additional integration data feeds |
 | `SpecialtyDataDB` | Specialty domain dataset (e.g. a non-SQL-Server engine like MariaDB) |
 
-Not every database needs to be enabled for every task — enable only the MCP servers relevant to what you're working on.
+Not every database needs to be enabled for every task; enable only the MCP servers relevant to what you're working on.
 
 ### MCP Tools Reference
 
 | Tool | Purpose | When to Use |
 |------|---------|-------------|
 | `search_objects` | List/inspect schemas, tables, views, columns, procedures, functions, indexes (`object_type` + optional `pattern`, `table`, `schema`, `detail_level`) | First step when exploring an unfamiliar database, or to check a table's/procedure's structure before writing JOINs |
-| `execute_sql` | Run any SQL statement — SELECT, INSERT/UPDATE/DELETE, DDL | Exploring data, validating results, debugging views, and (with caution — confirm with user first) modifying data or schema |
+| `execute_sql` | Run any SQL statement (SELECT, INSERT/UPDATE/DELETE, DDL) | Exploring data, validating results, debugging views, and (with caution; confirm with user first) modifying data or schema |
 
-`search_objects` replaces the old `list_tables`/`describe_table` split — pass `object_type: "table"` with no pattern to list tables, or `object_type: "column"` with `table`+`schema` to describe one. `execute_sql` replaces `read_query`/`write_query`/`export_query`/`create_table`/`alter_table`/`drop_table` — there's no dedicated export tool, so export by running the query and writing the result to a file yourself when needed. There's no `append_insight` equivalent — note findings in your response to the user instead.
+`search_objects` replaces the old `list_tables`/`describe_table` split: pass `object_type: "table"` with no pattern to list tables, or `object_type: "column"` with `table`+`schema` to describe one. `execute_sql` replaces `read_query`/`write_query`/`export_query`/`create_table`/`alter_table`/`drop_table`: there is no dedicated export tool, so export by running the query and writing the result to a file yourself when needed. There is no `append_insight` equivalent: note findings in your response to the user instead.
 
 ## Exploration Workflow
 
@@ -66,7 +66,7 @@ Start by listing tables and describing the ones relevant to the task:
 search_objects (object_type: table) → identify relevant tables → search_objects (object_type: column, table: <name>) for each
 ```
 
-Pay attention to column types, nullable columns, and foreign key relationships — they inform how to write correct JOINs and WHERE clauses.
+Pay attention to column types, nullable columns, and foreign key relationships; they inform how to write correct JOINs and WHERE clauses.
 
 ### 2. Sample the Data
 
@@ -76,7 +76,7 @@ Run a quick `SELECT TOP 10` to understand what the data actually looks like:
 SELECT TOP 10 * FROM dbo.TableName;
 ```
 
-This is the one place where `SELECT *` is acceptable — you're exploring, not building production queries. Look for patterns in the data: null values, date formats, unexpected values, encoding issues.
+This is the one place where `SELECT *` is acceptable: you're exploring, not building production queries. Look for patterns in the data: null values, date formats, unexpected values, encoding issues.
 
 ### 3. Validate or Debug
 
@@ -89,7 +89,7 @@ When validating a view or stored procedure, compare its output against the sourc
 
 ### 4. Document Findings
 
-When you discover something important — a data quality issue, an unexpected pattern, or a business rule embedded in the data — call it out explicitly in your response to the user. There's no dedicated MCP tool for this; the finding lives in the conversation.
+When you discover something important (such as a data quality issue, an unexpected pattern, or a business rule embedded in the data), call it out explicitly in your response to the user. There's no dedicated MCP tool for this; the finding lives in the conversation.
 
 ## Query Guidelines for Exploration
 
@@ -124,7 +124,7 @@ When comparing data across databases, you cannot JOIN across MCP connections. In
 
 ### Performance-Aware Exploration
 
-- Use `TOP` to limit results during exploration — avoid pulling entire tables
+- Use `TOP` to limit results during exploration; avoid pulling entire tables
 - Add `WHERE` filters early to narrow the dataset
 - If a query is slow, check if the filtered columns have indexes via `search_objects` (`object_type: index`)
 
@@ -132,9 +132,9 @@ When comparing data across databases, you cannot JOIN across MCP connections. In
 
 Before executing any write via `execute_sql` (INSERT, UPDATE, DELETE, DDL):
 
-1. Run a SELECT via `execute_sql` first to preview exactly which rows will be affected — show this to the user
+1. Run a SELECT via `execute_sql` first to preview exactly which rows will be affected; show this to the user
 2. Present a summary: *"This change will affect N rows in [table]. Do you confirm execution?"*
-3. Wait for explicit confirmation before executing the write — never proceed on silence or ambiguity
+3. Wait for explicit confirmation before executing the write; never proceed on silence or ambiguity
 4. For multi-statement operations, wrap in a `BEGIN TRANSACTION` and explain the rollback plan to the user before starting
 5. Use `OUTPUT` clause to capture what was changed
 6. After execution, show the row count affected and a sample of changed rows

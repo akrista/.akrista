@@ -61,14 +61,14 @@ Order by typical latency, compensating for frequency of access:
 Batch operations to amortize fixed costs (syscalls, network round trips, allocations):
 
 ```text
-// GOOD: Batch writes — one system call
+// GOOD: Batch writes (one system call)
 function flushBatch(messages):
     buffer = []
     for msg in messages:
         buffer.append(msg.data)
     disk.writeAll(buffer)
 
-// BAD: Individual writes — one system call per message
+// BAD: Individual writes (one system call per message)
 function processMessage(msg):
     disk.write(msg.data)
 ```
@@ -81,7 +81,7 @@ Separate infrequent control operations from hot data paths:
 // Control plane: Setup, config (can be slow, heavily validated)
 function configure(options):
     assert(options.isValid())
-    // complex setup — happens once
+    // complex setup (happens once)
 
 // Data plane: Hot path (fast, batched, minimal work)
 function processData(data):
@@ -108,7 +108,7 @@ function sumValues(values):
         sum += v
     return sum
 
-// BAD: Unpredictable branches — branch mispredictions stall the pipeline
+// BAD: Unpredictable branches: branch mispredictions stall the pipeline
 function sumValues(values):
     sum = 0
     for v in values:
@@ -144,7 +144,7 @@ Be explicit about what you want. Don't rely on defaults that could change:
 // GOOD: Explicit options
 prefetch(pointer, cache: DATA, rw: READ, locality: 3)
 
-// BAD: Rely on defaults — what if defaults change in version N+1?
+// BAD: Rely on defaults (what if defaults change in version N+1?)
 prefetch(pointer)
 ```
 

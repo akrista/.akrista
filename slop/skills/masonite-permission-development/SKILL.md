@@ -1,6 +1,6 @@
 ---
 name: masonite-permission-development
-description: Build and work with the tenant-scoped RBAC permission system in this Masonite app — roles, permissions, pivot tables, the `permission:slug` middleware, `User.can()`, and seeding the permission catalog.
+description: Build and work with the tenant-scoped RBAC permission system in this Masonite app: roles, permissions, pivot tables, the `permission:slug` middleware, `User.can()`, and seeding the permission catalog.
 license: MIT
 metadata:
   author: Jorge Thomas
@@ -8,7 +8,7 @@ metadata:
 
 # Masonite Permission Development
 
-This skill documents the RBAC pattern used in this application. It is a custom, tenant-scoped roles/permissions system built on Masonite ORM models — not a package.
+This skill documents the RBAC pattern used in this application. It is a custom, tenant-scoped roles/permissions system built on Masonite ORM models, not a package.
 
 ## Core Concepts
 
@@ -21,10 +21,10 @@ This skill documents the RBAC pattern used in this application. It is a custom, 
 
 The four tables and their pivots (see `databases/migrations/2026_08_05_000001_create_rbac_tables.py`):
 
-- `roles` — `name`, `slug`, `tenant_id`; unique on `["tenant_id", "slug"]`.
-- `permissions` — global catalog; `slug` (unique) + `name`.
-- `permission_role` — pivot: `role_id` ↔ `permission_id`.
-- `role_user` — pivot: `user_id` ↔ `role_id`.
+- `roles`: `name`, `slug`, `tenant_id`; unique on `["tenant_id", "slug"]`.
+- `permissions`: global catalog; `slug` (unique) + `name`.
+- `permission_role`: pivot: `role_id` ↔ `permission_id`.
+- `role_user`: pivot: `user_id` ↔ `role_id`.
 
 Relationships live on the models:
 
@@ -51,7 +51,7 @@ class User(Model, Authenticates, Notifiable):
 
 ## Authorization Checks
 
-Always use `user.can(slug)` — it honors the `is_owner` bypass:
+Always use `user.can(slug)`; it honors the `is_owner` bypass:
 
 ```python
 if not user.can("users.manage"):
@@ -76,8 +76,8 @@ Route.get("/users", "UserController@index").middleware(
 
 The catalog lives in `app/utils/rbac.py` as `PERMISSIONS = [(slug, name), ...]`. Current entries:
 
-- `users.manage` — "Manage users"
-- `roles.manage` — "Manage roles"
+- `users.manage`: "Manage users"
+- `roles.manage`: "Manage roles"
 
 When a new permission is needed, add it to `PERMISSIONS` so `sync_permission_catalog()` picks it up (idempotent).
 
@@ -85,9 +85,9 @@ When a new permission is needed, add it to `PERMISSIONS` so `sync_permission_cat
 
 `app/utils/rbac.py` provides idempotent bootstrap helpers used by migrations and the register flow:
 
-- `sync_permission_catalog()` — `first_or_create` any missing permissions.
-- `ensure_roles(tenant_id)` — creates the standard `admin` / `user` roles for a tenant; the `admin` role gets every catalog permission.
-- `seed_app_basics()` — provisions permissions, a default tenant, roles, and the owner on migrate.
+- `sync_permission_catalog()`: `first_or_create` any missing permissions.
+- `ensure_roles(tenant_id)`: creates the standard `admin` / `user` roles for a tenant; the `admin` role gets every catalog permission.
+- `seed_app_basics()`: provisions permissions, a default tenant, roles, and the owner on migrate.
 
 Use `first_or_create` for roles/permissions so seeding is safe to re-run. For pivot rows, insert via the query builder with `table("permission_role").create({...})` after checking for duplicates.
 
@@ -97,7 +97,7 @@ The reference implementation is `app/controllers/RoleController.py`:
 
 - Every role query is scoped: `Role.where("tenant_id", user.tenant_id)`.
 - `_grantable_permissions(user)` returns permissions the user is allowed to grant (owner sees all; others see only what they themselves hold).
-- `_sync_permissions(request, user, role)` replaces a role's pivot rows, skipping slugs the user may not grant — never let a user escalate beyond their own permissions.
+- `_sync_permissions(request, user, role)` replaces a role's pivot rows, skipping slugs the user may not grant; never let a user escalate beyond their own permissions.
 - Uniqueness of `slug` is enforced per tenant (`where("slug", slug).first()`), plus the DB unique constraint.
 
 ## Tenant Isolation

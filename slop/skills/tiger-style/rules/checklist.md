@@ -8,7 +8,7 @@ Quick validation before committing code. Run through this after writing.
 - [ ] **No recursion**: All traversals use explicit iteration with bounded stack
 - [ ] **Bounded loops**: All loops have explicit upper bounds
 - [ ] **Bounded allocation**: No dynamic allocation on hot paths or from untrusted input sizes
-- [ ] **Errors handled**: No ignored errors — every error is propagated or explicitly handled
+- [ ] **Errors handled**: No ignored errors: every error is propagated or explicitly handled
 - [ ] **Explicit types**: Using `i32`/`u64`/`float64`, not architecture-dependent `int`/`long`
 
 ## Control Flow

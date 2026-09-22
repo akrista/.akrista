@@ -251,7 +251,7 @@ install_termux_packages() {
         termux-change-repo
     fi
 
-    log_info "Installing comprehensive development suite..."
+    log_info "Installing development suite..."
     pkg install -y proot-distro git curl wget neovim termux-api termux-services openssh zsh tree-sitter libllvm make ripgrep fd unzip gitui eza bat oh-my-posh tmux zig clang nnn fzf zoxide rust nodejs sqlite gh lua-language-server stylua dos2unix glibc-runner
 
     # Verify key utilities are functional and repair dependencies if broken

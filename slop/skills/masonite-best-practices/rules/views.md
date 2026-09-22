@@ -31,8 +31,8 @@ Extract repeated markup (nav, forms, table rows) into partial templates and incl
 
 ## Expression Syntax
 
-- `{{ expr }}` — escaped output.
-- `{% if %}`, `{% for %}`, `{% block %}` — control flow.
+- `{{ expr }}`: escaped output.
+- `{% if %}`, `{% for %}`, `{% block %}`: control flow.
 - Filters pipe: `{{ item.permissions | join(', ') }}`.
 
 ## No Inline JS/CSS

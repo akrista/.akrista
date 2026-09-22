@@ -8,13 +8,13 @@ metadata:
 
 # TigerStyle
 
-A coding discipline adapted from TigerBeetle, optimized for **Safety > Performance > Developer Experience** — in that order. The principles are language-agnostic. Every rule serves one of these three priorities.
+A coding discipline adapted from TigerBeetle, optimized for **Safety > Performance > Developer Experience** (in that order). The principles are language-agnostic. Every rule serves one of these three priorities.
 
-> "The design is not just what it looks like and feels like. The design is how it works." — Steve Jobs
+> "The design is not just what it looks like and feels like. The design is how it works." - Steve Jobs
 
 ## Consistency First
 
-Before applying any rule, check what the codebase already does. If the project uses `camelCase` consistently, don't introduce `snake_case` — that's a different convention, and consistency beats any single rule. These rules are defaults for when no pattern exists yet, not overrides.
+Before applying any rule, check what the codebase already does. If the project uses `camelCase` consistently, don't introduce `snake_case`: that's a different convention, and consistency beats any single rule. These rules are defaults for when no pattern exists yet, not overrides.
 
 ## Quick Reference
 
@@ -48,15 +48,15 @@ Before applying any rule, check what the codebase already does. If the project u
 
 - Prototypes or throwaway code where speed of exploration matters more than correctness
 - Code that intentionally trades safety for flexibility (e.g., dynamic configuration loaders)
-- When the codebase already has a well-established, consistently applied set of conventions that contradict a rule — consistency wins
+- When the codebase already has a well-established, consistently applied set of conventions that contradict a rule: consistency wins
 
 ## Severity Definitions
 
 | Severity | Criteria | Examples |
 |----------|----------|----------|
-| **CRITICAL** | Safety risk — will cause bugs | Missing assertions, unbounded loops, unchecked errors, missing else branches |
-| **MAJOR** | Maintainability risk — will cause pain | Function too long, complex control flow, vague naming, no bounds on data structures |
-| **MINOR** | Style — worth fixing, won't block | Formatting drift, comment quality, minor naming improvements |
+| **CRITICAL** | Safety risk: will cause bugs | Missing assertions, unbounded loops, unchecked errors, missing else branches |
+| **MAJOR** | Maintainability risk: will cause pain | Function too long, complex control flow, vague naming, no bounds on data structures |
+| **MINOR** | Style: worth fixing, won't block | Formatting drift, comment quality, minor naming improvements |
 
 ## Philosophical Context
 

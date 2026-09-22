@@ -33,10 +33,10 @@ class CreateRbacTables(Migration):
 - Use the `craft migration` command (`craft migration create_xxx_table`) so the timestamp prefix is consistent. Follow whatever the repo already does.
 - Every table gets a primary key. Masonite ORM convention: `table.integer("id", length=11)` then `table._last_column.set_as_primary()`.
 - Foreign keys get `on_delete` semantics. Use `"cascade"` for ownership (tenant, user) and keep child rows' references consistent.
-- Add `unique()` constraints for dedupe keys — they also create useful indexes (`["tenant_id", "slug"]`).
+- Add `unique()` constraints for dedupe keys; they also create useful indexes (`["tenant_id", "slug"]`).
 - Add `.unique()` or `.index()` on any column you filter or order by (see `rules/db-performance.md`).
 - `table.timestamps()` adds `created_at`/`updated_at`; keep it unless there's a reason not to.
-- `down()` must be the exact inverse of `up()` — drop tables in reverse dependency order (children first).
+- `down()` must be the exact inverse of `up()`: drop tables in reverse dependency order (children first).
 
 ## Data Migrations
 

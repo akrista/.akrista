@@ -1,12 +1,12 @@
 ---
 name: rockery-topic
-description: Create deep-dive topic/reference notes for a Quartz/Obsidian digital garden. Use whenever the user says "write a topic about", "create a topic note", "deep dive on", "reference note on", "documentation for", "tutorial on", or asks to write a detailed reference about a concept, tool, or technology. Also use when the user wants a comprehensive, structured reference — think man-page style with usage, examples, flags, and related topics. Do NOT use for daily notes, ideas, projects, or tasks — those have their own skills.
+description: Create deep-dive topic/reference notes for a Quartz/Obsidian digital garden. Use whenever the user says "write a topic about", "create a topic note", "deep dive on", "reference note on", "documentation for", "tutorial on", or asks to write a detailed reference about a concept, tool, or technology. Also use when the user wants a structured reference (man-page style with usage, examples, flags, and related topics). Do NOT use for daily notes, ideas, projects, or tasks: those have their own skills.
 license: MIT
 metadata:
   author: Jorge Thomas
 ---
 
-Create deep-dive topic/reference notes for the Rockery digital garden. Topics are factual, third-person reference documents structured like mini man pages. You are generating a complete, production-ready markdown file — not a template or draft.
+Create deep-dive topic/reference notes for the Rockery digital garden. Topics are factual, third-person reference documents structured like mini man pages. You are generating a complete, production-ready markdown file, not a template or draft.
 
 ## Content routing
 
@@ -40,7 +40,7 @@ tags:
 ```
 
 Guidelines:
-- **title**: The topic name itself — concise, unquoted string. Examples: `tcpdump`, `SSH Config`, `GCP Fundamentals`
+- **title**: The topic name itself: a concise, unquoted string. Examples: `tcpdump`, `SSH Config`, `GCP Fundamentals`
 - **date**: Today's date in YYYY-MM-DD format
 - **tags**: 3-7 lowercase hyphenated tags. Mix broad (`linux-systems`, `networks`, `security-standards`) and specific (`packet-analyses`, `remote-accesses`). All tags and categories must be pluralized.
 - **Optional Properties**: Standardize and reuse YAML property keys across topics. Keep them compact and composable (e.g. `start` or `end` instead of `start_date` / `end_date`, list types for fields that could contain multiple values).
@@ -49,7 +49,7 @@ Guidelines:
 
 ## Body structure
 
-Every topic note follows this template. Use it as a guide, not a rigid checklist — adapt sections to the specific topic.
+Every topic note follows this template. Use it as a guide, not a rigid checklist; adapt sections to the specific topic.
 
 ### Opening definition
 
@@ -65,12 +65,12 @@ Or for commands:
 
 Use H2 headings for major sections. Common sections include:
 
-- **Basic usage** — show the most common invocation with a code block
-- **Common flags/options** — use a markdown table with `| Flag | Description |`
-- **Examples** — show 2-4 realistic examples with ` ```bash ` or appropriate language tag
-- **Key concepts** — explain what makes this topic interesting or important
-- **Configuration** — if the topic has config files, show format and common options
-- **Related** or **See also** — ALWAYS end with this section containing wikilinks to related topics
+- **Basic usage**: show the most common invocation with a code block
+- **Common flags/options**: use a markdown table with `| Flag | Description |`
+- **Examples**: show 2-4 realistic examples with ` ```bash ` or appropriate language tag
+- **Key concepts**: explain what makes this topic interesting or important
+- **Configuration**: if the topic has config files, show format and common options
+- **Related** or **See also**: ALWAYS end with this section containing wikilinks to related topics
 
 ### Subsections (`###` level)
 
@@ -83,8 +83,8 @@ Every topic note ends with a `## Related` or `## See also` section:
 ```markdown
 ## Related
 
-- [[netstat]] — show active connections and port statistics
-- [[tcpdump]] — capture and analyze live network traffic
+- [[netstat]]: show active connections and port statistics
+- [[tcpdump]]: capture and analyze live network traffic
 ```
 
 ## Writing conventions
@@ -104,17 +104,17 @@ Every topic note ends with a `## Related` or `## See also` section:
 - The first reference to a concept in the note gets a wikilink: `[[Linux]]`
 - Subsequent references to the same concept are plain text
 - Self-referential wikilinks are used (e.g., `[[PowerShell]]` in a PowerShell note)
-- External URLs use standard markdown: `[text](url)` — these are rare, use wikilinks where possible
+- External URLs use standard markdown: `[text](url)`. These are rare; use wikilinks where possible
 
 ### Callouts
-Use sparingly — only when the information needs emphasis. The existing codebase uses `> [!warning]` for security caveats and known issues. This is the right approach: callouts should be the exception, not the rule.
+Use sparingly: only when the information needs emphasis. The existing codebase uses `> [!warning]` for security caveats and known issues. This is the right approach: callouts should be the exception, not the rule.
 
 ### Style
 - Third person, factual, active voice
 - No personal pronouns (no "I", "my", "we")
 - No emojis (they're reserved for the homepage)
-- No hard line wrapping — let lines flow naturally
-- Use em dashes — for parenthetical phrases
+- No hard line wrapping: let lines flow naturally
+- Use commas or parentheses for parenthetical phrases; do not use em dashes
 
 ## Privacy & data sanitization
 

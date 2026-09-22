@@ -1,6 +1,6 @@
 # Model Best Practices (Masonite ORM)
 
-Models wrap one table each. They hold relationships, casts, and domain helpers — not HTTP concerns.
+Models wrap one table each. They hold relationships, casts, and domain helpers, not HTTP concerns.
 
 ## Define Fillable and Hidden Explicitly
 

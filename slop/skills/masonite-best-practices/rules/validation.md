@@ -31,7 +31,7 @@ errors = request.validate(
 
 ## Read Input With Defaults
 
-`request.input(name, default)` returns the default when the field is missing — use this instead of keying into the raw payload:
+`request.input(name, default)` returns the default when the field is missing; use this instead of keying into the raw payload:
 
 ```python
 selected = request.input("permissions", [])

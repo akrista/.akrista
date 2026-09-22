@@ -17,7 +17,7 @@ schedule.command("your:command").daily()  # with a cadence
 
 ## Idempotency and Overlap
 
-- Scheduled tasks must be safe to run twice — the same guardrails as jobs (see `rules/queue-jobs.md`).
+- Scheduled tasks must be safe to run twice: the same guardrails as jobs (see `rules/queue-jobs.md`).
 - Prevent overlapping runs where a long task could still be running when the next tick fires; add a lock/flag the repo already uses or a documented skip.
 
 ## Keep Them Short and Observable

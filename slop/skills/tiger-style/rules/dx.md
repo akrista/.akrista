@@ -6,7 +6,7 @@ DX is the #3 priority (after safety and performance). Good DX makes correctness 
 
 ### Get Nouns and Verbs Right
 
-Names capture the essence of a thing or action. Take time to find the perfect name — it provides a crisp mental model for the reader:
+Names capture the essence of a thing or action. Take time to find the perfect name: it provides a crisp mental model for the reader:
 
 ```text
 // GOOD: Clear what it is and does
@@ -21,7 +21,7 @@ process()       // Process what?
 
 ### Follow the Project's Naming Convention Consistently
 
-The specific convention (`camelCase`, `snake_case`, `PascalCase`) matters less than consistency within the codebase. Check sibling files first. If the project uses `camelCase` for functions, use `camelCase` — don't mix.
+The specific convention (`camelCase`, `snake_case`, `PascalCase`) matters less than consistency within the codebase. Check sibling files first. If the project uses `camelCase` for functions, use `camelCase` (don't mix).
 
 ```text
 // PHP project using camelCase for methods
@@ -163,7 +163,7 @@ buffer = allocate(BATCH_SIZE)
 
 ### Explain Why, Not What
 
-The code already says what it does. Comments should explain **why** the code is the way it is — the rationale, the trade-off, the alternative that was rejected:
+The code already says what it does. Comments should explain **why** the code is the way it is: the rationale, the trade-off, the alternative that was rejected:
 
 ```text
 // GOOD: Explains the rationale
@@ -200,11 +200,11 @@ pages = divideExact(bytes, PAGE_SIZE)
 startPage = divideFloor(offset, PAGE_SIZE)
 blocks = divideCeil(bytes, BLOCK_SIZE)
 
-// BAD: Implicit rounding — which way does it round?
+// BAD: Implicit rounding: which way does it round?
 pages = bytes / PAGE_SIZE
 ```
 
-**Language notes:** PHP has `intdiv()` for floor division. Python uses `//` for floor division. JavaScript's `/` gives floats — use `Math.floor()`, `Math.ceil()`, or `Number.isInteger()`.
+**Language notes:** PHP has `intdiv()` for floor division. Python uses `//` for floor division. JavaScript's `/` gives floats; use `Math.floor()`, `Math.ceil()`, or `Number.isInteger()`.
 
 ### Variables Close to Use
 
@@ -218,13 +218,13 @@ function process():
     result = compute()       // Declared here
     validate(result)         // Used immediately
 
-// BAD: Declared too early — POCPOU gap
+// BAD: Declared too early (POCPOU gap)
 function process():
     result = compute()       // Declared early
 
     // ... 50 lines of other work ...
 
-    validate(result)         // Used much later — was it modified?
+    validate(result)         // Used much later; was it modified?
 ```
 
 ### No Duplicated Variables or Aliases
@@ -235,7 +235,7 @@ Don't take multiple references to the same data. This reduces the probability th
 // GOOD: One reference to rule them all
 data = loadData()
 
-// BAD: Two names for the same thing — they can diverge
+// BAD: Two names for the same thing: they can diverge
 data = loadData()
 alias = data  // No!
 ```
@@ -261,7 +261,7 @@ Dependencies bring supply chain risk, safety/performance unknowns, and maintenan
 
 ### One Toolchain
 
-Standardize on one toolchain for scripting and automation. Avoid adding new languages or tools for auxiliary tasks — use what you already have.
+Standardize on one toolchain for scripting and automation. Avoid adding new languages or tools for auxiliary tasks: use what you already have.
 
 **Language notes:** PHP projects should prefer PHP scripts over Bash/shell scripts for portability. Python projects should prefer Python scripts over Makefiles for cross-platform support.
 
@@ -269,7 +269,7 @@ Standardize on one toolchain for scripting and automation. Avoid adding new lang
 
 ### Rationale in Git History
 
-Store design rationale in commit messages, not PR descriptions. PR descriptions are invisible in `git blame` — commit messages persist forever:
+Store design rationale in commit messages, not PR descriptions. PR descriptions are invisible in `git blame`; commit messages persist forever:
 
 ```text
 // GOOD: Explains why

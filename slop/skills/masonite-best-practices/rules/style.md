@@ -48,4 +48,4 @@ ruff check .
 ruff format --check .
 ```
 
-`ruff format` is the repo's formatter — don't hand-format to fight it. The lint gate includes the `N999` exception already configured in `pyproject.toml`.
+`ruff format` is the repo's formatter; don't hand-format to fight it. The lint gate includes the `N999` exception already configured in `pyproject.toml`.

@@ -2,7 +2,7 @@
 
 ## The Essence Of Style
 
-> “There are three things extremely hard: steel, a diamond, and to know one's self.” — Benjamin
+> “There are three things extremely hard: steel, a diamond, and to know one's self.” - Benjamin
 > Franklin
 
 TigerBeetle's coding style is evolving. A collective give-and-take at the intersection of
@@ -15,7 +15,7 @@ come.
 
 Another word for style is design.
 
-> “The design is not just what it looks like and feels like. The design is how it works.” — Steve
+> “The design is not just what it looks like and feels like. The design is how it works.” - Steve
 > Jobs
 
 Our design goals are safety, performance, and developer experience. In that order. All three are
@@ -40,7 +40,7 @@ concession or a compromise.
 Rather, simplicity is how we bring our design goals together, how we identify the “super idea” that
 solves the axes simultaneously, to achieve something elegant.
 
-> “Simplicity and elegance are unpopular because they require hard work and discipline to achieve” —
+> “Simplicity and elegance are unpopular because they require hard work and discipline to achieve” -
 > Edsger Dijkstra
 
 Contrary to popular belief, simplicity is also not the first attempt but the hardest revision. It's
@@ -57,7 +57,7 @@ and then again by the costs of operation and maintenance.
 An hour or day of design is worth weeks or months in production:
 
 > “the simple and elegant systems tend to be easier and faster to design and get right, more
-> efficient in execution, and much more reliable” — Edsger Dijkstra
+> efficient in execution, and much more reliable” - Edsger Dijkstra
 
 ## Technical Debt
 
@@ -68,23 +68,23 @@ more expensive than a problem solved in implementation, or a problem solved in d
 Since it's hard enough to discover showstoppers, when we do find them, we solve them. We don't allow
 potential memcpy latency spikes, or exponential complexity algorithms to slip through.
 
-> “You shall not pass!” — Gandalf
+> “You shall not pass!” - Gandalf
 
 In other words, TigerBeetle has a “zero technical debt” policy. We do it right the first time. This
 is important because the second time may not transpire, and because doing good work, that we can be
 proud of, builds momentum.
 
-We know that what we ship is solid. We may lack crucial features, but what we have meets our design
+We know that what we ship is solid. We may lack key features, but what we have meets our design
 goals. This is the only way to make steady incremental progress, knowing that the progress we have
 made is indeed progress.
 
 ## Safety
 
 > “The rules act like the seat-belt in your car: initially they are perhaps a little uncomfortable,
-> but after a while their use becomes second-nature and not using them becomes unimaginable.” —
+> but after a while their use becomes second-nature and not using them becomes unimaginable.” -
 > Gerard J. Holzmann
 
-[NASA's Power of Ten — Rules for Developing Safety Critical
+[NASA's Power of Ten: Rules for Developing Safety Critical
 Code](https://spinroot.com/gerard/pdf/P10.pdf) will change the way you code forever. To expand:
 
 - Use **only very simple, explicit control flow** for clarity. **Do not use recursion** to ensure
@@ -93,7 +93,7 @@ Code](https://spinroot.com/gerard/pdf/P10.pdf) will change the way you code fore
   cost](https://isaacfreund.com/blog/2022-05/). Every abstraction introduces the risk of a leaky
   abstraction.
 
-- **Put a limit on everything** because, in reality, this is what we expect—everything has a limit.
+- **Put a limit on everything** because, in reality, this is what we expect: everything has a limit.
   For example, all loops and all queues must have a fixed upper bound to prevent infinite loops or
   tail latency spikes. This follows the [“fail-fast”](https://en.wikipedia.org/wiki/Fail-fast)
   principle so that violations are detected sooner rather than later. Where a loop cannot terminate
@@ -130,7 +130,7 @@ Code](https://spinroot.com/gerard/pdf/P10.pdf) will change the way you code fore
     invariants](https://github.com/coilhq/tigerbeetle/blob/db789acfb93584e5cb9f331f9d6092ef90b53ea6/src/vsr/journal.zig#L45-L47)
     or [type
     sizes](https://github.com/coilhq/tigerbeetle/blob/578ac603326e1d3d33532701cb9285d5d2532fe7/src/ewah.zig#L41-L53).
-    Compile-time assertions are extremely powerful because they are able to check a program's design
+    Compile-time assertions are powerful because they are able to check a program's design
     integrity _before_ the program even executes.
 
   - **The golden rule of assertions is to assert the _positive space_ that you do expect AND to
@@ -150,7 +150,7 @@ Code](https://spinroot.com/gerard/pdf/P10.pdf) will change the way you code fore
 
 - All memory must be statically allocated at startup. **No memory may be dynamically allocated (or
   freed and reallocated) after initialization.** This avoids unpredictable behavior that can
-  significantly affect performance, and avoids use-after-free. As a second-order effect, it is our
+  degrade performance, and avoids use-after-free. As a second-order effect, it is our
   experience that this also makes for more efficient, simpler designs that are more performant and
   easier to maintain and reason about, compared to designs that do not consider all possible memory
   usage patterns upfront as part of the design.
@@ -230,7 +230,7 @@ Beyond these rules:
 
 ## Performance
 
-> “The lack of back-of-the-envelope performance sketches is the root of all evil.” — Rivacindela
+> “The lack of back-of-the-envelope performance sketches is the root of all evil.” - Rivacindela
 > Hudsoni
 
 - Think about performance from the outset, from the beginning. **The best time to solve performance,
@@ -266,7 +266,7 @@ Beyond these rules:
 ## Developer Experience
 
 > “There are only two hard things in Computer Science: cache invalidation, naming things, and
-> off-by-one errors.” — Phil Karlton
+> off-by-one errors.” - Phil Karlton
 
 ### Naming Things
 
@@ -383,7 +383,7 @@ Beyond these rules:
   In-place initializations can assume **pointer stability** and **immovable types** while
   eliminating intermediate copy-move allocations, which can lead to undesirable stack growth.
 
-  Keep in mind that in-place initializations are viral — if any field is initialized
+  Keep in mind that in-place initializations are viral: if any field is initialized
   in-place, the entire container struct should be initialized in-place as well.
 
   **Prefer:**
@@ -433,7 +433,7 @@ Beyond these rules:
   suspend, but may be misleading otherwise.
 
 - Be on your guard for **[buffer bleeds](https://en.wikipedia.org/wiki/Heartbleed)**. This is a
-  buffer underflow, the opposite of a buffer overflow, where a buffer is not fully utilized, with
+  buffer underflow, the opposite of a buffer overflow, where a buffer is not fully used, with
   padding not zeroed correctly. This may not only leak sensitive information, but may cause
   deterministic guarantees as required by TigerBeetle to be violated.
 
@@ -486,8 +486,8 @@ best for everything, but it's good enough for most things. We invest into our Zi
 that we can tackle new problems quickly, with a minimum of accidental complexity in our local
 development environment.
 
-> “The right tool for the job is often the tool you are already using—adding new tools has a higher
-> cost than many people appreciate” — John Carmack
+> “The right tool for the job is often the tool you are already using: adding new tools has a higher
+> cost than many people appreciate” - John Carmack
 
 For example, the next time you write a script, instead of `scripts/*.sh`, write `scripts/*.zig`.
 
@@ -501,7 +501,7 @@ makes for more velocity for the team in the long term.
 
 ## The Last Stage
 
-At the end of the day, keep trying things out, have fun, and remember—it's called TigerBeetle, not
+Keep trying things out, have fun, and remember: it's called TigerBeetle, not
 only because it's fast, but because it's small!
 
 > You don’t really suppose, do you, that all your adventures and escapes were managed by mere luck,

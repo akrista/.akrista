@@ -1,19 +1,19 @@
 ---
 name: rockery-project
-description: Create long-form project documentation for a Quartz/Obsidian digital garden. Use whenever the user says "create a project doc", "start a project note", "document this project", "project overview", "project documentation", or wants to write long-form documentation about a project they're working on. Also use when the user describes a substantial piece of work that needs structured documentation over time — this is for sustained projects, not single sessions. Do NOT use for daily notes, topics, ideas, or tasks — those have their own skills.
+description: Create long-form project documentation for a Quartz/Obsidian digital garden. Use whenever the user says "create a project doc", "start a project note", "document this project", "project overview", "project documentation", or wants to write long-form documentation about a project they're working on. Also use when the user describes a substantial piece of work that needs structured documentation over time (this is for sustained projects, not single sessions). Do NOT use for daily notes, topics, ideas, or tasks: those have their own skills.
 license: MIT
 metadata:
   author: Jorge Thomas
 ---
 
-Create long-form project documentation for the Rockery digital garden. Projects are sustained, structured documentation that evolves over time — not single-session notes. You are generating a complete, production-ready markdown file with the correct directory structure.
+Create long-form project documentation for the Rockery digital garden. Projects are sustained, structured documentation that evolves over time, not single-session notes. You are generating a complete, production-ready markdown file with the correct directory structure.
 
 ## Content routing
 
 Determine privacy:
 
-- **Public**: `content/projects/<project-name>/` — for open-source or public-facing projects
-- **Private**: `content/private/projects/<project-name>/` — for internal or sensitive projects
+- **Public**: `content/projects/<project-name>/`: for open-source or public-facing projects
+- **Private**: `content/private/projects/<project-name>/`: for internal or sensitive projects
 
 Default to **public** unless the project involves proprietary technology, company work, or anything that shouldn't be public.
 
@@ -90,17 +90,17 @@ Wikilinks to relevant topics, daily notes, and other projects. This is important
 ```markdown
 ## Related
 
-- [[nginx]] — reverse proxy configuration
-- [[systemd]] — service management
-- [[ufw]] — firewall setup
+- [[nginx]]: reverse proxy configuration
+- [[systemd]]: service management
+- [[ufw]]: firewall setup
 ```
 
 ### Additional files (for larger projects)
 
 If a project has many subsections, create additional files in the same directory:
-- `content/projects/<name>/setup.md` — detailed setup instructions
-- `content/projects/<name>/reference.md` — configuration reference
-- `content/projects/<name>/journal.md` — ongoing development journal
+- `content/projects/<name>/setup.md`: detailed setup instructions
+- `content/projects/<name>/reference.md`: configuration reference
+- `content/projects/<name>/journal.md`: ongoing development journal
 
 ## Conventions
 

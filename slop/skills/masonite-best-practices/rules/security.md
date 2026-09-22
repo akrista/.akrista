@@ -6,7 +6,7 @@
   ```python
   Route.get("/dashboard", "DashboardController@show").middleware("auth")
   ```
-- Resolve the current user with `request.user()`. It returns `None` when unauthenticated — handle that branch explicitly.
+- Resolve the current user with `request.user()`. It returns `None` when unauthenticated; handle that branch explicitly.
 - Store only hashed passwords via `Hash.make()`. Never log or echo a raw password.
 
 ## Authorization

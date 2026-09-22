@@ -2,7 +2,7 @@
 
 ## Exceptions Are the Contract
 
-Let exceptions propagate unless you can recover meaningfully. Never `except Exception: pass` — a swallowed error hides the exact bug you'll chase at 3am. If a failure is expected (best-effort cleanup, optional third-party call), catch the narrow exception and log it.
+Let exceptions propagate unless you can recover meaningfully. Never `except Exception: pass`; a swallowed error hides the exact bug you'll chase at 3am. If a failure is expected (best-effort cleanup, optional third-party call), catch the narrow exception and log it.
 
 ## Narrow Excepts
 
@@ -23,7 +23,7 @@ Include the discriminating values (ids, tenant, operation) in the log line so yo
 logger.error("failed to sync permissions for role %s (tenant %s)", role_id, tenant_id)
 ```
 
-Log via the configured logger (Masonite `LoggingProvider`) — print is not production logging.
+Log via the configured logger (Masonite `LoggingProvider`); print is not production logging.
 
 ## HTTP Error Responses
 

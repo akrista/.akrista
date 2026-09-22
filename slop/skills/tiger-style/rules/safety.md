@@ -24,7 +24,7 @@ function processMessage(msg, buffer):
     // just processing, no checks
 ```
 
-**Language notes:** Use your language's assertion mechanism — PHP `assert()`, Python `assert`, Java `assert`, C `assert()`, Rust `assert!()`, Go `require.True()`. In languages where assertions can be disabled (e.g., PHP, Java), pair them with explicit runtime checks for production-critical paths.
+**Language notes:** Use your language's assertion mechanism: PHP `assert()`, Python `assert`, Java `assert`, C `assert()`, Rust `assert!()`, Go `require.True()`. In languages where assertions can be disabled (e.g., PHP, Java), pair them with explicit runtime checks for production-critical paths.
 
 ### Pair Assertions
 
@@ -35,7 +35,7 @@ For every property you want to enforce, find at least **two different code paths
 assert(isValidData(data))
 write(data)
 
-// Assert after read (paired — catches corruption in storage)
+// Assert after read (paired; catches corruption in storage)
 loaded = read()
 assert(isValidData(loaded))
 ```
@@ -68,11 +68,11 @@ assert(BUFFER_SIZE >= MAX_MESSAGE_SIZE)
 assert(sizeof(Header) == 64)
 ```
 
-**Language notes:** PHP has `assert()` at runtime only — use PHPStan/rector-level static analysis for compile-time equivalents. Rust has `const _: () = assert!(...)`. C has `static_assert`. Java has no direct equivalent but unit tests serve this purpose.
+**Language notes:** PHP has `assert()` at runtime only; use PHPStan/rector-level static analysis for compile-time equivalents. Rust has `const _: () = assert!(...)`. C has `static_assert`. Java has no direct equivalent but unit tests serve this purpose.
 
 ### The Golden Rule: Assert Positive AND Negative Space
 
-Assert the values you **do** expect AND the values you **do not** expect — bugs live at the boundary between valid and invalid. Tests must cover both valid and invalid inputs.
+Assert the values you **do** expect AND the values you **do not** expect: bugs live at the boundary between valid and invalid. Tests must cover both valid and invalid inputs.
 
 ## Control Flow
 
@@ -164,7 +164,7 @@ Every loop must have an explicit upper bound. If a loop is intentionally unbound
 for item in items[0:MAX_ITEMS]:
     process(item)
 
-// GOOD: Event loop — intentional, documented
+// GOOD: Event loop (intentional, documented)
 loop:
     assert(isEventLoop)  // This is intentionally unbounded
     pollAndProcess()
@@ -177,7 +177,7 @@ loop:
 queue = RingBuffer(capacity: 1024)
 
 // BAD: Unbounded, grows under load spike
-queue = DynamicArray()  // No max — OOM risk
+queue = DynamicArray()  // No max: OOM risk
 ```
 
 ## Memory
@@ -209,7 +209,7 @@ function init():
     index = allocate(COUNT)
     defer free(index)
 
-// BAD: Dispersed — easy to miss a free
+// BAD: Dispersed: easy to miss a free
 function init():
     buffer = allocate(BUFFER_SIZE)
     // ... 20 lines ...
@@ -279,7 +279,7 @@ function handleMessage(msg):
 
 - **Parent functions** handle branching (control flow)
 - **Helper functions** handle iteration and computation (logic)
-- **Leaf functions** stay pure — no side effects
+- **Leaf functions** stay pure (no side effects)
 
 ## External Events
 
@@ -313,7 +313,7 @@ if result.isError:
     return result.error
 
 // BAD: Silence the error
-operation()  // Return value discarded — silent failure
+operation()  // Return value discarded: silent failure
 ```
 
-Never use empty catch blocks. Never discard error return values. If an error is truly expected and benign, document why explicitly.
+Never use empty catch blocks. Never discard error return values. If an error is expected and benign, document why explicitly.
