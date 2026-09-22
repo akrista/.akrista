@@ -1108,6 +1108,19 @@ for skill_name in coordinator merge open-pr rebase workmux worktree; do
     link_file "$HOME/.agents/skills/$skill_name" "$COPILOT_SKILLS_DIR/$skill_name" "Copilot $skill_name skill"
 done
 
+# Expose shared ~/.agents/skills copies to Antigravity and Gemini CLI.
+GEMINI_SKILLS_DIR="$GEMINI_CONFIG_DIR/skills"
+mkdir -p "$GEMINI_SKILLS_DIR"
+if [ -d "$HOME/.agents/skills" ]; then
+    for skill_path in "$HOME/.agents/skills"/*; do
+        [ -d "$skill_path" ] || continue
+        skill_name="$(basename "$skill_path")"
+        link_file "$skill_path" "$GEMINI_SKILLS_DIR/$skill_name" "Antigravity $skill_name skill"
+    done
+fi
+mkdir -p "$HOME/.gemini"
+link_file "$GEMINI_SKILLS_DIR" "$HOME/.gemini/skills" "Gemini CLI skills directory"
+
 GUIDELINES_FILE="$DOTFILES_DIR/slop/guidelines/AGENTS.md"
 if [ -f "$GUIDELINES_FILE" ]; then
     link_file "$GUIDELINES_FILE" "$HOME/.claude/CLAUDE.md" "Claude Code global CLAUDE.md"
@@ -1536,6 +1549,24 @@ New-Item -ItemType Directory -Path $copilotSkillsDir -Force | Out-Null
         -TargetPath (Join-Path $copilotSkillsDir $skillName) `
         -Name "Copilot $skillName skill"
 }
+
+# Expose shared ~/.agents/skills copies to Antigravity and Gemini CLI.
+$geminiSkillsDir = Join-Path $geminiConfigDir "skills"
+New-Item -ItemType Directory -Path $geminiSkillsDir -Force | Out-Null
+$agentsSkillsDir = Join-Path $HOME ".agents\skills"
+if (Test-Path $agentsSkillsDir) {
+    Get-ChildItem -Path $agentsSkillsDir -Directory | ForEach-Object {
+        $skillName = $_.Name
+        Link-File -SourcePath $_.FullName `
+            -TargetPath (Join-Path $geminiSkillsDir $skillName) `
+            -Name "Antigravity $skillName skill"
+    }
+}
+$geminiDir = Join-Path $HOME ".gemini"
+New-Item -ItemType Directory -Path $geminiDir -Force | Out-Null
+Link-File -SourcePath $geminiSkillsDir `
+    -TargetPath (Join-Path $geminiDir "skills") `
+    -Name "Gemini CLI skills directory"
 
 $guidelinesFile = Join-Path $dotfilesPath "slop/guidelines/AGENTS.md"
 if (Test-Path $guidelinesFile) {
