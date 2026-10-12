@@ -1,6 +1,6 @@
 ---
 name: rockery-task-manager
-description: Manage tasks with status tracking for a Quartz/Obsidian digital garden. Use whenever the user says "add a task", "create task", "new task", "show tasks", "my tasks", "what's up", "what am I working on", "task status", "mark task as done", "update task", "list tasks", "show me what I need to do", or asks about their current work, pending items, or to-do list. Also use when the user mentions tracking work, following up on something, or recording an action item. Do NOT use for daily notes, topics, ideas, or projects: those have their own skills.
+description: "Manage tasks with status tracking for a Quartz/Obsidian digital garden. Use whenever the user says \"add a task\", \"create task\", \"new task\", \"show tasks\", \"my tasks\", \"what's up\", \"what am I working on\", \"task status\", \"mark task as done\", \"update task\", \"list tasks\", \"show me what I need to do\", or asks about their current work, pending items, or to-do list. Also use when the user mentions tracking work, following up on something, or recording an action item. Do NOT use for daily notes, topics, ideas, or projects: those have their own skills."
 license: MIT
 metadata:
   author: Jorge Thomas

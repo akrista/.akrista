@@ -1,6 +1,6 @@
 ---
 name: rockery-daily-note
-description: Create daily notes for a Quartz/Obsidian digital garden following the Rockery daily notes protocol. Use whenever the user says "write a daily note", "capture a daily", "journal entry", "today I learned", "learning log", "daily log", "capture my day", or asks to record what they learned/worked on today. Also use when the user mentions creating a daily entry, logging progress, or documenting their day's learning (even if they don't explicitly name the file type). Do NOT use for deep-dive topics, ideas, projects, or tasks: those have their own skills.
+description: "Create daily notes for a Quartz/Obsidian digital garden following the Rockery daily notes protocol. Use whenever the user says \"write a daily note\", \"capture a daily\", \"journal entry\", \"today I learned\", \"learning log\", \"daily log\", \"capture my day\", or asks to record what they learned/worked on today. Also use when the user mentions creating a daily entry, logging progress, or documenting their day's learning (even if they don't explicitly name the file type). Do NOT use for deep-dive topics, ideas, projects, or tasks: those have their own skills."
 license: MIT
 metadata:
   author: Jorge Thomas

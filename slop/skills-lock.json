@@ -5,13 +5,13 @@
       "source": "vercel-labs/agent-browser",
       "sourceType": "github",
       "skillPath": "skills/agent-browser/SKILL.md",
-      "computedHash": "a674b7d81066e3cc471a7512ddb4ae724418cbfefa75cbb050b0dc430e4d57a0"
+      "computedHash": "80161e6836b3b40f4e83730a290deb40ac14d877d38c97ad5f6d71be37ce74c3"
     },
     "agents-md-generator": {
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/agents-md-generator/SKILL.md",
-      "computedHash": "9cc79ba49a64d3d65a48ad88911e1c5671307d5744daf0ef65f12165d8f42e2c"
+      "computedHash": "5a2e1548215a374e1244130f5607586578ffc425ff8e5354bd1ed5c7d1f94d66"
     },
     "biz-opportunity-scout": {
       "source": "buYoung/skills",
@@ -29,13 +29,13 @@
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
       "skillPath": "skills/brandkit/SKILL.md",
-      "computedHash": "b63012f3c3d21197e0185d3e9cc7ec40c589fb10e0b5a32a561739de31aa3f20"
+      "computedHash": "4bf33908992cde092395205122fad7a59e117190292bc8847cdba324b6f1c5b2"
     },
     "code-review": {
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/code-review/SKILL.md",
-      "computedHash": "e93af08cb22e25bde771653d405d5fd861dc033b2e846a993c16093be925451b"
+      "computedHash": "79d2cb24f8c95c0e333b0bcafd364deaaf70119bf1face0ffcd0881b0ab876a2"
     },
     "code-security-audit": {
       "source": "buYoung/skills",
@@ -53,19 +53,19 @@
       "source": "raine/workmux",
       "sourceType": "github",
       "skillPath": "skills/coordinator/SKILL.md",
-      "computedHash": "915bd0df025927ec39247090774b60bcf99b00da947db1cade6a67a6208d3292"
+      "computedHash": "487481e912db7bb477256f9610bbb96c8ffa54ff28fd16afb98fe1261c9edd03"
     },
     "dbhub": {
       "source": "bytebase/dbhub",
       "sourceType": "github",
       "skillPath": "skills/dbhub/SKILL.md",
-      "computedHash": "f771e9b578db351d84425c8a6e397af2750af9bf1a519a19e48f78ee28d08b50"
+      "computedHash": "aa0eab1ec7e40d414b40da92f5250beb745ddd4706a561ef83c0af59ab594f2f"
     },
     "defuddle": {
       "source": "kepano/obsidian-skills",
       "sourceType": "github",
       "skillPath": "skills/defuddle/SKILL.md",
-      "computedHash": "0ed68bc3e818ba0e6b8d192357ea3daaf552a3893f8854e7fd43c06831f91323"
+      "computedHash": "5ae2d9f2d5de3f27adb5b4d0a752c16be38f1a2d6316721a74ab721866d5fb2e"
     },
     "delegated-review-loop": {
       "source": "buYoung/skills",
@@ -79,11 +79,17 @@
       "skillPath": "laravel-cloud/skills/deploying-laravel-cloud/SKILL.md",
       "computedHash": "b38620dee9d47c5af28a435ca9e586998bf6e7b6145a92a5a264eff3f230f435"
     },
+    "deploying-to-cloud": {
+      "source": "laravel/agent-skills",
+      "sourceType": "github",
+      "skillPath": "laravel-cloud/skills/deploying-to-cloud/SKILL.md",
+      "computedHash": "b6762d08d0b540c8e4d5c778981d94ed10add1f49a453ab96a86c06b85aab624"
+    },
     "design-taste-frontend": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
       "skillPath": "skills/taste-skill/SKILL.md",
-      "computedHash": "6d838b246d0e35d0b53f4f23f98ba7a1dd561937e64f7d0c7553b0928e376c3e"
+      "computedHash": "01866407343be7129247b5582c179599bdfdcabd2e7697a3097414cc37b7f9f9"
     },
     "design-taste-frontend-v1": {
       "source": "Leonxlnx/taste-skill",
@@ -95,7 +101,7 @@
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/document-writing/SKILL.md",
-      "computedHash": "9f86ee07050741b239ec7147280a13fd48804d31535570932f059ed534c07301"
+      "computedHash": "52fa65bc84e9d400d11c989cb5264576574e0d2f537b6f54fcf437aee7ab9ff1"
     },
     "full-output-enforcement": {
       "source": "Leonxlnx/taste-skill",
@@ -107,7 +113,7 @@
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
       "skillPath": "skills/gpt-tasteskill/SKILL.md",
-      "computedHash": "cc8f0c601d8240a124e1d11634351a2be7b8a72fd807c75e5b6bf7afcd5ddee0"
+      "computedHash": "a7517d2f71baa638a57ffdba2d712f9debddda96c9a8f264006e64c2a9cca1f5"
     },
     "high-end-visual-design": {
       "source": "Leonxlnx/taste-skill",
@@ -137,7 +143,7 @@
       "source": "pbakaus/impeccable",
       "sourceType": "github",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "computedHash": "74a370e8c3daa8045dedbb03b5edabea46043bcf73404dffab1c2d76793df672"
+      "computedHash": "4f1c9edac4c110984200216ed05a2f0b5ced6aa871f5094a7cc4445eacf5477f"
     },
     "industrial-brutalist-ui": {
       "source": "Leonxlnx/taste-skill",
@@ -155,13 +161,13 @@
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/jetbrains-plugin-development/SKILL.md",
-      "computedHash": "938a2bad6fa4e34f21c6beb1c70f3e96b8bb183871b5b3f4ed9d9b1de86227e1"
+      "computedHash": "28ad58e33167d060520d2c01ccac1f95664b1aac4d3b849d80aa1a1a5da804c6"
     },
     "jetbrains-vmoptions": {
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/jetbrains-vmoptions/SKILL.md",
-      "computedHash": "2c346558e9edff1cfe5dc5566476e2f846799dd7967dccde7837975bb2494247"
+      "computedHash": "462b12cbb167385052755ff459557742d574e544c397e30c19d5da86fc74d564"
     },
     "json-canvas": {
       "source": "kepano/obsidian-skills",
@@ -173,13 +179,13 @@
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/kysely-converter/SKILL.md",
-      "computedHash": "9297e798fb539a3656cfda1b640fc2eaf30306b0a4d4d95c3bcb543026835dce"
+      "computedHash": "ced1d61e2d2d47351ec2ce9a41bb9e5aaf181198c6b97f60e732e6a619cf2f28"
     },
     "last30days": {
       "source": "mvanhorn/last30days-skill",
       "sourceType": "github",
       "skillPath": "skills/last30days/SKILL.md",
-      "computedHash": "0fa1adf30cd437a5ff4f6b79ad0dd887520a19f69d46b0dc63776dc72d46ca29"
+      "computedHash": "f46cb7796844023ca15b863db17159705ac772e884facb5c49a9c0a3e3f3f5b2"
     },
     "linear-issue-creator": {
       "source": "buYoung/skills",
@@ -203,7 +209,7 @@
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/masonite-best-practices/SKILL.md",
-      "computedHash": "8a2acf9dd5a1d9861c2626b4d14f40262f1c100e1c9c3a5dc81e80ffdc281cc0"
+      "computedHash": "7d4f499d2b6d2f5e95eb0af1f81bb9dc78d084cd2f952b02394a38aac8d52759"
     },
     "masonite-permission-development": {
       "source": "akrista/.akrista",
@@ -215,7 +221,7 @@
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/masonite-tailwindcss-development/SKILL.md",
-      "computedHash": "0ad02655fab6238cf908d889a6424efb84cc5b3f9fdf458106ab0bed58cfc7a4"
+      "computedHash": "3e7a983854845729a1af9f36c4728a824672f2d5c8627dc844abe2de7ae0e2a6"
     },
     "merge": {
       "source": "raine/workmux",
@@ -227,7 +233,7 @@
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
       "skillPath": "skills/minimalist-skill/SKILL.md",
-      "computedHash": "08873a3131d3be27bef9bf3304b310b16b44ca6e3561aebe532797be3443f6bd"
+      "computedHash": "b201c0763796192405cfed7933b55e3dab6d530ca7f06a5e8095063d476635d7"
     },
     "no-ai-slop": {
       "source": "realrossmanngroup/no_ai_slop_writing_rules",
@@ -269,7 +275,7 @@
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/react-guide/SKILL.md",
-      "computedHash": "1b2420e4b1efe1b05a76fc254266c1a1ae7e509077e0d4f82acf073ead7939cc"
+      "computedHash": "47966ae450057ed60a5a4855b8c6a8d6bd82e072581d4f1a02d7d5c0c41e2048"
     },
     "rebase": {
       "source": "raine/workmux",
@@ -281,13 +287,13 @@
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
       "skillPath": "skills/redesign-skill/SKILL.md",
-      "computedHash": "b405eee0e0e80fc243f731d9aa368bca307e356db7e6157d27101d369dac6726"
+      "computedHash": "52f2ade5449b7005942ebd221e53808a245b3e088ff096c44a374e1e481e9f6b"
     },
     "release-it": {
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/release-it/SKILL.md",
-      "computedHash": "d52c86d4efaa6c1af50e00ba0626dfc2a8948dd2665f7aa3cb472d0ccec21436"
+      "computedHash": "9c267375733cdb012a1731db3d6c036602dfd4aaaa23deafb15185bad6f410de"
     },
     "rockery-daily-note": {
       "source": "akrista/.akrista",
@@ -329,7 +335,7 @@
       "source": "shadcn/ui",
       "sourceType": "github",
       "skillPath": "skills/shadcn/SKILL.md",
-      "computedHash": "c1a68ee06a668aced9ab2b5fbdea5f989864123794eb2e056b339a072dbb7f10"
+      "computedHash": "da388f632cd83783c02967446e21941c9ee8291ccb43ba74c23f7d4e9b7c298c"
     },
     "starter-kit-upgrade": {
       "source": "laravel/agent-skills",
@@ -347,7 +353,7 @@
       "source": "supabase/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/supabase/SKILL.md",
-      "computedHash": "583344c20e90f3654dbb0632f088d89fd9f1dde8ac85e8a644dd12eee59b1380"
+      "computedHash": "211141fd078b4b3645803868528d54221bc7755d24d5c8af45a366785c151dba"
     },
     "supabase-postgres-best-practices": {
       "source": "supabase/agent-skills",
@@ -365,43 +371,43 @@
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/system-prompt-creator/SKILL.md",
-      "computedHash": "c761522940f257f682a2271edb27769fb3ba8b57b88b9f6a48c1512e66bf43c9"
+      "computedHash": "3ed5b286b2d045ad53977445d20efb88b625b9974054269acb109cc87b095af5"
     },
     "task-brief-creator": {
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/task-brief-creator/SKILL.md",
-      "computedHash": "e548134f40cd6115d881132e285ee7c9df9a52cfec72edd887f0d401b4ee01cf"
+      "computedHash": "effe782aab71b98d35670869524f816ff2a9a9138850c897c092e26926f289e9"
     },
     "task-brief-creator-caveman": {
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/task-brief-creator-caveman/SKILL.md",
-      "computedHash": "1d1fa932791cc8ea1cb6db39437c29585c22579278a61ee3931856edc44ee750"
+      "computedHash": "d211117fe008310ddd859fda14adeed51903fcdd1d5ade10a3e6158f4f37d360"
     },
     "tiger-style": {
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/tiger-style/SKILL.md",
-      "computedHash": "29858e989c662d75756cbd7e6efd8f8a4913e63c6068ddc40908f8ebd72fde4a"
+      "computedHash": "1fc4a318f35a093ce5da8ad091c2b351f7d1f9dbb352d76d623d42d9bc75988e"
     },
     "tsql-data-exploration": {
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/tsql-data-exploration/SKILL.md",
-      "computedHash": "649becac669b6c18ef47f9e0d13d042833e1d93ae93a0c38aa2d6700e2c4b7d3"
+      "computedHash": "cf0eaf36bb526503ced1851d63450d84012a2e5a13470db09b9d4b2f237058e8"
     },
     "tsql-development": {
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/tsql-development/SKILL.md",
-      "computedHash": "a09a8089e19800da7c96ca4841c001d973bb76642d66fc556c666a36cfce1d74"
+      "computedHash": "a7f2e59b847fab3a3466ed01c41600c3be4ce3db885dff7d3a1d262ca3d3b496"
     },
     "typst-creator": {
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/typst-creator/SKILL.md",
-      "computedHash": "f214baaca74e42d86779c2db4da05a3fef78028163b6257862f4cec1de2ea544"
+      "computedHash": "0c5d37d70f7fceaeb6980e6d883b5a914d3f917bef2cc4b4cf869cb68df3542d"
     },
     "veo-prompt-director": {
       "source": "buYoung/skills",
@@ -413,13 +419,13 @@
       "source": "buYoung/skills",
       "sourceType": "github",
       "skillPath": "skills/vite-guide/SKILL.md",
-      "computedHash": "201880e6dc34c5e3b4a357aa63b41b7f43c667f74c7b6a50dc3a204954e504e2"
+      "computedHash": "dc934901c8502cb5940f4c8fcfe329208917b4d2e2f16adad8feb7eb7df008fa"
     },
     "workmux": {
       "source": "raine/workmux",
       "sourceType": "github",
       "skillPath": "skills/workmux/SKILL.md",
-      "computedHash": "831f772bda94807ff9f3e7e7804b4b95788e3e793df273ffbeced0eae8d3b29e"
+      "computedHash": "1641bb965d1343c6404dc8084a9d683c3d5076cce9956ba4f0eff66f8c1a999f"
     },
     "worktree": {
       "source": "raine/workmux",

@@ -1,6 +1,6 @@
 ---
 name: rockery-idea
-description: Capture half-baked concepts, brainstorms, and rough thoughts for a Quartz/Obsidian digital garden. Use whenever the user says "capture an idea", "brainstorm", "idea note", "half-baked thought", "rough concept", "think out loud about", or wants to record an in-progress thought, hypothesis, or creative spark. Also use when the user has a raw concept that needs a home before it becomes a full topic or project. Do NOT use for daily notes, topics, projects, or tasks: those have their own skills.
+description: "Capture half-baked concepts, brainstorms, and rough thoughts for a Quartz/Obsidian digital garden. Use whenever the user says \"capture an idea\", \"brainstorm\", \"idea note\", \"half-baked thought\", \"rough concept\", \"think out loud about\", or wants to record an in-progress thought, hypothesis, or creative spark. Also use when the user has a raw concept that needs a home before it becomes a full topic or project. Do NOT use for daily notes, topics, projects, or tasks: those have their own skills."
 license: MIT
 metadata:
   author: Jorge Thomas

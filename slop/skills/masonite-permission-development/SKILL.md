@@ -1,6 +1,6 @@
 ---
 name: masonite-permission-development
-description: Build and work with the tenant-scoped RBAC permission system in this Masonite app: roles, permissions, pivot tables, the `permission:slug` middleware, `User.can()`, and seeding the permission catalog.
+description: "Build and work with the tenant-scoped RBAC permission system in this Masonite app: roles, permissions, pivot tables, the `permission:slug` middleware, `User.can()`, and seeding the permission catalog."
 license: MIT
 metadata:
   author: Jorge Thomas

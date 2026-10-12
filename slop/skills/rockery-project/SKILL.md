@@ -1,6 +1,6 @@
 ---
 name: rockery-project
-description: Create long-form project documentation for a Quartz/Obsidian digital garden. Use whenever the user says "create a project doc", "start a project note", "document this project", "project overview", "project documentation", or wants to write long-form documentation about a project they're working on. Also use when the user describes a substantial piece of work that needs structured documentation over time (this is for sustained projects, not single sessions). Do NOT use for daily notes, topics, ideas, or tasks: those have their own skills.
+description: "Create long-form project documentation for a Quartz/Obsidian digital garden. Use whenever the user says \"create a project doc\", \"start a project note\", \"document this project\", \"project overview\", \"project documentation\", or wants to write long-form documentation about a project they're working on. Also use when the user describes a substantial piece of work that needs structured documentation over time (this is for sustained projects, not single sessions). Do NOT use for daily notes, topics, ideas, or tasks: those have their own skills."
 license: MIT
 metadata:
   author: Jorge Thomas

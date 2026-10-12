@@ -1,6 +1,6 @@
 ---
 name: rockery-topic
-description: Create deep-dive topic/reference notes for a Quartz/Obsidian digital garden. Use whenever the user says "write a topic about", "create a topic note", "deep dive on", "reference note on", "documentation for", "tutorial on", or asks to write a detailed reference about a concept, tool, or technology. Also use when the user wants a structured reference (man-page style with usage, examples, flags, and related topics). Do NOT use for daily notes, ideas, projects, or tasks: those have their own skills.
+description: "Create deep-dive topic/reference notes for a Quartz/Obsidian digital garden. Use whenever the user says \"write a topic about\", \"create a topic note\", \"deep dive on\", \"reference note on\", \"documentation for\", \"tutorial on\", or asks to write a detailed reference about a concept, tool, or technology. Also use when the user wants a structured reference (man-page style with usage, examples, flags, and related topics). Do NOT use for daily notes, ideas, projects, or tasks: those have their own skills."
 license: MIT
 metadata:
   author: Jorge Thomas
