@@ -76,9 +76,6 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # Lerd
 [ -d "$HOME/.local/share/lerd/bin" ] && export PATH="$HOME/.local/share/lerd/bin:$PATH"
 
-# Deno
-[ -s "$HOME/.deno/env" ] && . "$HOME/.deno/env"
-
 # Completions
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
@@ -86,10 +83,6 @@ if ! shopt -oq posix; then
   elif [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
   fi
-fi
-
-if [ -f "$HOME/.local/share/bash-completion/completions/deno.bash" ]; then
-  source "$HOME/.local/share/bash-completion/completions/deno.bash"
 fi
 
 # Zoxide

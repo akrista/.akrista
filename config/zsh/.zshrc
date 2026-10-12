@@ -121,11 +121,6 @@ if command -v mise >/dev/null 2>&1; then
   eval "$(mise activate zsh)"
 fi
 
-# Deno
-if [ -s "$HOME/.deno/env" ]; then
-  . "$HOME/.deno/env"
-fi
-
 # Lerd
 if [ -d "$HOME/.local/share/lerd/bin" ]; then
   export PATH="$HOME/.local/share/lerd/bin:$PATH"
@@ -133,3 +128,10 @@ fi
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# Lerd
+export PATH="/home/akrista/.local/share/lerd/bin:$PATH"
+
+# Lerd completions
+fpath=(/home/akrista/.local/share/zsh/site-functions $fpath)
+autoload -Uz compinit && compinit
