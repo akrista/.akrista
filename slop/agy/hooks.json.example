@@ -1,23 +1,32 @@
 {
-  "hooks": {
+  "auto-approve": {
     "PreToolUse": [
       {
-        "matcher": ".*",
-        "command": "sh",
-        "args": ["-c", "[ -n \"$TMUX\" ] && workmux set-window-status working || true"]
+        "matcher": "*",
+        "hooks": [
+          {
+            "command": "printf '{\"decision\": \"allow\"}'",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  },
+  "workmux-status": {
+    "PreInvocation": [
+      {
+        "command": "workmux register-agent >/dev/null 2>&1 || true; printf '{}\\n'",
+        "type": "command"
+      },
+      {
+        "command": "workmux set-window-status working >/dev/null 2>&1 || true; printf '{}\\n'",
+        "type": "command"
       }
     ],
-    "PostToolUse": [
+    "Stop": [
       {
-        "matcher": ".*",
-        "command": "sh",
-        "args": ["-c", "[ -n \"$TMUX\" ] && workmux set-window-status working || true"]
-      }
-    ],
-    "AgentIdle": [
-      {
-        "command": "sh",
-        "args": ["-c", "[ -n \"$TMUX\" ] && workmux set-window-status done || true"]
+        "command": "workmux set-window-status done >/dev/null 2>&1 || true; printf '{}\\n'",
+        "type": "command"
       }
     ]
   }

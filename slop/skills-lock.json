@@ -215,7 +215,7 @@
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/masonite-permission-development/SKILL.md",
-      "computedHash": "8910614303331339280561e270b6b534e55f14b59f0c9b069f67629dca80d407"
+      "computedHash": "fd07507aaaf2d9a64058b00e3ca1d93fb2069d53b8785156a14a4b5e912919ff"
     },
     "masonite-tailwindcss-development": {
       "source": "akrista/.akrista",
@@ -299,31 +299,31 @@
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-daily-note/SKILL.md",
-      "computedHash": "d64bff2aeff146dab2e831e5edef6963ea987f9b504e997cc60b04e6c4e5696e"
+      "computedHash": "090f51b9fded46be559062c8a5fdb1b8b7adcc7bb5ab0656cce944803a2b7903"
     },
     "rockery-idea": {
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-idea/SKILL.md",
-      "computedHash": "e2d81090a3159920ae114ba7199de130eda6c33521ce5f4ce5c08a14f9b60db5"
+      "computedHash": "2785ac7042bc8dba8ff6376a4761e6d00a6770ca5b27c542eb1356137ba3fcf2"
     },
     "rockery-project": {
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-project/SKILL.md",
-      "computedHash": "8d321d9d3b7f9d1ffec6ad9bceac47f8346e7f6e46c9169c907629dfe722f172"
+      "computedHash": "0ce401e0ce4b192f6f823aad1fe25d38257dfed279f576a1090d99ed5fc9146e"
     },
     "rockery-task-manager": {
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-task-manager/SKILL.md",
-      "computedHash": "e08023c89abe4d6360679bcdf605f25ca2052bafa8c8549473f4acba8ee1d8b4"
+      "computedHash": "9cc735db9708e64185ce9037ee909cd3d6f06d137e6c6e6b5ccd12e103b65ef3"
     },
     "rockery-topic": {
       "source": "akrista/.akrista",
       "sourceType": "github",
       "skillPath": "slop/skills/rockery-topic/SKILL.md",
-      "computedHash": "02043e730000fd53f45ca7f0c9c087a9f379581ec0e374660837b2c5241d8ccf"
+      "computedHash": "3d43e7bfaf7912a460b6b28e0810421ce40c90458c93137be07837b9f8fd3aca"
     },
     "rossmann-voice": {
       "source": "realrossmanngroup/no_ai_slop_writing_rules",
