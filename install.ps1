@@ -799,6 +799,14 @@ if [ "$OS" != "Termux" ]; then
             log_success "eza is already installed."
         fi
 
+        if ! command -v systemctl-tui &> /dev/null; then
+            log_info "Installing systemctl-tui..."
+            cargo install systemctl-tui --locked
+            log_success "systemctl-tui installed."
+        else
+            log_success "systemctl-tui is already installed."
+        fi
+
         if ! command -v tree-sitter &> /dev/null; then
             if command -v bun &> /dev/null; then
                 log_info "Installing tree-sitter-cli via Bun..."
