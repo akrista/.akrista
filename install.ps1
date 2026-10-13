@@ -1125,6 +1125,7 @@ GUIDELINES_FILE="$DOTFILES_DIR/slop/guidelines/AGENTS.md"
 if [ -f "$GUIDELINES_FILE" ]; then
     link_file "$GUIDELINES_FILE" "$HOME/.claude/CLAUDE.md" "Claude Code global CLAUDE.md"
     mkdir -p "$HOME/.copilot"
+    link_file "$GUIDELINES_FILE" "$HOME/.copilot/copilot-instructions.md" "GitHub Copilot global instructions"
     link_file "$GUIDELINES_FILE" "$HOME/.copilot/AGENTS.md" "GitHub Copilot CLI global AGENTS.md"
     mkdir -p "$HOME/.config/opencode"
     link_file "$GUIDELINES_FILE" "$HOME/.config/opencode/AGENTS.md" "OpenCode global AGENTS.md"
@@ -1573,6 +1574,7 @@ if (Test-Path $guidelinesFile) {
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $HOME ".claude\CLAUDE.md") -Name "Claude Code global CLAUDE.md"
     $copilotDir = Join-Path $HOME ".copilot"
     New-Item -ItemType Directory -Path $copilotDir -Force | Out-Null
+    Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $copilotDir "copilot-instructions.md") -Name "GitHub Copilot global instructions"
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $copilotDir "AGENTS.md") -Name "GitHub Copilot CLI global AGENTS.md"
     $opencodeGlobalDir = Join-Path $HOME ".config\opencode"
     New-Item -ItemType Directory -Path $opencodeGlobalDir -Force | Out-Null

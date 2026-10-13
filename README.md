@@ -103,3 +103,8 @@ There is a single mechanism for every skill, custom or community: the [`skills`]
    `install.ps1` runs `bunx skills experimental_install`, which restores every locked skill (custom and community alike) to:
    * **Universal Agent Skills**: `~/.agents/skills/` (read by Antigravity, OpenCode, Codex, Cursor)
    * **Claude Code Skills**: `~/.claude/skills/`
+
+The canonical `slop/guidelines/AGENTS.md` is linked into each agent's documented global
+instruction location. For GitHub Copilot CLI, that location is
+`~/.copilot/copilot-instructions.md`; the legacy `~/.copilot/AGENTS.md` link is retained
+for compatibility.
