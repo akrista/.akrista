@@ -685,23 +685,6 @@ if [ "$OS" != "Termux" ]; then
         fnm default lts-latest
     fi
 
-    # Deno
-    if ! command -v deno &> /dev/null && [ ! -d "$HOME/.deno" ]; then
-        log_info "Installing Deno..."
-        curl -fsSL https://deno.land/install.sh | sh -s -- -y
-    elif command -v deno &> /dev/null; then
-        log_info "Checking for Deno updates..."
-        deno upgrade 2>/dev/null || log_warn "Deno upgrade check failed."
-    fi
-
-    if command -v deno &> /dev/null || [ -x "$HOME/.deno/bin/deno" ]; then
-        DENO_BIN="$(command -v deno 2>/dev/null || echo "$HOME/.deno/bin/deno")"
-        mkdir -p "$HOME/.zsh/completions"
-        "$DENO_BIN" completions zsh > "$HOME/.zsh/completions/_deno" 2>/dev/null || true
-        mkdir -p "$HOME/.local/share/bash-completion/completions"
-        "$DENO_BIN" completions bash > "$HOME/.local/share/bash-completion/completions/deno.bash" 2>/dev/null || true
-    fi
-
     # uv
     if ! command -v uv &> /dev/null && [ ! -f "$HOME/.local/bin/uv" ]; then
         log_info "Installing uv..."
