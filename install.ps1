@@ -882,6 +882,16 @@ if [ "$supports_agy" = true ]; then
 fi
 
 if [ "$OS" != "Termux" ]; then
+    if command -v claude &> /dev/null; then
+        log_info "Claude Code is already installed."
+    else
+        log_info "Installing Claude Code..."
+        curl -fsSL https://claude.ai/install.sh | bash
+        log_success "Claude Code installed."
+    fi
+fi
+
+if [ "$OS" != "Termux" ]; then
     if [ ! -f "$HOME/.opencode/bin/opencode" ]; then
         log_info "Installing OpenCode..."
         curl -fsSL https://opencode.ai/install | bash
