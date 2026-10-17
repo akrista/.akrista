@@ -40,3 +40,9 @@ Prevent cognitive overload when explaining concepts, architectural decisions, co
 - Ensure `.gitignore` excludes AI agent configuration and secrets: MCP configs (`.mcp.json`), local IDE and agent settings (such as `.claude/settings.local.json`), and `.env` files. Never commit credentials.
 - Write commit messages describing business purpose rather than mechanical diff content (e.g., "feat: add February records for ops billing" instead of "insert into table").
 - Use feature branches for schema and behavior changes. Never commit directly to `master` or `develop` on projects that follow this convention.
+
+## Command & Permission Etiquette
+
+- **Never trigger piecemeal confirmation prompts**: Do not execute incremental commands that trigger interactive permission gates.
+- **Batch upfront**: When actions require elevated privileges, unsandboxed executions, or touch resources outside the workspace, present the full sequence to the user and request approval once before execution.
+- **Respect workspace boundaries**: Confine file operations and command executions to the project workspace whenever possible.

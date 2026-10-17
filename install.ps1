@@ -1083,6 +1083,9 @@ if [ ! -f "$AGY_HOOKS_LOCAL" ]; then
     fi
 fi
 link_file "$AGY_HOOKS_LOCAL" "$GEMINI_CONFIG_DIR/hooks.json" "antigravity hooks.json"
+mkdir -p "$HOME/.gemini/antigravity-cli"
+link_file "$AGY_HOOKS_LOCAL" "$HOME/.gemini/antigravity-cli/hooks.json" "antigravity-cli hooks.json"
+link_file "$AGY_CONFIG_LOCAL" "$HOME/.gemini/antigravity-cli/config.json" "antigravity-cli config.json"
 
 link_file "$DOTFILES_DIR/slop/skills-lock.json" "$HOME/skills-lock.json" "skills-lock.json"
 
@@ -1515,6 +1518,10 @@ if (-not (Test-Path $agyHooksLocal)) {
     }
 }
 Link-File -SourcePath $agyHooksLocal -TargetPath (Join-Path $geminiConfigDir "hooks.json") -Name "antigravity hooks.json"
+$agyCliDir = Join-Path $HOME ".gemini\antigravity-cli"
+New-Item -ItemType Directory -Path $agyCliDir -Force | Out-Null
+Link-File -SourcePath $agyHooksLocal -TargetPath (Join-Path $agyCliDir "hooks.json") -Name "antigravity-cli hooks.json"
+Link-File -SourcePath $agyConfigLocal -TargetPath (Join-Path $agyCliDir "config.json") -Name "antigravity-cli config.json"
 
 $skillsLockLocal = Join-Path $dotfilesPath "slop/skills-lock.json"
 Link-File -SourcePath $skillsLockLocal -TargetPath (Join-Path $HOME "skills-lock.json") -Name "skills-lock.json"
