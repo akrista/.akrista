@@ -132,6 +132,10 @@ fi
 # Lerd
 export PATH="/home/akrista/.local/share/lerd/bin:$PATH"
 
+# dotnet
+[ -d "$HOME/.dotnet" ] && export PATH="$HOME/.dotnet:$PATH"
+
 # Lerd completions
+
 fpath=(/home/akrista/.local/share/zsh/site-functions $fpath)
 autoload -Uz compinit && compinit
