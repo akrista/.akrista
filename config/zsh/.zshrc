@@ -130,12 +130,26 @@ fi
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # Lerd
-export PATH="/home/akrista/.local/share/lerd/bin:$PATH"
+if [ -d "$HOME/.local/share/lerd/bin" ]; then
+  export PATH="$HOME/.local/share/lerd/bin:$PATH"
+fi
 
 # dotnet
 [ -d "$HOME/.dotnet" ] && export PATH="$HOME/.dotnet:$PATH"
 
 # Lerd completions
+if [ -d "$HOME/.local/share/zsh/site-functions" ]; then
+  fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
+fi
 
-fpath=(/home/akrista/.local/share/zsh/site-functions $fpath)
+# Grok CLI
+if [ -d "$HOME/.grok/bin" ]; then
+  export PATH="$HOME/.grok/bin:$PATH"
+fi
+
+# Grok completions
+if [ -d "$HOME/.grok/completions/zsh" ]; then
+  fpath=("$HOME/.grok/completions/zsh" $fpath)
+fi
+
 autoload -Uz compinit && compinit

@@ -743,6 +743,14 @@ if [ "$OS" != "Termux" ]; then
         git clone -q https://github.com/tmuxpack/tpack "$HOME/.tmux/plugins/tpm"
     fi
 
+    # Refresh the compiled tpack binary as well as the checkout. The binary is
+    # released separately, so git pull alone can leave an older self-updater.
+    if [ -f "$HOME/.tmux/plugins/tpm/lib/download_binary.sh" ]; then
+        source "$HOME/.tmux/plugins/tpm/lib/download_binary.sh"
+        _download_tpack "$HOME/.tmux/plugins/tpm" \
+            || log_warn "Could not download the latest tpack binary."
+    fi
+
     # Rust
     if command -v rustup &> /dev/null; then
         log_info "Checking for Rust updates..."
