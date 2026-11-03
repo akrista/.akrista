@@ -54,6 +54,7 @@ typeset -U fpath
 [ -d "$HOME/.zsh/zsh-completions/src" ] && fpath=("$HOME/.zsh/zsh-completions/src" $fpath)
 [ -d "$HOME/.zsh/completions" ] && fpath=("$HOME/.zsh/completions" $fpath)
 [ -d "$HOME/.local/share/zsh/site-functions" ] && fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
+[ -d "$HOME/.grok/completions/zsh" ] && fpath=("$HOME/.grok/completions/zsh" $fpath)
 
 [[ -n "$ZSH_STARTUP_DEBUG" ]] && _log_time "Before Oh My Zsh"
 if [ -d "$ZSH" ] && [ -f "$ZSH/oh-my-zsh.sh" ]; then
@@ -122,34 +123,13 @@ if command -v mise >/dev/null 2>&1; then
 fi
 
 # Lerd
-if [ -d "$HOME/.local/share/lerd/bin" ]; then
-  export PATH="$HOME/.local/share/lerd/bin:$PATH"
-fi
+[ -d "$HOME/.local/share/lerd/bin" ] && export PATH="$HOME/.local/share/lerd/bin:$PATH"
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-# Lerd
-if [ -d "$HOME/.local/share/lerd/bin" ]; then
-  export PATH="$HOME/.local/share/lerd/bin:$PATH"
-fi
-
 # dotnet
 [ -d "$HOME/.dotnet" ] && export PATH="$HOME/.dotnet:$PATH"
 
-# Lerd completions
-if [ -d "$HOME/.local/share/zsh/site-functions" ]; then
-  fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
-fi
-
 # Grok CLI
-if [ -d "$HOME/.grok/bin" ]; then
-  export PATH="$HOME/.grok/bin:$PATH"
-fi
-
-# Grok completions
-if [ -d "$HOME/.grok/completions/zsh" ]; then
-  fpath=("$HOME/.grok/completions/zsh" $fpath)
-fi
-
-autoload -Uz compinit && compinit
+[ -d "$HOME/.grok/bin" ] && export PATH="$HOME/.grok/bin:$PATH"

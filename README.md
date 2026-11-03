@@ -40,19 +40,18 @@ irm https://raw.githubusercontent.com/akrista/.akrista/master/install.ps1 | iex
 │   ├── sshd/                    # 99-hardening.conf server daemon security
 │   ├── termux/                  # Android Termux customizations
 │   ├── tmux/                    # .tmux.conf + TPM plugins
-│   ├── workmux/                 # Workmux git worktree + tmux orchestrator config
 │   ├── zed/                     # Zed Editor settings.json template & MCP servers
 │   ├── zellij/                  # Zellij terminal workspace multiplexer
 │   └── zsh/                     # .zshrc, .zshenv, aliases, prompt, functions (uak)
 │
 ├── slop/                        # Dedicated AI Agent Toolbelt & Skills Hub
-│   ├── claude/                  # Claude Code settings & profile (settings.json, .claude.json)
+│   ├── claude/                  # Claude Code settings (settings.json)
 │   ├── opencode/                # OpenCode configuration (opencode.json, opencode.global.dat, tui.json, themes/)
-│   ├── mcp/                     # Shared MCP catalog & server definitions (servers.json.example)
+│   ├── maga/                    # Multi-agent harness MCP & plugin manager (config.toml)
 │   ├── skills/                  # 🛠️ Handmade custom skills, one flat folder per skill (Tracked in Git)
 │   ├── guidelines/
 │   │   └── AGENTS.md            # 🧭 Single global guideline file, symlinked into every tool
-│   ├── agy/                     # Antigravity CLI configuration (config.json, mcp_config.json)
+│   ├── agy/                     # Antigravity CLI configuration (config.json, hooks.json)
 │   ├── pi/                      # Pi Coding Agent configurations
 │   └── skills-lock.json         # 🔒 Skills lockfile for custom and community skills
 │
@@ -65,9 +64,9 @@ irm https://raw.githubusercontent.com/akrista/.akrista/master/install.ps1 | iex
 
 To prevent private credentials (API keys, SSH hosts, proxy URLs, database connection strings) from being tracked by Git while keeping everything organized in a single repository:
 
-1. **Templates in Git**: Clean `.example` files (`settings.json.example`, `.claude.json.example`, `.env.local.example`, `config.local.example`, `opencode.json.example`, `servers.json.example`, `config.json.example`, `mcp_config.json.example`, `hooks.json.example`) are tracked in Git.
-2. **Local Active Files**: Real working files (`settings.json`, `.claude.json`, `.env.local`, `config.local`, `opencode.json`, `opencode.global.dat`, `config.json`, `mcp_config.json`, `hooks.json`) live directly inside `.akrista/config/` and `.akrista/slop/` but are **ignored by `.gitignore`**.
-3. **OS Symlinks**: System target paths (`~/.config/zed/settings.json`, `~/.config/opencode/opencode.json`, `~/.config/opencode/tui.json`, `~/.config/opencode/themes`, `~/.claude/settings.json`, `~/.claude.json`, `~/.gemini/config/config.json`, `~/.gemini/config/mcp_config.json`, `~/.gemini/config/hooks.json`, `~/.env.local`, `~/.ssh/config.local`) are symlinked directly to their centralized `.akrista` paths.
+1. **Templates in Git**: Clean `.example` files (`settings.json.example`, `.env.local.example`, `config.local.example`, `opencode.json.example`, `config.json.example`, `hooks.json.example`) are tracked in Git.
+2. **Local Active Files**: Real working files (`settings.json`, `.env.local`, `config.local`, `opencode.json`, `opencode.global.dat`, `config.json`, `hooks.json`) live directly inside `.akrista/config/` and `.akrista/slop/` but are **ignored by `.gitignore`**.
+3. **OS Symlinks**: System target paths (`~/.config/zed/settings.json`, `~/.config/maga/config.toml`, `~/.config/opencode/opencode.json`, `~/.config/opencode/tui.json`, `~/.config/opencode/themes`, `~/.claude/settings.json`, `~/.gemini/config/config.json`, `~/.gemini/config/hooks.json`, `~/.env.local`, `~/.ssh/config.local`) are symlinked directly to their centralized `.akrista` paths.
 
 ---
 
@@ -75,11 +74,11 @@ To prevent private credentials (API keys, SSH hosts, proxy URLs, database connec
 
 The `slop/` module centralizes configurations for terminal-native and autonomous AI coding agents:
 
-* **Claude Code (`slop/claude/`)**: Configured with custom marketplaces (`wakatime`, `ponytail`, `last30days-skill`), enabled plugins, an optional custom `ANTHROPIC_BASE_URL` proxy, and dark fullscreen TUI.
-* **OpenCode (`slop/opencode/`)**: Configured with active plugins (`opencode-wakatime`, `@tarquinen/opencode-dcp`, `@dietrichgebert/ponytail`), the gruvbox-transparent theme (`themes/`, selected in `tui.json`), and local/remote MCP definitions.
-* **Shared MCP Catalog (`slop/mcp/`)**: Reference catalog for stdio/SSE servers (Context7, DBHub, Astro, Svelte, Shadcn, NextJs, Metabase, Stitch).
+* **Claude Code (`slop/claude/`)**: Configured with custom marketplaces (`wakatime`, `ponytail`, `last30days-skill`), an optional custom `ANTHROPIC_BASE_URL` proxy, and dark fullscreen TUI.
+* **OpenCode (`slop/opencode/`)**: Configured with the gruvbox-transparent theme (`themes/`, selected in `tui.json`) and custom provider options.
+* **Maga (`slop/maga/`)**: General TUI and harness sync configuration (`config.toml`) for `maga`, which centrally manages MCP servers (`mcp.toml`) and plugins (`plugins.toml`) across Antigravity, Claude Code, Copilot, Grok, and OpenCode.
 * **Pi Coding Agent (`slop/pi/`)**: Terminal-native coding agent configurations.
-* **Antigravity CLI (`slop/agy/`)**: Configured with user settings (`config.json`), global MCP definitions (`mcp_config.json`), and safe lifecycle hooks (`hooks.json`).
+* **Antigravity CLI (`slop/agy/`)**: Configured with user settings (`config.json`) and safe lifecycle hooks (`hooks.json`).
 
 ---
 

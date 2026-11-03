@@ -1,0 +1,50 @@
+# maga General Configuration
+# Note: MCP server definitions are managed separately in mcp.toml.
+#
+# [ui]
+#   theme         - Active TUI color theme: "indigo" | "blush" | "elite"
+#   mascot_mode   - Companion mode: "rich" (moe/chibi companion box) | "lite" (ASCII splash)
+#   background    - Enable full-TUI Riverflow ASCII background watermark (true/false)
+#   hero_mascot   - Enable high-res Hero Mascot Showcase via [m] key and empty state (true/false)
+#   hide_ui       - Hide foreground UI panels to display only the background art via [b] key (true/false)
+#   animations    - Enable arcane ASCII flow/glitch and tachyonfx micro-animations (true/false)
+#
+# [refresh]
+#   enabled       - Enable periodic background disk reload & reconciliation (true/false)
+#   interval_secs - Polling interval in seconds for auto-refresh (0 disables timer)
+#
+# [tools.antigravity] / [tools.claude] / [tools.copilot] / [tools.grok] / [tools.opencode]
+#   enabled       - Sync MCP servers with this harness (true/false)
+#   config_path   - Path to the harness MCP config file (supports leading ~/)
+
+[ui]
+theme = "blush"
+mascot_mode = "lite"
+background = false
+hero_mascot = true
+hide_ui = false
+animations = true
+
+[refresh]
+enabled = true
+interval_secs = 5
+
+[tools.antigravity]
+enabled = true
+config_path = "~/.gemini/config/mcp_config.json"
+
+[tools.claude]
+enabled = true
+config_path = "~/.claude.json"
+
+[tools.copilot]
+enabled = true
+config_path = "~/.copilot/mcp-config.json"
+
+[tools.grok]
+enabled = true
+config_path = "~/.grok/config.toml"
+
+[tools.opencode]
+enabled = true
+config_path = "~/.config/opencode/opencode.json"

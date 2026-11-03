@@ -718,22 +718,6 @@ if [ "$OS" != "Termux" ]; then
         copilot completion bash > "$HOME/.local/share/bash-completion/completions/copilot"
     fi
 
-    # workmux
-    if command -v workmux &> /dev/null || [ -x "$HOME/.local/bin/workmux" ]; then
-        log_info "Checking for workmux updates..."
-        workmux update 2>/dev/null || true
-    else
-        log_info "Installing workmux..."
-        curl -fsSL https://raw.githubusercontent.com/raine/workmux/main/scripts/install.sh | bash
-    fi
-
-    if command -v workmux &> /dev/null || [ -x "$HOME/.local/bin/workmux" ]; then
-        WORKMUX_BIN="$(command -v workmux 2>/dev/null || echo "$HOME/.local/bin/workmux")"
-        mkdir -p "$HOME/.zsh/completions" "$HOME/.local/share/bash-completion/completions"
-        "$WORKMUX_BIN" completions zsh > "$HOME/.zsh/completions/_workmux" 2>/dev/null || true
-        "$WORKMUX_BIN" completions bash > "$HOME/.local/share/bash-completion/completions/workmux" 2>/dev/null || true
-    fi
-
     # Tmux Pack (tpack / lightweight TPM)
     if [ -d "$HOME/.tmux/plugins/tpm" ]; then
         log_info "Updating tpack (TPM compatible)..."
@@ -933,6 +917,42 @@ else
     log_warn "Neither bun nor npm found. Skipping global packages."
 fi
 
+if [ "$OS" != "Termux" ]; then
+    GROK_BIN=""
+    if command -v grok &> /dev/null; then
+        GROK_BIN="$(command -v grok)"
+    elif [ -x "$HOME/.grok/bin/grok" ]; then
+        GROK_BIN="$HOME/.grok/bin/grok"
+    elif [ -x "$HOME/.local/bin/grok" ]; then
+        GROK_BIN="$HOME/.local/bin/grok"
+    fi
+
+    if [ -n "$GROK_BIN" ]; then
+        log_info "Grok is already installed."
+        "$GROK_BIN" update 2>/dev/null || true
+    else
+        log_info "Installing Grok..."
+        curl -fsSL https://x.ai/cli/install.sh | bash
+        log_success "Grok installed."
+    fi
+
+    if [ -f "$HOME/.cargo/env" ]; then
+        . "$HOME/.cargo/env"
+    fi
+
+    if [ "$FORCE" = true ] || ! command -v maga &> /dev/null; then
+        if command -v cargo &> /dev/null; then
+            log_info "Installing maga..."
+            cargo install --git https://github.com/akrista/maga --locked
+            log_success "maga installed."
+        else
+            log_warn "cargo not found. Skipping maga installation."
+        fi
+    else
+        log_success "maga is already installed."
+    fi
+fi
+
 # Post-installation package cleanup
 if [ "$PACKAGER" = "pkg" ]; then
     log_info "Cleaning up Termux packages..."
@@ -1001,10 +1021,6 @@ MISE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
 mkdir -p "$MISE_CONFIG_DIR"
 link_file "$DOTFILES_DIR/config/mise/config.toml" "$MISE_CONFIG_DIR/config.toml" "mise config.toml"
 
-WORKMUX_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/workmux"
-mkdir -p "$WORKMUX_CONFIG_DIR"
-link_file "$DOTFILES_DIR/config/workmux/config.yaml" "$WORKMUX_CONFIG_DIR/config.yaml" "workmux config.yaml"
-
 ZED_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zed"
 mkdir -p "$ZED_CONFIG_DIR"
 ZED_REPO_LOCAL="$DOTFILES_DIR/config/zed/settings.json"
@@ -1034,15 +1050,9 @@ if [ ! -f "$CLAUDE_REPO_LOCAL" ]; then
 fi
 link_file "$CLAUDE_REPO_LOCAL" "$CLAUDE_DIR/settings.json" "claude settings.json"
 
-CLAUDE_JSON_LOCAL="$DOTFILES_DIR/slop/claude/.claude.json"
-if [ ! -f "$CLAUDE_JSON_LOCAL" ]; then
-    log_info "Initializing slop/claude/.claude.json from template..."
-    if [ -f "$DOTFILES_DIR/slop/claude/.claude.json.example" ]; then
-        cp "$DOTFILES_DIR/slop/claude/.claude.json.example" "$CLAUDE_JSON_LOCAL"
-        chmod 600 "$CLAUDE_JSON_LOCAL"
-    fi
-fi
-link_file "$CLAUDE_JSON_LOCAL" "$HOME/.claude.json" ".claude.json"
+MAGA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/maga"
+mkdir -p "$MAGA_CONFIG_DIR"
+link_file "$DOTFILES_DIR/slop/maga/config.toml" "$MAGA_CONFIG_DIR/config.toml" "maga config.toml"
 
 OPENCODE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
 mkdir -p "$OPENCODE_CONFIG_DIR"
@@ -1082,16 +1092,6 @@ if [ ! -f "$AGY_CONFIG_LOCAL" ]; then
 fi
 link_file "$AGY_CONFIG_LOCAL" "$GEMINI_CONFIG_DIR/config.json" "antigravity config.json"
 
-AGY_MCP_LOCAL="$DOTFILES_DIR/slop/agy/mcp_config.json"
-if [ ! -f "$AGY_MCP_LOCAL" ]; then
-    log_info "Initializing slop/agy/mcp_config.json from template..."
-    if [ -f "$DOTFILES_DIR/slop/agy/mcp_config.json.example" ]; then
-        cp "$DOTFILES_DIR/slop/agy/mcp_config.json.example" "$AGY_MCP_LOCAL"
-        chmod 600 "$AGY_MCP_LOCAL"
-    fi
-fi
-link_file "$AGY_MCP_LOCAL" "$GEMINI_CONFIG_DIR/mcp_config.json" "antigravity mcp_config.json"
-
 AGY_HOOKS_LOCAL="$DOTFILES_DIR/slop/agy/hooks.json"
 if [ ! -f "$AGY_HOOKS_LOCAL" ]; then
     log_info "Initializing slop/agy/hooks.json from template..."
@@ -1111,14 +1111,6 @@ if [ -f "$DOTFILES_DIR/slop/skills-lock.json" ] && command -v bunx &> /dev/null;
     log_info "Synchronizing Agent Skills via bunx skills..."
     (cd "$HOME" && bunx -y skills experimental_install 2>/dev/null || true)
 fi
-
-# Copilot does not receive these shared workmux skills from the skills CLI on
-# every installation, so expose the canonical ~/.agents/skills copies.
-COPILOT_SKILLS_DIR="$HOME/.copilot/skills"
-mkdir -p "$COPILOT_SKILLS_DIR"
-for skill_name in coordinator merge open-pr rebase workmux worktree; do
-    link_file "$HOME/.agents/skills/$skill_name" "$COPILOT_SKILLS_DIR/$skill_name" "Copilot $skill_name skill"
-done
 
 # Expose shared ~/.agents/skills copies to Antigravity and Gemini CLI.
 GEMINI_SKILLS_DIR="$GEMINI_CONFIG_DIR/skills"
@@ -1439,10 +1431,6 @@ $miseDir = Join-Path $HOME ".config\mise"
 New-Item -ItemType Directory -Path $miseDir -Force | Out-Null
 Link-File -SourcePath (Join-Path $dotfilesPath "config/mise/config.toml") -TargetPath (Join-Path $miseDir "config.toml") -Name "mise config.toml"
 
-$workmuxDir = Join-Path $HOME ".config\workmux"
-New-Item -ItemType Directory -Path $workmuxDir -Force | Out-Null
-Link-File -SourcePath (Join-Path $dotfilesPath "config/workmux/config.yaml") -TargetPath (Join-Path $workmuxDir "config.yaml") -Name "workmux config.yaml"
-
 $zedDir = Join-Path $env:APPDATA "Zed"
 New-Item -ItemType Directory -Path $zedDir -Force | Out-Null
 $zedRepoLocal = Join-Path $dotfilesPath "config/zed/settings.json"
@@ -1468,15 +1456,9 @@ if (-not (Test-Path $claudeRepoLocal)) {
 }
 Link-File -SourcePath $claudeRepoLocal -TargetPath (Join-Path $claudeDir "settings.json") -Name "claude settings.json"
 
-$claudeJsonLocal = Join-Path $dotfilesPath "slop/claude/.claude.json"
-if (-not (Test-Path $claudeJsonLocal)) {
-    Write-LogInfo "Initializing slop/claude/.claude.json from template..."
-    $claudeJsonExample = Join-Path $dotfilesPath "slop/claude/.claude.json.example"
-    if (Test-Path $claudeJsonExample) {
-        Copy-Item $claudeJsonExample $claudeJsonLocal
-    }
-}
-Link-File -SourcePath $claudeJsonLocal -TargetPath (Join-Path $HOME ".claude.json") -Name ".claude.json"
+$magaDir = Join-Path $HOME ".config\maga"
+New-Item -ItemType Directory -Path $magaDir -Force | Out-Null
+Link-File -SourcePath (Join-Path $dotfilesPath "slop/maga/config.toml") -TargetPath (Join-Path $magaDir "config.toml") -Name "maga config.toml"
 
 $opencodeDir = Join-Path $HOME ".config\opencode"
 New-Item -ItemType Directory -Path $opencodeDir -Force | Out-Null
@@ -1517,16 +1499,6 @@ if (-not (Test-Path $agyConfigLocal)) {
 }
 Link-File -SourcePath $agyConfigLocal -TargetPath (Join-Path $geminiConfigDir "config.json") -Name "antigravity config.json"
 
-$agyMcpLocal = Join-Path $dotfilesPath "slop/agy/mcp_config.json"
-if (-not (Test-Path $agyMcpLocal)) {
-    Write-LogInfo "Initializing slop/agy/mcp_config.json from template..."
-    $agyMcpExample = Join-Path $dotfilesPath "slop/agy/mcp_config.json.example"
-    if (Test-Path $agyMcpExample) {
-        Copy-Item $agyMcpExample $agyMcpLocal
-    }
-}
-Link-File -SourcePath $agyMcpLocal -TargetPath (Join-Path $geminiConfigDir "mcp_config.json") -Name "antigravity mcp_config.json"
-
 $agyHooksLocal = Join-Path $dotfilesPath "slop/agy/hooks.json"
 if (-not (Test-Path $agyHooksLocal)) {
     Write-LogInfo "Initializing slop/agy/hooks.json from template..."
@@ -1554,17 +1526,6 @@ if ((Test-Path $skillsLockLocal) -and (Get-Command bunx -ErrorAction SilentlyCon
     } finally {
         Pop-Location
     }
-}
-
-# Keep Copilot pointed at the canonical shared workmux skills restored by the
-# skills CLI.
-$copilotSkillsDir = Join-Path $HOME ".copilot\skills"
-New-Item -ItemType Directory -Path $copilotSkillsDir -Force | Out-Null
-@("coordinator", "merge", "open-pr", "rebase", "workmux", "worktree") | ForEach-Object {
-    $skillName = $_
-    Link-File -SourcePath (Join-Path $HOME ".agents\skills\$skillName") `
-        -TargetPath (Join-Path $copilotSkillsDir $skillName) `
-        -Name "Copilot $skillName skill"
 }
 
 # Expose shared ~/.agents/skills copies to Antigravity and Gemini CLI.

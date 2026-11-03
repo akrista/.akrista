@@ -49,12 +49,6 @@
       "skillPath": "laravel-nightwatch/skills/configure-nightwatch/SKILL.md",
       "computedHash": "c47f582081a7ec6b9fc4ea72c863fddada67e3d55e2b9b95f979bc536eb9e674"
     },
-    "coordinator": {
-      "source": "raine/workmux",
-      "sourceType": "github",
-      "skillPath": "skills/coordinator/SKILL.md",
-      "computedHash": "487481e912db7bb477256f9610bbb96c8ffa54ff28fd16afb98fe1261c9edd03"
-    },
     "dbhub": {
       "source": "bytebase/dbhub",
       "sourceType": "github",
@@ -223,12 +217,6 @@
       "skillPath": "slop/skills/masonite-tailwindcss-development/SKILL.md",
       "computedHash": "3e7a983854845729a1af9f36c4728a824672f2d5c8627dc844abe2de7ae0e2a6"
     },
-    "merge": {
-      "source": "raine/workmux",
-      "sourceType": "github",
-      "skillPath": "skills/merge/SKILL.md",
-      "computedHash": "2529104266e3368657c6e04b05c527dece31d37ada4917029ae2aa8648c38ee9"
-    },
     "minimalist-ui": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
@@ -259,12 +247,6 @@
       "skillPath": "skills/obsidian-markdown/SKILL.md",
       "computedHash": "0f47297035d7824e7bf0f1984e8145a59a123e2258b5d54c9ac9642f9f77e177"
     },
-    "open-pr": {
-      "source": "raine/workmux",
-      "sourceType": "github",
-      "skillPath": "skills/open-pr/SKILL.md",
-      "computedHash": "f79fdc14a6bbb5e4d0158a659b75a4ec2b0993d60c932e72dc683c4163f578ed"
-    },
     "orchestration": {
       "source": "buYoung/skills",
       "sourceType": "github",
@@ -276,12 +258,6 @@
       "sourceType": "github",
       "skillPath": "skills/react-guide/SKILL.md",
       "computedHash": "47966ae450057ed60a5a4855b8c6a8d6bd82e072581d4f1a02d7d5c0c41e2048"
-    },
-    "rebase": {
-      "source": "raine/workmux",
-      "sourceType": "github",
-      "skillPath": "skills/rebase/SKILL.md",
-      "computedHash": "5f16d4376e643b1aaa5ed03c3009f36b0d011663348c965010be15bc969b43c3"
     },
     "redesign-existing-projects": {
       "source": "Leonxlnx/taste-skill",
@@ -403,6 +379,12 @@
       "skillPath": "slop/skills/tsql-development/SKILL.md",
       "computedHash": "a7f2e59b847fab3a3466ed01c41600c3be4ce3db885dff7d3a1d262ca3d3b496"
     },
+    "tui-design": {
+      "source": "pageton/tui-design-skill",
+      "sourceType": "github",
+      "skillPath": "skills/tui-design/SKILL.md",
+      "computedHash": "e650655cba1ab3b31a03f96ddfa23b7f36d3e18e2bd41ac221988ff51dfadfe0"
+    },
     "typst-creator": {
       "source": "buYoung/skills",
       "sourceType": "github",
@@ -420,18 +402,6 @@
       "sourceType": "github",
       "skillPath": "skills/vite-guide/SKILL.md",
       "computedHash": "dc934901c8502cb5940f4c8fcfe329208917b4d2e2f16adad8feb7eb7df008fa"
-    },
-    "workmux": {
-      "source": "raine/workmux",
-      "sourceType": "github",
-      "skillPath": "skills/workmux/SKILL.md",
-      "computedHash": "1641bb965d1343c6404dc8084a9d683c3d5076cce9956ba4f0eff66f8c1a999f"
-    },
-    "worktree": {
-      "source": "raine/workmux",
-      "sourceType": "github",
-      "skillPath": "skills/worktree/SKILL.md",
-      "computedHash": "5bff3a7ad8434ffc8f63ed06085f264d5b65c043bb8046644b6cc4a8dd9bafc5"
     }
   }
 }

@@ -3,8 +3,9 @@
 This directory houses configuration templates for the Antigravity CLI (`agy`):
 
 * `config.json.example`: Agent runtime settings, workspace policies, and terminal command execution policies (such as `terminalCommandAutoExecutionPolicy: "TERMINAL_COMMAND_AUTO_EXECUTION_POLICY_NOT_ENFORCED"`).
-* `mcp_config.json.example`: Global Model Context Protocol (MCP) server definitions.
 * `hooks.json.example`: Lifecycle hooks for tool execution gating and window status tracking.
+
+> **Note**: Global Model Context Protocol (MCP) server definitions (`~/.gemini/config/mcp_config.json`) are managed directly by `maga` (`slop/maga/config.toml`).
 
 ## Lifecycle Hooks (`hooks.json`)
 

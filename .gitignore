@@ -6,8 +6,14 @@
 config/zed/settings.json
 slop/opencode/opencode.json
 slop/claude/settings.json
-slop/claude/.claude.json
 slop/opencode/opencode.global.dat
 slop/agy/config.json
-slop/agy/mcp_config.json
 slop/agy/hooks.json
+.agents
+.claude
+.cursor
+.grok
+.opencode
+.pi
+.github/prompts
+.github/skills
