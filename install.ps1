@@ -1272,18 +1272,18 @@ function Link-File {
         [string]$TargetPath,
         [string]$Name
     )
-    if (Test-Path -LiteralPath $SourcePath -Force) {
+    if (Test-Path -LiteralPath $SourcePath) {
         $sourceItem = Get-Item -LiteralPath $SourcePath -Force
         $sourceFull = $sourceItem.FullName.TrimEnd('\')
         $isDir = $sourceItem.PSIsContainer
         $alreadyLinked = $false
 
         $parentDir = Split-Path -Path $TargetPath -Parent
-        if ($parentDir -and -not (Test-Path -LiteralPath $parentDir -Force)) {
+        if ($parentDir -and -not (Test-Path -LiteralPath $parentDir)) {
             New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
         }
 
-        if (Test-Path -LiteralPath $TargetPath -Force) {
+        if (Test-Path -LiteralPath $TargetPath) {
             $item = Get-Item -LiteralPath $TargetPath -Force
             if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
                 $targets = @($item.Target) | Where-Object { $_ } | ForEach-Object {
@@ -1301,7 +1301,7 @@ function Link-File {
 
             if (-not $alreadyLinked) {
                 Write-LogInfo "Backing up existing $TargetPath to $TargetPath.bak..."
-                if (Test-Path -LiteralPath "$TargetPath.bak" -Force) {
+                if (Test-Path -LiteralPath "$TargetPath.bak") {
                     Remove-Item -LiteralPath "$TargetPath.bak" -Recurse -Force
                 }
                 Move-Item -LiteralPath $TargetPath -Destination "$TargetPath.bak" -Force
@@ -1336,14 +1336,14 @@ function Initialize-RepoConfig {
         [string]$Label,
         [switch]$AllowEmptyFallback
     )
-    if (Test-Path -LiteralPath $RepoLocalPath -Force) {
+    if (Test-Path -LiteralPath $RepoLocalPath) {
         return
     }
     $repoParent = Split-Path -Path $RepoLocalPath -Parent
-    if ($repoParent -and -not (Test-Path -LiteralPath $repoParent -Force)) {
+    if ($repoParent -and -not (Test-Path -LiteralPath $repoParent)) {
         New-Item -ItemType Directory -Path $repoParent -Force | Out-Null
     }
-    if ($LiveTargetPath -and (Test-Path -LiteralPath $LiveTargetPath -Force)) {
+    if ($LiveTargetPath -and (Test-Path -LiteralPath $LiveTargetPath)) {
         $liveItem = Get-Item -LiteralPath $LiveTargetPath -Force
         if (-not ($liveItem.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
             Write-LogInfo "Seeding $Label from existing $LiveTargetPath..."
@@ -1351,7 +1351,7 @@ function Initialize-RepoConfig {
             return
         }
     }
-    if ($ExamplePath -and (Test-Path -LiteralPath $ExamplePath -Force)) {
+    if ($ExamplePath -and (Test-Path -LiteralPath $ExamplePath)) {
         Write-LogInfo "Initializing $Label from template..."
         Copy-Item -LiteralPath $ExamplePath -Destination $RepoLocalPath -Force
     } elseif ($AllowEmptyFallback) {
