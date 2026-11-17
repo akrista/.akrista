@@ -1,3 +1,4 @@
+[general]
 import = ["~/.akrista/config/alacritty/alacritty.toml"]
 
 [terminal.shell]
