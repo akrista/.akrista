@@ -1093,18 +1093,7 @@ if [ ! -f "$AGY_CONFIG_LOCAL" ]; then
     fi
 fi
 link_file "$AGY_CONFIG_LOCAL" "$GEMINI_CONFIG_DIR/config.json" "antigravity config.json"
-
-AGY_HOOKS_LOCAL="$DOTFILES_DIR/slop/agy/hooks.json"
-if [ ! -f "$AGY_HOOKS_LOCAL" ]; then
-    log_info "Initializing slop/agy/hooks.json from template..."
-    if [ -f "$DOTFILES_DIR/slop/agy/hooks.json.example" ]; then
-        cp "$DOTFILES_DIR/slop/agy/hooks.json.example" "$AGY_HOOKS_LOCAL"
-        chmod 600 "$AGY_HOOKS_LOCAL"
-    fi
-fi
-link_file "$AGY_HOOKS_LOCAL" "$GEMINI_CONFIG_DIR/hooks.json" "antigravity hooks.json"
 mkdir -p "$HOME/.gemini/antigravity-cli"
-link_file "$AGY_HOOKS_LOCAL" "$HOME/.gemini/antigravity-cli/hooks.json" "antigravity-cli hooks.json"
 link_file "$AGY_CONFIG_LOCAL" "$HOME/.gemini/antigravity-cli/config.json" "antigravity-cli config.json"
 
 link_file "$DOTFILES_DIR/slop/skills-lock.json" "$HOME/skills-lock.json" "skills-lock.json"
@@ -1508,17 +1497,8 @@ Initialize-RepoConfig `
     -Label "slop/agy/config.json"
 Link-File -SourcePath $agyConfigLocal -TargetPath $agyConfigTarget -Name "antigravity config.json"
 
-$agyHooksLocal = Join-Path $dotfilesPath "slop/agy/hooks.json"
-$agyHooksTarget = Join-Path $geminiConfigDir "hooks.json"
-Initialize-RepoConfig `
-    -RepoLocalPath $agyHooksLocal `
-    -ExamplePath (Join-Path $dotfilesPath "slop/agy/hooks.json.example") `
-    -LiveTargetPath $agyHooksTarget `
-    -Label "slop/agy/hooks.json"
-Link-File -SourcePath $agyHooksLocal -TargetPath $agyHooksTarget -Name "antigravity hooks.json"
 $agyCliDir = Join-Path $HOME ".gemini\antigravity-cli"
 New-Item -ItemType Directory -Path $agyCliDir -Force | Out-Null
-Link-File -SourcePath $agyHooksLocal -TargetPath (Join-Path $agyCliDir "hooks.json") -Name "antigravity-cli hooks.json"
 Link-File -SourcePath $agyConfigLocal -TargetPath (Join-Path $agyCliDir "config.json") -Name "antigravity-cli config.json"
 
 $skillsLockLocal = Join-Path $dotfilesPath "slop/skills-lock.json"
