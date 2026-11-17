@@ -1066,6 +1066,8 @@ if [ ! -f "$OPENCODE_REPO_LOCAL" ]; then
 fi
 link_file "$OPENCODE_REPO_LOCAL" "$OPENCODE_CONFIG_DIR/opencode.json" "opencode opencode.json"
 link_file "$OPENCODE_REPO_LOCAL" "$OPENCODE_CONFIG_DIR/config.json" "opencode config.json"
+link_file "$DOTFILES_DIR/slop/opencode/tui.json" "$OPENCODE_CONFIG_DIR/tui.json" "opencode tui.json"
+link_file "$DOTFILES_DIR/slop/opencode/themes" "$OPENCODE_CONFIG_DIR/themes" "opencode themes"
 
 OPENCODE_DESKTOP_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ai.opencode.desktop"
 mkdir -p "$OPENCODE_DESKTOP_DIR"
@@ -1133,10 +1135,11 @@ if [ -f "$GUIDELINES_FILE" ]; then
     link_file "$GUIDELINES_FILE" "$HOME/.copilot/AGENTS.md" "GitHub Copilot CLI global AGENTS.md"
     mkdir -p "$HOME/.config/opencode"
     link_file "$GUIDELINES_FILE" "$HOME/.config/opencode/AGENTS.md" "OpenCode global AGENTS.md"
-    mkdir -p "$HOME/.gemini" "$HOME/.pi/agent"
+    mkdir -p "$HOME/.gemini" "$HOME/.pi/agent" "$HOME/.grok"
     link_file "$GUIDELINES_FILE" "$HOME/.gemini/GEMINI.md" "Antigravity (agy) global GEMINI.md"
     link_file "$GUIDELINES_FILE" "$HOME/.gemini/AGENTS.md" "Antigravity (agy) global AGENTS.md (cross-tool)"
     link_file "$GUIDELINES_FILE" "$HOME/.pi/agent/AGENTS.md" "Pi global AGENTS.md"
+    link_file "$GUIDELINES_FILE" "$HOME/.grok/AGENTS.md" "Grok CLI global AGENTS.md"
 fi
 
 mkdir -p "$HOME/.local/bin"
@@ -1262,42 +1265,35 @@ if ($Force) {
     Write-LogInfo "Force flag enabled."
 }
 
-# Tools installation (winget)
-if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
-    Write-LogSuccess "Oh My Posh is already installed."
-} else {
-    Write-LogInfo "Installing Oh My Posh..."
-    winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh --source winget
-}
-
-if (Get-Command uv -ErrorAction SilentlyContinue) {
-    Write-LogSuccess "Astral uv is already installed."
-} else {
-    Write-LogInfo "Installing Astral uv..."
-    Invoke-RestMethod https://astral.sh/uv/install.ps1 | Invoke-Expression
-}
-
-if (Get-Command mise -ErrorAction SilentlyContinue) {
-    Write-LogSuccess "mise is already installed."
-} else {
-    Write-LogInfo "Installing mise..."
-    winget install -e --accept-source-agreements --accept-package-agreements jdx.mise --source winget
-}
-
-# Windows symlink helper with fallback
+# Windows symlink helper with Junction/Copy fallback
 function Link-File {
     param (
         [string]$SourcePath,
         [string]$TargetPath,
         [string]$Name
     )
-    if (Test-Path $SourcePath) {
+    if (Test-Path -LiteralPath $SourcePath -Force) {
+        $sourceItem = Get-Item -LiteralPath $SourcePath -Force
+        $sourceFull = $sourceItem.FullName.TrimEnd('\')
+        $isDir = $sourceItem.PSIsContainer
         $alreadyLinked = $false
-        if (Test-Path $TargetPath) {
-            $item = Get-Item $TargetPath
-            if ($item.Attributes -match "ReparsePoint") {
-                $target = $item.Target
-                if ($target -eq $SourcePath -or $target -eq (Get-Item $SourcePath).FullName) {
+
+        $parentDir = Split-Path -Path $TargetPath -Parent
+        if ($parentDir -and -not (Test-Path -LiteralPath $parentDir -Force)) {
+            New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+        }
+
+        if (Test-Path -LiteralPath $TargetPath -Force) {
+            $item = Get-Item -LiteralPath $TargetPath -Force
+            if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+                $targets = @($item.Target) | Where-Object { $_ } | ForEach-Object {
+                    try {
+                        [System.IO.Path]::GetFullPath($_).TrimEnd('\')
+                    } catch {
+                        $_.TrimEnd('\')
+                    }
+                }
+                if ($targets -contains $sourceFull -or $item.Target -contains $SourcePath) {
                     Write-LogSuccess "$Name is already linked to the repository version."
                     $alreadyLinked = $true
                 }
@@ -1305,27 +1301,62 @@ function Link-File {
 
             if (-not $alreadyLinked) {
                 Write-LogInfo "Backing up existing $TargetPath to $TargetPath.bak..."
-                if (Test-Path "$TargetPath.bak") {
-                    Remove-Item "$TargetPath.bak" -Force
+                if (Test-Path -LiteralPath "$TargetPath.bak" -Force) {
+                    Remove-Item -LiteralPath "$TargetPath.bak" -Recurse -Force
                 }
-                Move-Item $TargetPath "$TargetPath.bak" -Force
-                Write-LogInfo "Creating symlink for $Name..."
-                try {
-                    New-Item -ItemType SymbolicLink -Path $TargetPath -Value $SourcePath -ErrorAction Stop | Out-Null
-                } catch {
-                    Write-LogWarning "Failed to create symlink. Copying file instead..."
-                    Copy-Item $SourcePath $TargetPath -Force -Recurse
-                }
-            }
-        } else {
-            Write-LogInfo "Creating symlink for $Name..."
-            try {
-                New-Item -ItemType SymbolicLink -Path $TargetPath -Value $SourcePath -ErrorAction Stop | Out-Null
-            } catch {
-                Write-LogWarning "Failed to create symlink. Copying file instead..."
-                Copy-Item $SourcePath $TargetPath -Force -Recurse
+                Move-Item -LiteralPath $TargetPath -Destination "$TargetPath.bak" -Force
             }
         }
+
+        if (-not $alreadyLinked) {
+            Write-LogInfo "Creating symlink for $Name..."
+            try {
+                New-Item -ItemType SymbolicLink -Path $TargetPath -Value $sourceItem.FullName -ErrorAction Stop | Out-Null
+                Write-LogSuccess "Linked $Name"
+            } catch {
+                if ($isDir) {
+                    try {
+                        New-Item -ItemType Junction -Path $TargetPath -Value $sourceItem.FullName -ErrorAction Stop | Out-Null
+                        Write-LogSuccess "Linked $Name (junction)"
+                        return
+                    } catch {}
+                }
+                Write-LogWarning "Failed to create symlink for $Name. Copying instead..."
+                Copy-Item -LiteralPath $sourceItem.FullName -Destination $TargetPath -Force -Recurse
+            }
+        }
+    }
+}
+
+function Initialize-RepoConfig {
+    param (
+        [string]$RepoLocalPath,
+        [string]$ExamplePath,
+        [string]$LiveTargetPath,
+        [string]$Label,
+        [switch]$AllowEmptyFallback
+    )
+    if (Test-Path -LiteralPath $RepoLocalPath -Force) {
+        return
+    }
+    $repoParent = Split-Path -Path $RepoLocalPath -Parent
+    if ($repoParent -and -not (Test-Path -LiteralPath $repoParent -Force)) {
+        New-Item -ItemType Directory -Path $repoParent -Force | Out-Null
+    }
+    if ($LiveTargetPath -and (Test-Path -LiteralPath $LiveTargetPath -Force)) {
+        $liveItem = Get-Item -LiteralPath $LiveTargetPath -Force
+        if (-not ($liveItem.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+            Write-LogInfo "Seeding $Label from existing $LiveTargetPath..."
+            Copy-Item -LiteralPath $LiveTargetPath -Destination $RepoLocalPath -Force
+            return
+        }
+    }
+    if ($ExamplePath -and (Test-Path -LiteralPath $ExamplePath -Force)) {
+        Write-LogInfo "Initializing $Label from template..."
+        Copy-Item -LiteralPath $ExamplePath -Destination $RepoLocalPath -Force
+    } elseif ($AllowEmptyFallback) {
+        Write-LogInfo "Initializing empty $Label..."
+        New-Item -ItemType File -Path $RepoLocalPath -Force | Out-Null
     }
 }
 
@@ -1395,24 +1426,9 @@ if ((Test-Path $firefoxDir) -and (Test-Path $ffProfilesIni)) {
     Write-LogWarning "No Firefox profile found. Skipping Firefox customization."
 }
 
-$pwshPfPath = Join-Path $HOME ".pwsh-pf"
-if (-not (Test-Path $pwshPfPath)) {
-    Write-LogInfo "Cloning pwsh-pf repository..."
-    git clone https://github.com/akrista/pwsh-pf $pwshPfPath
-} else {
-    Write-LogInfo "pwsh-pf repository exists at $pwshPfPath. Pulling updates..."
-    git -C $pwshPfPath pull
-}
-
 # PowerShell profile setup (pwsh-pf)
 Write-LogInfo "Running pwsh-pf setup..."
-$pwshPfSetupScript = Join-Path $pwshPfPath "setup.ps1"
-if (Test-Path $pwshPfSetupScript) {
-    & $pwshPfSetupScript
-} else {
-    Write-LogInfo "Fetching pwsh-pf setup script..."
-    Invoke-Expression (Invoke-RestMethod -Uri "https://raw.githubusercontent.com/akrista/pwsh-pf/master/setup.ps1")
-}
+Invoke-Expression "& { $(Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/akrista/pwsh-pf/master/setup.ps1') } @args"
 
 # Configuration dotfiles
 Write-LogInfo "Linking configuration files..."
@@ -1427,34 +1443,28 @@ $zellijDir = Join-Path $HOME ".config\zellij"
 New-Item -ItemType Directory -Path $zellijDir -Force | Out-Null
 Link-File -SourcePath (Join-Path $dotfilesPath "config/zellij/config.kdl") -TargetPath (Join-Path $zellijDir "config.kdl") -Name "zellij config.kdl"
 
-$miseDir = Join-Path $HOME ".config\mise"
-New-Item -ItemType Directory -Path $miseDir -Force | Out-Null
-Link-File -SourcePath (Join-Path $dotfilesPath "config/mise/config.toml") -TargetPath (Join-Path $miseDir "config.toml") -Name "mise config.toml"
-
 $zedDir = Join-Path $env:APPDATA "Zed"
 New-Item -ItemType Directory -Path $zedDir -Force | Out-Null
 $zedRepoLocal = Join-Path $dotfilesPath "config/zed/settings.json"
-if (-not (Test-Path $zedRepoLocal)) {
-    Write-LogInfo "Initializing config/zed/settings.json from template..."
-    $zedExample = Join-Path $dotfilesPath "config/zed/settings.json.example"
-    if (Test-Path $zedExample) {
-        Copy-Item $zedExample $zedRepoLocal
-    }
-}
-Link-File -SourcePath $zedRepoLocal -TargetPath (Join-Path $zedDir "settings.json") -Name "zed settings.json"
+$zedTarget = Join-Path $zedDir "settings.json"
+Initialize-RepoConfig `
+    -RepoLocalPath $zedRepoLocal `
+    -ExamplePath (Join-Path $dotfilesPath "config/zed/settings.json.example") `
+    -LiveTargetPath $zedTarget `
+    -Label "config/zed/settings.json"
+Link-File -SourcePath $zedRepoLocal -TargetPath $zedTarget -Name "zed settings.json"
 Link-File -SourcePath (Join-Path $dotfilesPath "config/zed/keymap.json") -TargetPath (Join-Path $zedDir "keymap.json") -Name "zed keymap.json"
 
 $claudeDir = Join-Path $HOME ".claude"
 New-Item -ItemType Directory -Path $claudeDir -Force | Out-Null
 $claudeRepoLocal = Join-Path $dotfilesPath "slop/claude/settings.json"
-if (-not (Test-Path $claudeRepoLocal)) {
-    Write-LogInfo "Initializing slop/claude/settings.json from template..."
-    $claudeExample = Join-Path $dotfilesPath "slop/claude/settings.json.example"
-    if (Test-Path $claudeExample) {
-        Copy-Item $claudeExample $claudeRepoLocal
-    }
-}
-Link-File -SourcePath $claudeRepoLocal -TargetPath (Join-Path $claudeDir "settings.json") -Name "claude settings.json"
+$claudeSettingsTarget = Join-Path $claudeDir "settings.json"
+Initialize-RepoConfig `
+    -RepoLocalPath $claudeRepoLocal `
+    -ExamplePath (Join-Path $dotfilesPath "slop/claude/settings.json.example") `
+    -LiveTargetPath $claudeSettingsTarget `
+    -Label "slop/claude/settings.json"
+Link-File -SourcePath $claudeRepoLocal -TargetPath $claudeSettingsTarget -Name "claude settings.json"
 
 $magaDir = Join-Path $HOME ".config\maga"
 New-Item -ItemType Directory -Path $magaDir -Force | Out-Null
@@ -1463,51 +1473,49 @@ Link-File -SourcePath (Join-Path $dotfilesPath "slop/maga/config.toml") -TargetP
 $opencodeDir = Join-Path $HOME ".config\opencode"
 New-Item -ItemType Directory -Path $opencodeDir -Force | Out-Null
 $opencodeRepoLocal = Join-Path $dotfilesPath "slop/opencode/opencode.json"
-if (-not (Test-Path $opencodeRepoLocal)) {
-    Write-LogInfo "Initializing slop/opencode/opencode.json from template..."
-    $opencodeExample = Join-Path $dotfilesPath "slop/opencode/opencode.json.example"
-    if (Test-Path $opencodeExample) {
-        Copy-Item $opencodeExample $opencodeRepoLocal
-    }
-}
-Link-File -SourcePath $opencodeRepoLocal -TargetPath (Join-Path $opencodeDir "opencode.json") -Name "opencode.json"
+$opencodeTarget = Join-Path $opencodeDir "opencode.json"
+Initialize-RepoConfig `
+    -RepoLocalPath $opencodeRepoLocal `
+    -ExamplePath (Join-Path $dotfilesPath "slop/opencode/opencode.json.example") `
+    -LiveTargetPath $opencodeTarget `
+    -Label "slop/opencode/opencode.json"
+Link-File -SourcePath $opencodeRepoLocal -TargetPath $opencodeTarget -Name "opencode.json"
 Link-File -SourcePath $opencodeRepoLocal -TargetPath (Join-Path $opencodeDir "config.json") -Name "opencode config.json"
+Link-File -SourcePath (Join-Path $dotfilesPath "slop/opencode/tui.json") -TargetPath (Join-Path $opencodeDir "tui.json") -Name "opencode tui.json"
+Link-File -SourcePath (Join-Path $dotfilesPath "slop/opencode/themes") -TargetPath (Join-Path $opencodeDir "themes") -Name "opencode themes"
 
 $opencodeDesktopDir = Join-Path $env:APPDATA "ai.opencode.desktop"
 New-Item -ItemType Directory -Path $opencodeDesktopDir -Force | Out-Null
 $opencodeDatLocal = Join-Path $dotfilesPath "slop/opencode/opencode.global.dat"
-if (-not (Test-Path $opencodeDatLocal)) {
-    $opencodeDatExample = Join-Path $dotfilesPath "slop/opencode/opencode.global.dat.example"
-    if (Test-Path $opencodeDatExample) {
-        Copy-Item $opencodeDatExample $opencodeDatLocal
-    } else {
-        New-Item -ItemType File -Path $opencodeDatLocal -Force | Out-Null
-    }
-}
-Link-File -SourcePath $opencodeDatLocal -TargetPath (Join-Path $opencodeDesktopDir "opencode.global.dat") -Name "opencode desktop global.dat"
+$opencodeDatTarget = Join-Path $opencodeDesktopDir "opencode.global.dat"
+Initialize-RepoConfig `
+    -RepoLocalPath $opencodeDatLocal `
+    -ExamplePath (Join-Path $dotfilesPath "slop/opencode/opencode.global.dat.example") `
+    -LiveTargetPath $opencodeDatTarget `
+    -Label "slop/opencode/opencode.global.dat" `
+    -AllowEmptyFallback
+Link-File -SourcePath $opencodeDatLocal -TargetPath $opencodeDatTarget -Name "opencode desktop global.dat"
 
 $geminiConfigDir = Join-Path $HOME ".gemini\config"
 New-Item -ItemType Directory -Path $geminiConfigDir -Force | Out-Null
 
 $agyConfigLocal = Join-Path $dotfilesPath "slop/agy/config.json"
-if (-not (Test-Path $agyConfigLocal)) {
-    Write-LogInfo "Initializing slop/agy/config.json from template..."
-    $agyConfigExample = Join-Path $dotfilesPath "slop/agy/config.json.example"
-    if (Test-Path $agyConfigExample) {
-        Copy-Item $agyConfigExample $agyConfigLocal
-    }
-}
-Link-File -SourcePath $agyConfigLocal -TargetPath (Join-Path $geminiConfigDir "config.json") -Name "antigravity config.json"
+$agyConfigTarget = Join-Path $geminiConfigDir "config.json"
+Initialize-RepoConfig `
+    -RepoLocalPath $agyConfigLocal `
+    -ExamplePath (Join-Path $dotfilesPath "slop/agy/config.json.example") `
+    -LiveTargetPath $agyConfigTarget `
+    -Label "slop/agy/config.json"
+Link-File -SourcePath $agyConfigLocal -TargetPath $agyConfigTarget -Name "antigravity config.json"
 
 $agyHooksLocal = Join-Path $dotfilesPath "slop/agy/hooks.json"
-if (-not (Test-Path $agyHooksLocal)) {
-    Write-LogInfo "Initializing slop/agy/hooks.json from template..."
-    $agyHooksExample = Join-Path $dotfilesPath "slop/agy/hooks.json.example"
-    if (Test-Path $agyHooksExample) {
-        Copy-Item $agyHooksExample $agyHooksLocal
-    }
-}
-Link-File -SourcePath $agyHooksLocal -TargetPath (Join-Path $geminiConfigDir "hooks.json") -Name "antigravity hooks.json"
+$agyHooksTarget = Join-Path $geminiConfigDir "hooks.json"
+Initialize-RepoConfig `
+    -RepoLocalPath $agyHooksLocal `
+    -ExamplePath (Join-Path $dotfilesPath "slop/agy/hooks.json.example") `
+    -LiveTargetPath $agyHooksTarget `
+    -Label "slop/agy/hooks.json"
+Link-File -SourcePath $agyHooksLocal -TargetPath $agyHooksTarget -Name "antigravity hooks.json"
 $agyCliDir = Join-Path $HOME ".gemini\antigravity-cli"
 New-Item -ItemType Directory -Path $agyCliDir -Force | Out-Null
 Link-File -SourcePath $agyHooksLocal -TargetPath (Join-Path $agyCliDir "hooks.json") -Name "antigravity-cli hooks.json"
@@ -1558,36 +1566,35 @@ if (Test-Path $guidelinesFile) {
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $opencodeGlobalDir "AGENTS.md") -Name "OpenCode global AGENTS.md"
     $geminiDir = Join-Path $HOME ".gemini"
     $piAgentDir = Join-Path $HOME ".pi\agent"
+    $grokDir = Join-Path $HOME ".grok"
     New-Item -ItemType Directory -Path $geminiDir -Force | Out-Null
     New-Item -ItemType Directory -Path $piAgentDir -Force | Out-Null
+    New-Item -ItemType Directory -Path $grokDir -Force | Out-Null
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $geminiDir "GEMINI.md") -Name "Antigravity (agy) global GEMINI.md"
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $geminiDir "AGENTS.md") -Name "Antigravity (agy) global AGENTS.md (cross-tool)"
     Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $piAgentDir "AGENTS.md") -Name "Pi global AGENTS.md"
+    Link-File -SourcePath $guidelinesFile -TargetPath (Join-Path $grokDir "AGENTS.md") -Name "Grok CLI global AGENTS.md"
 }
 
 $gitRepoLocal = Join-Path $dotfilesPath "config/git/.gitconfig.local"
-if (-not (Test-Path $gitRepoLocal)) {
-    Write-LogInfo "Initializing config/git/.gitconfig.local from template..."
-    $gitExample = Join-Path $dotfilesPath "config/git/.gitconfig.local.example"
-    if (Test-Path $gitExample) {
-        Copy-Item $gitExample $gitRepoLocal
-    } else {
-        New-Item -ItemType File -Path $gitRepoLocal -Force | Out-Null
-    }
-}
-Link-File -SourcePath $gitRepoLocal -TargetPath (Join-Path $HOME ".gitconfig.local") -Name ".gitconfig.local"
+$gitTarget = Join-Path $HOME ".gitconfig.local"
+Initialize-RepoConfig `
+    -RepoLocalPath $gitRepoLocal `
+    -ExamplePath (Join-Path $dotfilesPath "config/git/.gitconfig.local.example") `
+    -LiveTargetPath $gitTarget `
+    -Label "config/git/.gitconfig.local" `
+    -AllowEmptyFallback
+Link-File -SourcePath $gitRepoLocal -TargetPath $gitTarget -Name ".gitconfig.local"
 
 $envRepoLocal = Join-Path $dotfilesPath "config/env/.env.local"
-if (-not (Test-Path $envRepoLocal)) {
-    Write-LogInfo "Initializing config/env/.env.local from template..."
-    $envExample = Join-Path $dotfilesPath "config/env/.env.local.example"
-    if (Test-Path $envExample) {
-        Copy-Item $envExample $envRepoLocal
-    } else {
-        New-Item -ItemType File -Path $envRepoLocal -Force | Out-Null
-    }
-}
-Link-File -SourcePath $envRepoLocal -TargetPath (Join-Path $HOME ".env.local") -Name ".env.local"
+$envTarget = Join-Path $HOME ".env.local"
+Initialize-RepoConfig `
+    -RepoLocalPath $envRepoLocal `
+    -ExamplePath (Join-Path $dotfilesPath "config/env/.env.local.example") `
+    -LiveTargetPath $envTarget `
+    -Label "config/env/.env.local" `
+    -AllowEmptyFallback
+Link-File -SourcePath $envRepoLocal -TargetPath $envTarget -Name ".env.local"
 
 $sshDir = Join-Path $HOME ".ssh"
 if (-not (Test-Path $sshDir)) {
@@ -1595,16 +1602,14 @@ if (-not (Test-Path $sshDir)) {
 }
 
 $sshRepoLocal = Join-Path $dotfilesPath "config/ssh/config.local"
-if (-not (Test-Path $sshRepoLocal)) {
-    Write-LogInfo "Initializing config/ssh/config.local from template..."
-    $sshExample = Join-Path $dotfilesPath "config/ssh/config.local.example"
-    if (Test-Path $sshExample) {
-        Copy-Item $sshExample $sshRepoLocal
-    } else {
-        New-Item -ItemType File -Path $sshRepoLocal -Force | Out-Null
-    }
-}
-Link-File -SourcePath $sshRepoLocal -TargetPath (Join-Path $sshDir "config.local") -Name ".ssh/config.local"
+$sshLocalTarget = Join-Path $sshDir "config.local"
+Initialize-RepoConfig `
+    -RepoLocalPath $sshRepoLocal `
+    -ExamplePath (Join-Path $dotfilesPath "config/ssh/config.local.example") `
+    -LiveTargetPath $sshLocalTarget `
+    -Label "config/ssh/config.local" `
+    -AllowEmptyFallback
+Link-File -SourcePath $sshRepoLocal -TargetPath $sshLocalTarget -Name ".ssh/config.local"
 
 $sshConfigFile = Join-Path $sshDir "config"
 if ($Force -or (-not (Test-Path $sshConfigFile))) {
